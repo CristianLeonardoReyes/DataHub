@@ -415,10 +415,10 @@ Una tarea se cierra (funciona, tiene prueba y está registrada en STATUS) antes 
 | OpenAPI nativo de .NET y `openapi-typescript` | Contrato verificable entre las dos personas. |
 | Una sola Web App de Azure; la API sirve el SPA | Mismo dominio: sin CORS, cookie segura, un solo recurso. |
 | JWT en cookie `HttpOnly` + `Secure` + `SameSite=Strict` | No queda expuesto a XSS. Es posible porque front y API comparten dominio. |
+| Sesión (JWT) de 1 hora | Decidido por el responsable (2026-10-08). |
 
 ### Pendientes (se resuelven en la tarea que las necesita)
 
 1. **Pruebas del frontend.** Recomendación: Vitest.
-2. **Duración de la sesión (JWT).**
-3. **Tamaño máximo de archivo.**
-4. **Librerías del frontend** (router, manejo de peticiones). Cada una se justifica en su tarea.
+2. **Tamaño máximo de archivo.**
+3. **Librerías del frontend** (router, manejo de peticiones). Cada una se justifica en su tarea.

@@ -1,0 +1,35 @@
+# .NET (api/)
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+.vs/
+appsettings.*.local.json
+
+# Build del SPA copiado a la API
+api/DataGlobal.DataHub.Api/wwwroot/
+
+# Node (web/, prototipo/)
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Secretos y entorno
+.env*
+!.env.example
+*.pfx
+*.publishsettings
+
+# IDE / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# Claude Code local
+.claude/settings.local.json
