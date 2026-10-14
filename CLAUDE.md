@@ -80,13 +80,15 @@ El usuario revisa y ejecuta todo el SQL. Ningún agente ejecuta SQL contra MySQL
 - Cada cambio va en `db/Migraciones/AAAA-MM-DD_<descripcion>.sql` con un bloque `-- REVERSIÓN`.
 - `db/Tablas/` y `db/Procedimientos/` (estado vigente) se actualizan solo cuando el usuario
   confirma que ejecutó la migración.
+- Tablas y columnas en español, PascalCase singular (`Cliente`, `ClienteId`,
+  `FechaCreacion`); `Id` interno, `Guid` público. Ver PRD §6.
 - Las pruebas de integración usan Testcontainers (MySQL en Docker) con esos scripts; eso sí
   está permitido.
 
 ## Seguridad (reglas del producto)
 
-- **Aislamiento entre clientes:** `organization_id` sale siempre del JWT, nunca del body ni
-  de la URL. Cada SP de datos de cliente recibe `p_organization_id` y filtra por él. Solo el
+- **Aislamiento entre clientes:** el `ClienteId` sale siempre del JWT, nunca del body ni
+  de la URL. Cada SP de datos de cliente recibe `p_ClienteId` y filtra por él. Solo el
   Super admin puede indicar el cliente sobre el que opera.
 - **Autorización** en la capa de servicios con `Can(usuario, acción, recurso)`: perfil +
   alcance (cliente y workspace asignado). El frontend solo oculta; decide el backend.

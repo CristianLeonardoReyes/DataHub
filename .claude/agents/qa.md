@@ -23,8 +23,8 @@ pruebas y reportas. No ejecutas SQL contra ninguna base (Testcontainers sí est�
 ## Qué revisar
 
 - **Aislamiento entre clientes:** `organizationId` tomado de los claims (nunca del body/URL
-  salvo Super admin); todo SP de datos de cliente filtra por `p_organization_id` y por
-  `deleted_at`; recurso ajeno o fuera de alcance responde `404`.
+  salvo Super admin); todo SP de datos de cliente filtra por `p_ClienteId` y por
+  `FechaEliminacion`; recurso ajeno o fuera de alcance responde `404`.
 - **Permisos:** la operación pasa por `Can()` y respeta la matriz de `docs/PRD.md` §3.2
   (p. ej. Colaborador no aprueba ni borra lo ajeno).
 - **SQL:** cada migración en `db/Migraciones/` tiene bloque `-- REVERSIÓN` coherente.

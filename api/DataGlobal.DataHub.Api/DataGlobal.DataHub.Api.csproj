@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>18391988-8eeb-4307-b866-8c1c9aeea7be</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataGlobal.DataHub.Services\DataGlobal.DataHub.Services.csproj" />
+    <ProjectReference Include="..\DataGlobal.DataHub.Common\DataGlobal.DataHub.Common.csproj" />
+  </ItemGroup>
+
+</Project>
