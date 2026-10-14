@@ -121,10 +121,10 @@ IA de cualquier tipo, tickets, gestión de tareas, notificaciones, chat, reaccio
 ### 4.4. Jerarquía (módulo 4)
 
 - **RF-JER-01.** CRUD de workspaces, espacios y colecciones según la matriz. Cada uno tiene nombre, descripción opcional y orden.
-- **RF-JER-02.** Las páginas viven en una colección. Una página puede tener subpáginas en varios niveles mediante `parent_page_id`.
+- **RF-JER-02.** Las páginas viven en una colección. Una página puede tener subpáginas en varios niveles mediante `PaginaPadreId`.
 - **RF-JER-03.** El menú lateral muestra el árbol que el usuario puede ver, expandible y contraíble.
 - **RF-JER-04.** Al iniciar sesión se muestra **Inicio**, con las páginas actualizadas recientemente dentro del alcance del usuario.
-- **RF-JER-05.** Eliminar es un borrado lógico (`deleted_at`) y arrastra a todo lo que cuelga del elemento. Lo eliminado no aparece en navegación ni en búsqueda. En el MVP no hay papelera en la interfaz.
+- **RF-JER-05.** Eliminar es un borrado lógico (`FechaEliminacion`) y arrastra a todo lo que cuelga del elemento. Lo eliminado no aparece en navegación ni en búsqueda. En el MVP no hay papelera en la interfaz.
 - **RF-JER-06.** Cada página muestra su ruta: Workspace / Espacio / Colección / páginas padre.
 
 ### 4.5. Editor (módulo 5)
@@ -163,7 +163,7 @@ IA de cualquier tipo, tickets, gestión de tareas, notificaciones, chat, reaccio
 
 ### 4.8. Búsqueda (módulo 8)
 
-- **RF-BUS-01.** Búsqueda por título y contenido con índice FULLTEXT de MySQL sobre `page.title` y `page_content.plain_text`.
+- **RF-BUS-01.** Búsqueda por título y contenido con índice FULLTEXT de MySQL sobre `Pagina.Titulo` y `PaginaContenido.TextoPlano`.
 - **RF-BUS-02.** El filtro de permisos va **dentro de la consulta**: cliente, workspaces del usuario y exclusión de lo eliminado. Un resultado restringido nunca sale de la base de datos.
 - **RF-BUS-03.** Cada resultado muestra título, ruta, fragmento y fecha de actualización. Se pagina de 20 en 20.
 
@@ -192,10 +192,10 @@ updated_at: 2026-10-06T15:30:00Z
 
 ## 5. Reglas de negocio
 
-- **RN-01.** Todo dato funcional pertenece a un cliente (`organization_id`), salvo el usuario Super admin.
-- **RN-02.** El `organization_id` sale **siempre del JWT**, nunca del body ni de la URL.
+- **RN-01.** Todo dato funcional pertenece a un cliente (`ClienteId`), salvo el usuario Super admin.
+- **RN-02.** El `ClienteId` sale **siempre del JWT** (claim `organizationId`), nunca del body ni de la URL.
   - Única excepción: el Super admin indica el cliente sobre el que opera, y la API solo lo acepta si el perfil es Super admin.
-- **RN-03.** Cada procedimiento almacenado de datos de un cliente recibe `p_organization_id` y filtra por él.
+- **RN-03.** Cada procedimiento almacenado de datos de un cliente recibe `p_ClienteId` y filtra por él.
 - **RN-04.** Tiptap JSON en MySQL es la fuente de verdad. Markdown es solo una representación.
 - **RN-05.** Los binarios viven en Azure Blob. MySQL guarda metadata y referencias.
 - **RN-06.** Las contraseñas se guardan con hash (`PasswordHasher` de ASP.NET Core). Nunca se cifran de forma reversible ni se registran en logs.
@@ -207,25 +207,27 @@ updated_at: 2026-10-06T15:30:00Z
 
 | Tabla | Campos principales |
 |---|---|
-| `organization` | id, name, slug (único), is_active, created_at, updated_at |
-| `user` | id, organization_id (NULL solo para super_admin), email (único), name, password_hash (NULL mientras está invitado), role (`super_admin`, `admin`, `coordinador`, `colaborador`), status (`invitado`, `activo`, `inactivo`), failed_login_count, lockout_until, created_at, updated_at |
-| `user_token` | id, user_id, type (`invitacion`, `reset`), token_hash, expires_at, used_at, created_at |
-| `workspace` | id, organization_id, name, slug, description, position, created_by, created_at, updated_at, deleted_at |
-| `workspace_member` | workspace_id, user_id, created_at (PK compuesta) |
-| `space` | id, organization_id, workspace_id, name, slug, description, position, created_by, timestamps, deleted_at |
-| `collection` | id, organization_id, space_id, name, slug, description, position, created_by, timestamps, deleted_at |
-| `page` | id, organization_id, workspace_id, collection_id, parent_page_id, title, slug, document_type, status, owner_id, review_date, position, created_by, updated_by, timestamps, deleted_at |
-| `page_content` | page_id (PK), content_json (JSON), plain_text (MEDIUMTEXT), content_version, updated_at |
-| `tag` | id, organization_id, name (único por cliente) |
-| `page_tag` | page_id, tag_id (PK compuesta) |
-| `attachment` | id, organization_id, page_id, original_name, blob_path, mime_type, size_bytes, uploaded_by, created_at, deleted_at |
+| `Cliente` | Id, Guid, Nombre, Slug (único), Activo, FechaCreacion, FechaActualizacion |
+| `Usuario` | Id, Guid, ClienteId (NULL solo para super_admin), Correo (único), Nombre, ContrasenaHash (NULL mientras está invitado), Perfil (`super_admin`, `admin`, `coordinador`, `colaborador`), Estado (`invitado`, `activo`, `inactivo`), IntentosFallidos, BloqueadoHasta, FechaCreacion, FechaActualizacion |
+| `UsuarioToken` | Id, UsuarioId, Tipo (`invitacion`, `reset`), TokenHash, FechaExpiracion, FechaUso, FechaCreacion |
+| `Workspace` | Id, Guid, ClienteId, Nombre, Slug, Descripcion, Posicion, CreadoPor, FechaCreacion, FechaActualizacion, FechaEliminacion |
+| `WorkspaceMiembro` | WorkspaceId, UsuarioId, FechaCreacion (PK compuesta) |
+| `Espacio` | Id, Guid, ClienteId, WorkspaceId, Nombre, Slug, Descripcion, Posicion, CreadoPor, FechaCreacion, FechaActualizacion, FechaEliminacion |
+| `Coleccion` | Id, Guid, ClienteId, EspacioId, Nombre, Slug, Descripcion, Posicion, CreadoPor, FechaCreacion, FechaActualizacion, FechaEliminacion |
+| `Pagina` | Id, Guid, ClienteId, WorkspaceId, ColeccionId, PaginaPadreId, Titulo, Slug, TipoDocumento, Estado, ResponsableId, FechaRevision, Posicion, CreadoPor, ActualizadoPor, FechaCreacion, FechaActualizacion, FechaEliminacion |
+| `PaginaContenido` | PaginaId (PK), ContenidoJson (JSON), TextoPlano (MEDIUMTEXT), VersionContenido, FechaActualizacion |
+| `Etiqueta` | Id, Guid, ClienteId, Nombre (único por cliente) |
+| `PaginaEtiqueta` | PaginaId, EtiquetaId (PK compuesta) |
+| `Adjunto` | Id, Guid, ClienteId, PaginaId, NombreOriginal, RutaBlob, TipoMime, TamanoBytes, SubidoPor, FechaCreacion, FechaEliminacion |
 
-- Todas las tablas de contenido llevan `organization_id`, para filtrar por cliente directamente sin recorrer la jerarquía.
-- `page` lleva además `workspace_id`, para filtrar permisos en navegación y búsqueda con un solo `IN`.
+- Nombres de tablas y columnas en español y PascalCase singular (estándar de la empresa). Los valores de los enums se mantienen.
+- `Id` (BIGINT) es interno para PK y FK; `Guid` es el único identificador que expone la API.
+- Todas las tablas de contenido llevan `ClienteId`, para filtrar por cliente directamente sin recorrer la jerarquía.
+- `Pagina` lleva además `WorkspaceId`, para filtrar permisos en navegación y búsqueda con un solo `IN`.
 - Restricciones:
-  - `CHECK` que obliga a que `role = 'super_admin'` coincida con `organization_id IS NULL`;
-  - índices FULLTEXT en `page.title` y `page_content.plain_text`;
-  - índices por `(organization_id, deleted_at)` en las tablas de contenido.
+  - `CHECK` que obliga a que `Perfil = 'super_admin'` coincida con `ClienteId IS NULL`;
+  - índices FULLTEXT en `Pagina.Titulo` y `PaginaContenido.TextoPlano`;
+  - índices por `(ClienteId, FechaEliminacion)` en las tablas de contenido.
 
 ---
 
@@ -241,7 +243,7 @@ updated_at: 2026-10-06T15:30:00Z
 | Base de datos | MySQL 8 |
 | Archivos | Azure Blob Storage (contenedor privado y SAS) |
 | Correo | AWS SES v2 y MimeKit |
-| Autenticación | JWT propio, `PasswordHasher` de ASP.NET Core y tokens en `user_token` |
+| Autenticación | JWT propio, `PasswordHasher` de ASP.NET Core y tokens en `UsuarioToken` |
 
 El backend sigue el patrón de los proyectos de DataGlobal (referencia: Suplaier).
 
@@ -416,6 +418,8 @@ Una tarea se cierra (funciona, tiene prueba y está registrada en STATUS) antes 
 | Una sola Web App de Azure; la API sirve el SPA | Mismo dominio: sin CORS, cookie segura, un solo recurso. |
 | JWT en cookie `HttpOnly` + `Secure` + `SameSite=Strict` | No queda expuesto a XSS. Es posible porque front y API comparten dominio. |
 | Sesión (JWT) de 1 hora | Decidido por el responsable (2026-10-08). |
+| Cada tabla con `Id` BIGINT (PK y FKs, interno) y `Guid` CHAR(36) único (lo único que expone la API) | Joins compactos y URLs no adivinables. Decidido por el responsable (2026-10-08). |
+| Esquema de BD en español, PascalCase singular (`Cliente`, `Usuario`, `ClienteId`, `FechaCreacion`) | Estándar de la empresa. Decidido por el responsable (2026-10-13). |
 
 ### Pendientes (se resuelven en la tarea que las necesita)
 
