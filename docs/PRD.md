@@ -96,7 +96,7 @@ IA de cualquier tipo, tickets, gestión de tareas, notificaciones, chat, reaccio
 
 - **RF-ACC-01.** No existe registro libre. Todo usuario entra por invitación.
 - **RF-ACC-02.** La invitación envía un correo con un enlace de un solo uso, válido por 72 h. Al abrirlo, el usuario define su nombre y contraseña y queda **Activo**.
-- **RF-ACC-03.** Login con email y contraseña. Emite un JWT con `userId`, `organizationId` (vacío para el Super admin) y `role` dentro de una cookie `HttpOnly`; el frontend nunca lo lee. Los datos del usuario los obtiene de `GET /api/v1/auth/me`. El logout borra la cookie.
+- **RF-ACC-03.** Login con email y contraseña. Emite un JWT con `usuarioId`, `clienteId` (Guid; vacío para el Super admin) y `perfil` dentro de una cookie `HttpOnly`; el frontend nunca lo lee. Los datos del usuario los obtiene de `GET /api/v1/auth/me`. El logout borra la cookie.
 - **RF-ACC-04.** Recuperación de contraseña: enlace de un solo uso, válido por 1 h. La respuesta es la misma exista o no el correo, para no revelar qué cuentas existen.
 - **RF-ACC-05.** Tras 5 intentos fallidos, la cuenta se bloquea 15 minutos.
 - **RF-ACC-06.** Un usuario Invitado o Inactivo no puede iniciar sesión. Cada petición valida que el usuario siga Activo, de modo que desactivar a alguien corta su acceso de inmediato.
@@ -193,7 +193,7 @@ updated_at: 2026-10-06T15:30:00Z
 ## 5. Reglas de negocio
 
 - **RN-01.** Todo dato funcional pertenece a un cliente (`ClienteId`), salvo el usuario Super admin.
-- **RN-02.** El `ClienteId` sale **siempre del JWT** (claim `organizationId`), nunca del body ni de la URL.
+- **RN-02.** El `ClienteId` sale **siempre del JWT** (claim `clienteId`), nunca del body ni de la URL.
   - Única excepción: el Super admin indica el cliente sobre el que opera, y la API solo lo acepta si el perfil es Super admin.
 - **RN-03.** Cada procedimiento almacenado de datos de un cliente recibe `p_ClienteId` y filtra por él.
 - **RN-04.** Tiptap JSON en MySQL es la fuente de verdad. Markdown es solo una representación.
@@ -420,9 +420,12 @@ Una tarea se cierra (funciona, tiene prueba y está registrada en STATUS) antes 
 | Sesión (JWT) de 1 hora | Decidido por el responsable (2026-10-08). |
 | Cada tabla con `Id` BIGINT (PK y FKs, interno) y `Guid` CHAR(36) único (lo único que expone la API) | Joins compactos y URLs no adivinables. Decidido por el responsable (2026-10-08). |
 | Esquema de BD en español, PascalCase singular (`Cliente`, `Usuario`, `ClienteId`, `FechaCreacion`) | Estándar de la empresa. Decidido por el responsable (2026-10-13). |
+| Rutas, DTOs, claims y procedimientos en español (`/auth/aceptar-invitacion`, `{ correo, contrasena }`, `sp_Usuario_ObtenerPorCorreo`) | Coherencia con el esquema. Decidido por el responsable (2026-10-14). |
+| Correo: en desarrollo se guarda como archivo local; SES (AWSSDK.SimpleEmailV2 + MimeKit) se activa por configuración | Probar en local sin credenciales de AWS. Decidido por el responsable (2026-10-14). |
+| Backend: `Microsoft.AspNetCore.Authentication.JwtBearer`, leyendo el JWT desde la cookie | Validación estándar del token. Decidido por el responsable (2026-10-14). |
+| Frontend: react-router, openapi-typescript (dev), Vitest + Testing Library (dev) | Navegación, tipos del contrato y pruebas de pantallas. Decidido por el responsable (2026-10-14). |
 
 ### Pendientes (se resuelven en la tarea que las necesita)
 
-1. **Pruebas del frontend.** Recomendación: Vitest.
-2. **Tamaño máximo de archivo.**
-3. **Librerías del frontend** (router, manejo de peticiones). Cada una se justifica en su tarea.
+1. **Tamaño máximo de archivo.**
+2. **Otras librerías del frontend.** Cada una se justifica en su tarea.

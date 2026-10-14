@@ -1,22 +1,26 @@
-import { useEffect, useState } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
+import { Protegida, SesionProvider } from './Sesion'
+import { AceptarInvitacion, Inicio, Login, OlvideContrasena, RestablecerContrasena } from './pantallas'
 
-function App() {
-  const [apiOk, setApiOk] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    fetch('/health')
-      .then((r) => setApiOk(r.ok))
-      .catch(() => setApiOk(false))
-  }, [])
-
+export function Rutas() {
   return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold">DataHub</h1>
-      <p role="status" className="mt-2 text-sm">
-        {apiOk === null ? 'Comprobando API…' : apiOk ? 'API ok' : 'API no disponible'}
-      </p>
-    </main>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/aceptar-invitacion" element={<AceptarInvitacion />} />
+      <Route path="/olvide-contrasena" element={<OlvideContrasena />} />
+      <Route path="/restablecer-contrasena" element={<RestablecerContrasena />} />
+      <Route path="/" element={<Protegida><Inicio /></Protegida>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <SesionProvider>
+        <Rutas />
+      </SesionProvider>
+    </BrowserRouter>
+  )
+}
