@@ -5,56 +5,56 @@ namespace DataGlobal.DataHub.Tests.Integration;
 
 public class EsquemaUsuarioTests(MySqlFixture db) : IClassFixture<MySqlFixture>
 {
-    private async Task<long> CrearOrgAsync()
+    private async Task<long> CrearClienteAsync()
     {
         await using var cn = new MySqlConnection(db.ConnectionString);
         return await cn.ExecuteScalarAsync<long>(
-            "INSERT INTO organization (name, slug) VALUES ('Org', @slug); SELECT LAST_INSERT_ID();",
+            "INSERT INTO Cliente (Nombre, Slug) VALUES ('Cliente', @slug); SELECT LAST_INSERT_ID();",
             new { slug = Guid.NewGuid().ToString("N") });
     }
 
-    private async Task InsertarUsuarioAsync(string email, string role, long? orgId)
+    private async Task InsertarUsuarioAsync(string correo, string perfil, long? clienteId)
     {
         await using var cn = new MySqlConnection(db.ConnectionString);
         await cn.ExecuteAsync(
-            "INSERT INTO `user` (organization_id, email, name, role) VALUES (@orgId, @email, 'U', @role)",
-            new { orgId, email, role });
+            "INSERT INTO Usuario (ClienteId, Correo, Nombre, Perfil) VALUES (@clienteId, @correo, 'U', @perfil)",
+            new { clienteId, correo, perfil });
     }
 
-    private static string Email() => $"{Guid.NewGuid():N}@test.co";
+    private static string Correo() => $"{Guid.NewGuid():N}@test.co";
 
     [Fact]
-    public async Task SuperAdmin_con_organizacion_falla()
+    public async Task SuperAdmin_con_cliente_falla()
     {
-        var org = await CrearOrgAsync();
-        await Assert.ThrowsAsync<MySqlException>(() => InsertarUsuarioAsync(Email(), "super_admin", org));
-    }
-
-    [Fact]
-    public async Task Admin_sin_organizacion_falla()
-    {
-        await Assert.ThrowsAsync<MySqlException>(() => InsertarUsuarioAsync(Email(), "admin", null));
+        var cliente = await CrearClienteAsync();
+        await Assert.ThrowsAsync<MySqlException>(() => InsertarUsuarioAsync(Correo(), "super_admin", cliente));
     }
 
     [Fact]
-    public async Task Email_duplicado_falla()
+    public async Task Admin_sin_cliente_falla()
     {
-        var org = await CrearOrgAsync();
-        var email = Email();
-        await InsertarUsuarioAsync(email, "admin", org);
-        await Assert.ThrowsAsync<MySqlException>(() => InsertarUsuarioAsync(email, "admin", org));
+        await Assert.ThrowsAsync<MySqlException>(() => InsertarUsuarioAsync(Correo(), "admin", null));
+    }
+
+    [Fact]
+    public async Task Correo_duplicado_falla()
+    {
+        var cliente = await CrearClienteAsync();
+        var correo = Correo();
+        await InsertarUsuarioAsync(correo, "admin", cliente);
+        await Assert.ThrowsAsync<MySqlException>(() => InsertarUsuarioAsync(correo, "admin", cliente));
     }
 
     [Fact]
     public async Task Insert_valido_genera_guid()
     {
-        var org = await CrearOrgAsync();
-        var email = Email();
-        await InsertarUsuarioAsync(email, "colaborador", org);
+        var cliente = await CrearClienteAsync();
+        var correo = Correo();
+        await InsertarUsuarioAsync(correo, "colaborador", cliente);
 
         // MySqlConnector lee CHAR(36) como System.Guid
         await using var cn = new MySqlConnection(db.ConnectionString);
-        var guid = await cn.ExecuteScalarAsync<Guid>("SELECT guid FROM `user` WHERE email = @email", new { email });
+        var guid = await cn.ExecuteScalarAsync<Guid>("SELECT Guid FROM Usuario WHERE Correo = @correo", new { correo });
 
         Assert.NotEqual(Guid.Empty, guid);
     }

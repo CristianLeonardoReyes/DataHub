@@ -35,7 +35,10 @@ indique el brief. No cambias de rama ni haces commit.
 - Lee completos los archivos que vas a editar. Del resto, solo lo que el brief no cubra.
 - **Aislamiento:** `organizationId` sale de los claims del JWT, nunca del body ni de la URL
   (salvo Super admin, según el brief). Todo SP de datos de cliente recibe
-  `p_organization_id` y filtra por él, igual que `deleted_at IS NULL` cuando aplique.
+  `p_ClienteId` y filtra por él, igual que `FechaEliminacion IS NULL` cuando aplique.
+- **Esquema:** tablas y columnas en español, PascalCase singular (`Usuario.ClienteId`).
+  `Id` BIGINT solo interno; los DTOs exponen `Guid` (`System.Guid`). Escribe los nombres
+  siempre con el mismo uso de mayúsculas (MySQL en Linux distingue mayúsculas en tablas).
 - Toda operación protegida pasa por `Can(usuario, acción, recurso)` en el servicio.
   Recurso ajeno o fuera de alcance → `404`.
 - Contraseñas con `PasswordHasher`; tokens como hash SHA-256. Nunca registres contraseñas,

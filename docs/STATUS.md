@@ -24,13 +24,15 @@ tocó. La historia la guarda git._
   (solo `CommandType.StoredProcedure`).
 - Paquetes: Dapper 2.1.89, MySqlConnector 2.6.2, Microsoft.AspNetCore.OpenApi 10.0.12,
   xunit.v3 4.0.1, Mvc.Testing 10.0.12, Testcontainers.MySql 4.16.0 (mysql:8.0).
-- Migración `db/Migraciones/2026-10-08_tablas_organizacion_usuario.sql` (organization, user):
-  validada en Testcontainers, **pendiente de que el usuario la ejecute**. `db/Tablas/` se
+- Migración `db/Migraciones/2026-10-08_tablas_cliente_usuario.sql` (`Cliente`, `Usuario`):
+  **pendiente de que el usuario la ejecute**. `db/Tablas/` se
   actualiza cuando lo confirme.
-- Convenciones: `guid` CHAR(36) se lee como `System.Guid` (MySqlConnector); los DTOs exponen
-  `Guid`, nunca `id`. `updated_at` lo asigna cada SP con `UTC_TIMESTAMP()`. FK de `user`
+- Convenciones: esquema en español, PascalCase singular (PRD §6); escribir los nombres con
+  las mismas mayúsculas siempre. `Guid` CHAR(36) se lee como `System.Guid`; los DTOs exponen
+  `Guid`, nunca `Id`. `FechaActualizacion` la asigna cada SP con `UTC_TIMESTAMP()`. FK de `Usuario`
   con `RESTRICT` (MySQL no admite CHECK con acción referencial).
-- Pruebas: 5/5 — `/health` y 4 de esquema (CHECK super_admin, email único, guid).
+- Pruebas: `/health` y 4 de esquema (CHECK super_admin, correo único, guid). Tras renombrar
+  a español: compila; **re-ejecutar con Docker abierto**.
 
 ## Frontend (web/)
 
@@ -39,7 +41,8 @@ tocó. La historia la guarda git._
 
 ## Decisiones vigentes
 
-- PRD §12. Añadidas: JWT de 1 hora; `id` BIGINT interno + `guid` público.
+- PRD §12. Añadidas: JWT de 1 hora; `Id` BIGINT interno + `Guid` público; esquema de BD en
+  español PascalCase (2026-10-13).
 
 ## Pendientes conocidos
 
