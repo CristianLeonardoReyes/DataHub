@@ -82,6 +82,9 @@ El usuario revisa y ejecuta todo el SQL. Ningún agente ejecuta SQL contra MySQL
   confirma que ejecutó la migración.
 - Tablas y columnas en español, PascalCase singular (`Cliente`, `ClienteId`,
   `FechaCreacion`); `Id` interno, `Guid` público. Ver PRD §6.
+- Collation `utf8mb4_0900_ai_ci` en base y tablas. Todo parámetro de texto de un SP declara
+  `CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci`. Scripts de SP re-ejecutables
+  (`DROP PROCEDURE IF EXISTS`).
 - Las pruebas de integración usan Testcontainers (MySQL en Docker) con esos scripts; eso sí
   está permitido.
 

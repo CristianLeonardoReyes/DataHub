@@ -1,4 +1,3 @@
-using MySqlConnector;
 using Testcontainers.MySql;
 
 namespace DataGlobal.DataHub.Tests.Integration;
@@ -6,7 +5,10 @@ namespace DataGlobal.DataHub.Tests.Integration;
 /// <summary>MySQL 8 en Docker con todas las migraciones de db/Migraciones aplicadas por orden de nombre.</summary>
 public class MySqlFixture : IAsyncLifetime
 {
-    private readonly MySqlContainer _container = new MySqlBuilder("mysql:8.0").Build();
+    private readonly MySqlContainer _container = new MySqlBuilder("mysql:8.0")
+        // Misma collation por defecto que el servidor real, para detectar mezclas de collation en los SP.
+        .WithCommand("--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci")
+        .Build();
 
     public string ConnectionString => _container.GetConnectionString();
 
@@ -14,13 +16,13 @@ public class MySqlFixture : IAsyncLifetime
     {
         await _container.StartAsync();
 
+        // Con el cliente mysql del contenedor: entiende DELIMITER (MySqlCommand no).
         var dir = Path.Combine(RaizRepo(), "db", "Migraciones");
-        await using var cn = new MySqlConnection(ConnectionString);
-        await cn.OpenAsync();
         foreach (var archivo in Directory.GetFiles(dir, "*.sql").OrderBy(Path.GetFileName, StringComparer.Ordinal))
         {
-            await using var cmd = new MySqlCommand(await File.ReadAllTextAsync(archivo), cn);
-            await cmd.ExecuteNonQueryAsync();
+            var r = await _container.ExecScriptAsync(await File.ReadAllTextAsync(archivo));
+            if (r.ExitCode != 0)
+                throw new InvalidOperationException($"Falló {Path.GetFileName(archivo)}: {r.Stderr}");
         }
     }
 
