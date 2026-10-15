@@ -5,10 +5,10 @@ tocó. La historia la guarda git._
 ## Común
 
 - **Hecho:** paso 1 (base) y paso 2 (Acceso, módulo 1) mergeados en `develop`.
-- **En curso:** paso 3 en bloques. **3a** (matriz `Can()`, `permisos` en `/me`, Clientes) en
-  `feature/clientes-usuarios-paso-3a`: implementado, QA OK (api 75/75, web 10/10). Falta que el
-  usuario ejecute las migraciones `2026-10-15_01` y `_02` y lo pruebe. Luego 3b (Usuarios) y 3c (selector de
-  cliente + aislamiento).
+- **Paso 3:** 3a mergeado (PR #4). **3b (Usuarios) terminado** en
+  `feature/clientes-usuarios-paso-3b-desde-develop`, QA OK (api 84/84, web 18/18); pendiente
+  commit/PR y ejecutar `2026-10-15_03_usuarios.sql`. Siguiente: 3c (selector
+  `POST /auth/cliente-operando` + aislamiento) y **punto de prueba completo**.
 - **Decisiones 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta botones, menús y rutas
   según `permisos`; crear cliente pide solo `correoAdmin`; `PUT` con `activo`; cliente inactivo
   corta login y sesiones de todos sus usuarios.
@@ -27,26 +27,29 @@ tocó. La historia la guarda git._
   min; rate limit por IP; correo `Archivo` (`correos-dev/`) o `Ses`.
 - **Permisos:** `MatrizPermisos` (Common/Enums/Permisos.cs, 13 acciones) +
   `Autorizacion.Can(usuario, accion, clienteIdRecurso)`; `/me` → `permisos` y `perfil` (enum).
+- **Usuarios (3b):** `/api/v1/usuarios` GET, POST `{correo, perfil}`, POST
+  `{guid}/reenviar-invitacion`, PUT `{perfil, activo}`; cliente = `UsuarioActual.ClienteId`
+  (Super admin sin cliente → 400 hasta 3c). RF-USR-04 en `usu_editarPerfilEstado` con FOR UPDATE.
 - **Clientes:** `/api/v1/clientes` GET, GET {guid}, POST (cliente + Admin invitado + token en un
   SP, luego correo), PUT `{nombre, slug, activo}`. 409 con extensión `campo`.
-- **SP:** estándar `<prefijo>_<verbo><Calificador>` (CLAUDE.md). **Pendiente de ejecutar, en
-  orden:** `2026-10-15_01_renombrar_sp_acceso.sql` (8 SP de acceso con nombre nuevo, borra los
-  `sp_*`) y `2026-10-15_02_clientes.sql` (4 `cli_*` nuevos, 4 `usu_*` modificados). Después:
-  `db/Procedimientos/` pasa a los nombres nuevos. Vigente hoy: `db/Tablas/` (Cliente, Usuario,
-  UsuarioToken) y `db/Procedimientos/` con los 8 `sp_*`. Semilla: `db/Semillas/dev_super_admin.sql`.
+- **SP:** estándar `<prefijo>_<verbo><Calificador>` (CLAUDE.md). BD vigente (ejecutado por el
+  usuario hasta `2026-10-15_02`): `db/Tablas/` (Cliente, Usuario, UsuarioToken) y
+  `db/Procedimientos/` (12: `usu_*`, `uto_*`, `cli_*`). Semilla: `db/Semillas/dev_super_admin.sql`.
 - user-secrets: `ConnectionStrings:DataHub`, `Jwt:Clave`. Paquetes: Dapper, MySqlConnector,
   OpenApi, JwtBearer, AWSSDK.SimpleEmailV2, MimeKit, Pkcs 10.0.13 (parche), xunit.v3,
   Mvc.Testing, Testcontainers.MySql.
 - Deuda: `UseForwardedHeaders` antes de desplegar; carrera de slug duplicado da 500
-  (improbable, `ponytail:` en el SP); sin aviso si falla el correo al crear cliente (reenviar: 3b).
+  (improbable, `ponytail:` en el SP); sin aviso si falla el correo al crear cliente (se puede reenviar); `usu_insertarInvitado` no
+  comprueba cliente activo (revisar en 3c, cuando el Super admin opere clientes).
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, Vitest + Testing Library (10
+- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, Vitest + Testing Library (18
   pruebas). Tipos: `npm run tipos` → `src/api/esquema.d.ts` (versionado; `overrides` TS 5).
 - Pantallas: login, aceptar invitación, olvidé/restablecer; `Layout` con menú según
   `puede(permiso)`; Inicio; `/clientes`, `/clientes/nuevo`, `/clientes/:guid` con
-  `RequierePermiso` (sin permiso → `/`). Componentes comunes en `src/ui.tsx`.
+  `RequierePermiso` (sin permiso → `/`). Componentes comunes en `src/ui.tsx`. `/usuarios` y
+  `/usuarios/nuevo` (`usuariosGestionar`; fila propia sin acciones).
 - Lint: 2 warnings de estilo en `Sesion.tsx`.
 
 ## Decisiones vigentes

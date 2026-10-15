@@ -1,9 +1,9 @@
--- Estado vigente. Origen: Migraciones/2026-10-14_acceso_usuario_token.sql
+-- Estado vigente. Origen: Migraciones/2026-10-15_02_clientes.sql
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS `sp_Usuario_AceptarInvitacion`$$
-CREATE PROCEDURE `sp_Usuario_AceptarInvitacion`(
+DROP PROCEDURE IF EXISTS `usu_editarAceptarInvitacion`$$
+CREATE PROCEDURE `usu_editarAceptarInvitacion`(
   IN p_TokenHash CHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci, IN p_Nombre VARCHAR(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci, IN p_ContrasenaHash VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci)
 BEGIN
   DECLARE v_TokenId BIGINT UNSIGNED DEFAULT NULL;
@@ -18,8 +18,10 @@ BEGIN
   SELECT t.Id, t.UsuarioId INTO v_TokenId, v_UsuarioId
   FROM UsuarioToken t
   JOIN Usuario u ON u.Id = t.UsuarioId
+  LEFT JOIN Cliente c ON c.Id = u.ClienteId
   WHERE t.TokenHash = p_TokenHash AND t.Tipo = 'invitacion' AND t.FechaUso IS NULL
     AND t.FechaExpiracion > UTC_TIMESTAMP() AND u.Estado = 'invitado'
+    AND COALESCE(c.Activo, 1) = 1
   FOR UPDATE;
 
   IF v_TokenId IS NULL THEN

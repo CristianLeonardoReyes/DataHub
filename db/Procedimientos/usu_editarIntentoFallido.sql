@@ -1,9 +1,9 @@
--- Estado vigente. Origen: Migraciones/2026-10-14_acceso_usuario_token.sql
+-- Estado vigente. Origen: Migraciones/2026-10-15_01_renombrar_sp_acceso.sql
 
 DELIMITER $$
 
-DROP PROCEDURE IF EXISTS `sp_Usuario_RegistrarIntentoFallido`$$
-CREATE PROCEDURE `sp_Usuario_RegistrarIntentoFallido`(IN p_UsuarioId BIGINT UNSIGNED)
+DROP PROCEDURE IF EXISTS `usu_editarIntentoFallido`$$
+CREATE PROCEDURE `usu_editarIntentoFallido`(IN p_UsuarioId BIGINT UNSIGNED)
 BEGIN
   UPDATE Usuario
   SET BloqueadoHasta     = IF(IntentosFallidos + 1 >= 5, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 15 MINUTE), BloqueadoHasta),

@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { Layout, Protegida, RequierePermiso, SesionProvider } from './Sesion'
 import { ClienteForm, Clientes } from './clientes'
+import { InvitarUsuario, Usuarios } from './usuarios'
 import { AceptarInvitacion, Inicio, Login, OlvideContrasena, RestablecerContrasena } from './pantallas'
 
 export function Rutas() {
@@ -15,6 +16,8 @@ export function Rutas() {
         <Route path="/clientes" element={<RequierePermiso permiso="clientesGestionar"><Clientes /></RequierePermiso>} />
         <Route path="/clientes/nuevo" element={<RequierePermiso permiso="clientesGestionar"><ClienteForm /></RequierePermiso>} />
         <Route path="/clientes/:guid" element={<RequierePermiso permiso="clientesGestionar"><ClienteForm /></RequierePermiso>} />
+        <Route path="/usuarios" element={<RequierePermiso permiso="usuariosGestionar"><Usuarios /></RequierePermiso>} />
+        <Route path="/usuarios/nuevo" element={<RequierePermiso permiso="usuariosGestionar"><InvitarUsuario /></RequierePermiso>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

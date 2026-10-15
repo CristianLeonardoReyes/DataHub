@@ -175,7 +175,7 @@ DELIMITER ;
 -- DROP PROCEDURE IF EXISTS `cli_consultarPorGuid`;
 -- DROP PROCEDURE IF EXISTS `cli_insertarConAdmin`;
 -- DROP PROCEDURE IF EXISTS `cli_editar`;
--- Los 4 SP de Usuario modificados vuelven a su versión anterior re-ejecutando los archivos vigentes:
---   db/Procedimientos/usu_consultarPorCorreo.sql, usu_consultarPorGuid.sql,
---   usu_editarAceptarInvitacion.sql, usu_editarContrasena.sql
+-- Los 4 SP de Usuario modificados vuelven a su versión anterior re-ejecutando
+-- 2026-10-15_01_renombrar_sp_acceso.sql (re-ejecutable; recrea usu_consultarPorCorreo,
+-- usu_consultarPorGuid, usu_editarAceptarInvitacion y usu_editarContrasena sin la regla de cliente).
 -- (Con la reversión, el código de la API que lee ClienteActivo deja de aplicar la regla.)
