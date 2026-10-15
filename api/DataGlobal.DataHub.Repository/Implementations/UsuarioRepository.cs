@@ -25,4 +25,19 @@ public class UsuarioRepository(DapperContext context) : BaseRepository(context),
     public async Task<bool> RestablecerContrasenaAsync(string tokenHash, string contrasenaHash) =>
         await ExecuteScalarAsync<int>(SpNombres.UsuarioRestablecerContrasena,
             new { p_TokenHash = tokenHash, p_ContrasenaHash = contrasenaHash }) == 1;
+
+    public Task<IReadOnlyList<UsuarioFila>> ListarAsync(long clienteId) =>
+        QueryListAsync<UsuarioFila>(SpNombres.UsuarioListar, new { p_ClienteId = clienteId });
+
+    public async Task<UsuarioFila> InsertarInvitadoAsync(long clienteId, string correo, string perfil, string tokenHash, int horas) =>
+        (await QueryFirstOrNullAsync<UsuarioFila>(SpNombres.UsuarioInsertarInvitado,
+            new { p_ClienteId = clienteId, p_Correo = correo, p_Perfil = perfil, p_TokenHash = tokenHash, p_Horas = horas }))!;
+
+    public async Task<UsuarioFila> ReenviarInvitacionAsync(long clienteId, Guid guid, string tokenHash, int horas) =>
+        (await QueryFirstOrNullAsync<UsuarioFila>(SpNombres.UsuarioReenviarInvitacion,
+            new { p_ClienteId = clienteId, p_Guid = guid, p_TokenHash = tokenHash, p_Horas = horas }))!;
+
+    public async Task<UsuarioFila> EditarPerfilEstadoAsync(long clienteId, long actorId, Guid guid, string perfil, bool activo) =>
+        (await QueryFirstOrNullAsync<UsuarioFila>(SpNombres.UsuarioEditarPerfilEstado,
+            new { p_ClienteId = clienteId, p_ActorId = actorId, p_Guid = guid, p_Perfil = perfil, p_Activo = activo }))!;
 }

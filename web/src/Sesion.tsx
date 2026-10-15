@@ -81,6 +81,7 @@ export function Layout() {
           onClick={() => setAbierto(false)}>
           <NavLink to="/" end className={itemCls}>Inicio</NavLink>
           {puede('clientesGestionar') && <NavLink to="/clientes" className={itemCls}>Clientes</NavLink>}
+          {puede('usuariosGestionar') && <NavLink to="/usuarios" className={itemCls}>Usuarios</NavLink>}
         </nav>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">

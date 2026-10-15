@@ -38,6 +38,7 @@ builder.Services.AddScoped<IUsuarioTokenRepository, UsuarioTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<UsuarioActual>();
 builder.Services.AddSingleton<IEnviadorCorreo>(sp =>
 {

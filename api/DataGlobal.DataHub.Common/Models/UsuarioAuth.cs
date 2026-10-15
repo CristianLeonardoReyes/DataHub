@@ -55,3 +55,15 @@ public class ResultadoCrearCliente
     public int Resultado { get; set; }
     public Guid? ClienteGuid { get; set; }
 }
+
+/// <summary>Fila devuelta por los SP de gestión de usuarios. Resultado: código del SP; el resto, si aplica.</summary>
+public class UsuarioFila
+{
+    public int Resultado { get; set; }
+    public Guid Guid { get; set; }
+    public string Nombre { get; set; } = "";
+    public string Correo { get; set; } = "";
+    public string Perfil { get; set; } = "";
+    public string Estado { get; set; } = "";
+    public DateTime FechaCreacion { get; set; }
+}
