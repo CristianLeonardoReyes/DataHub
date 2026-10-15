@@ -32,3 +32,5 @@ export const aceptarInvitacion = (b: S['AceptarInvitacionRequest']) => enviar<vo
 export const olvideContrasena = (b: S['OlvideContrasenaRequest']) => enviar<void>('POST', '/olvide-contrasena', b)
 export const restablecerContrasena = (b: S['RestablecerContrasenaRequest']) =>
   enviar<void>('POST', '/restablecer-contrasena', b)
+export const clienteOperando = (clienteGuid: string | null) =>
+  enviar<void>('POST', '/cliente-operando', { clienteGuid } satisfies S['ClienteOperandoRequest'])

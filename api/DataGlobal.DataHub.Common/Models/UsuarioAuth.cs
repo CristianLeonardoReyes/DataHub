@@ -31,6 +31,15 @@ public class UsuarioActual
     public string Perfil { get; set; } = "";
 }
 
+/// <summary>Cliente sobre el que opera el Super admin. Uso interno (lleva el Id).</summary>
+public class ClienteOperando
+{
+    public long Id { get; set; }
+    public Guid Guid { get; set; }
+    public string Nombre { get; set; } = "";
+    public bool Activo { get; set; }
+}
+
 /// <summary>Resultado de un login correcto.</summary>
 public record Sesion(string Token, DateTime Expira);
 

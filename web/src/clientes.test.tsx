@@ -60,7 +60,7 @@ test('la lista pinta filas Activo/Inactivo', async () => {
       { guid: 'c2', nombre: 'Beta', slug: 'beta', activo: false, fechaCreacion: '2026-02-05T10:00:00Z' },
     ]))
   montar('/clientes')
-  expect(await screen.findByText('Acme')).toBeInTheDocument()
+  expect(await screen.findByRole('cell', { name: 'Acme' })).toBeInTheDocument()
   expect(screen.getByText('Activo')).toBeInTheDocument()
   expect(screen.getByText('Inactivo')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Desactivar Acme' })).toBeInTheDocument()
