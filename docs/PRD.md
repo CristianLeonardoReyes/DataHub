@@ -87,6 +87,7 @@ IA de cualquier tipo, tickets, gestión de tareas, notificaciones, chat, reaccio
 - **Perfiles fijos.** La matriz vive en código (`DataGlobal.DataHub.Common`) como un mapa perfil → acciones. No hay tablas de perfiles editables en el MVP.
 - **Una sola verificación** en la capa de servicios: `Can(usuario, acción, recurso)`. Comprueba el perfil y luego el alcance (cliente y workspace asignado).
 - El frontend oculta lo que el usuario no puede hacer, pero **la decisión siempre la toma el backend**.
+- `GET /auth/me` devuelve los `permisos` del usuario calculados con la misma matriz; el frontend oculta botones, menús y rutas según esa lista. Sin permiso para la acción → `403`; recurso de otro cliente o fuera de alcance → `404`.
 
 ---
 
@@ -107,14 +108,14 @@ IA de cualquier tipo, tickets, gestión de tareas, notificaciones, chat, reaccio
 ### 4.2. Clientes (módulo 2)
 
 - **RF-CLI-01.** El Super admin crea un cliente (nombre y slug) e invita a su primer Admin en el mismo paso.
-- **RF-CLI-02.** El Super admin puede editar y desactivar clientes. Los usuarios de un cliente inactivo no pueden iniciar sesión.
+- **RF-CLI-02.** El Super admin puede editar y desactivar clientes. Los usuarios de un cliente inactivo no pueden iniciar sesión y pierden la sesión abierta en su siguiente petición.
 - **RF-CLI-03.** El Super admin elige un cliente en la interfaz para operar dentro de él con permisos totales.
 
 ### 4.3. Usuarios y perfiles (módulo 3)
 
 - **RF-USR-01.** El Admin invita usuarios de su cliente con un perfil (Admin, Coordinador o Colaborador). Puede reenviar la invitación.
 - **RF-USR-02.** El Admin cambia perfiles, desactiva y reactiva usuarios.
-- **RF-USR-03.** El Admin asigna y quita workspaces a Coordinadores y Colaboradores.
+- **RF-USR-03.** El Admin asigna y quita workspaces a Coordinadores y Colaboradores. *(Se implementa en el módulo 4, junto con los workspaces; decidido 2026-10-15.)*
 - **RF-USR-04.** Un cliente no puede quedarse sin Admin activo, y un Admin no puede desactivarse a sí mismo.
 - **RF-USR-05.** El email es único en todo el sistema.
 
@@ -280,7 +281,7 @@ datahub/
 Prefijo `/api/v1`. Grupos:
 
 - `/auth`: login, logout, me, aceptar invitación, olvidé contraseña, restablecer.
-- `/organizations`: solo Super admin.
+- `/clientes`: solo Super admin.
 - `/users`
 - `/workspaces`, `/workspaces/{id}/members`
 - `/spaces`, `/collections`
@@ -388,7 +389,7 @@ Una tarea se cierra (funciona, tiene prueba y está registrada en STATUS) antes 
 1. Base: repositorio en GitHub con `CODEOWNERS`, `docs/STATUS.md` por secciones (la sección Común incluye un enlace al proceso de despliegue de 7.6), solución .NET en capas con su proyecto de pruebas xUnit, proyecto web con proxy de Vite, `BaseRepository` y tablas de cliente y usuario.
 2. Acceso: login, JWT, invitación, recuperación y correo SES (módulo 1).
 3. Clientes y usuarios (módulos 2 y 3) y la matriz de permisos.
-4. Jerarquía y navegación (módulo 4).
+4. Jerarquía y navegación (módulo 4), incluida la asignación de workspaces a usuarios (RF-USR-03).
 5. Editor y autosave (módulo 5).
 6. Metadata y etiquetas (módulo 6).
 7. Archivos (módulo 7).
@@ -420,7 +421,8 @@ Una tarea se cierra (funciona, tiene prueba y está registrada en STATUS) antes 
 | Sesión (JWT) de 1 hora | Decidido por el responsable (2026-10-08). |
 | Cada tabla con `Id` BIGINT (PK y FKs, interno) y `Guid` CHAR(36) único (lo único que expone la API) | Joins compactos y URLs no adivinables. Decidido por el responsable (2026-10-08). |
 | Esquema de BD en español, PascalCase singular (`Cliente`, `Usuario`, `ClienteId`, `FechaCreacion`) | Estándar de la empresa. Decidido por el responsable (2026-10-13). |
-| Rutas, DTOs, claims y procedimientos en español (`/auth/aceptar-invitacion`, `{ correo, contrasena }`, `sp_Usuario_ObtenerPorCorreo`) | Coherencia con el esquema. Decidido por el responsable (2026-10-14). |
+| Rutas, DTOs, claims y procedimientos en español (`/auth/aceptar-invitacion`, `{ correo, contrasena }`, `usu_consultarPorCorreo`) | Coherencia con el esquema. Decidido por el responsable (2026-10-14). |
+| SP con nombre `<prefijo de tabla>_<verbo><Calificador>` (verbos insertar, editar, consultar, eliminar; prefijos en `CLAUDE.md`) | Estándar de la empresa. Decidido por el responsable (2026-10-15). |
 | Correo: en desarrollo se guarda como archivo local; SES (AWSSDK.SimpleEmailV2 + MimeKit) se activa por configuración | Probar en local sin credenciales de AWS. Decidido por el responsable (2026-10-14). |
 | Backend: `Microsoft.AspNetCore.Authentication.JwtBearer`, leyendo el JWT desde la cookie | Validación estándar del token. Decidido por el responsable (2026-10-14). |
 | Frontend: react-router, openapi-typescript (dev), Vitest + Testing Library (dev) | Navegación, tipos del contrato y pruebas de pantallas. Decidido por el responsable (2026-10-14). |

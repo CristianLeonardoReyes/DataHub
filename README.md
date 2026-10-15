@@ -67,9 +67,9 @@ DataHub/
 ├── CLAUDE.md          # instrucciones del orquestador (Claude Code)
 ├── .claude/           # subagentes: backend, frontend, qa
 ├── docs/              # PRD.md y STATUS.md
-├── api/               # solución .NET 10, se abre con Visual Studio 2026   (paso 1)
-├── db/                # Tablas/, Procedimientos/, Migraciones/            (paso 1)
-├── web/               # app React, se abre con VS Code                    (paso 1)
+├── api/               # solución .NET 10, se abre con Visual Studio 2026
+├── db/                # Tablas/, Procedimientos/, Migraciones/, Semillas/
+├── web/               # app React, se abre con VS Code
 └── prototipo/         # referencia visual (mock), no se compila ni despliega
 ```
 
@@ -77,11 +77,88 @@ DataHub/
 
 - .NET SDK 10 y Visual Studio 2026 (backend).
 - Node.js 22 y VS Code (frontend).
-- Docker, para las pruebas de integración y para MySQL local.
-- MySQL 8.0.16 o superior.
+- Acceso a un MySQL 8.0.16 o superior, con base y tablas en `utf8mb4_0900_ai_ci`.
+- Docker Desktop, solo para `dotnet test` (las pruebas crean un MySQL temporal).
 
-Las instrucciones para ejecutar el proyecto se agregan aquí cuando se complete el paso 1
-(base del repositorio).
+## Guía de arranque
+
+**1. Clonar y entrar a `develop`**
+
+```bash
+git clone https://github.com/CristianLeonardoReyes/DataHub.git
+cd DataHub
+git checkout develop
+```
+
+**2. Base de datos**
+
+Si el equipo comparte la base, ya está creada y al día: solo ejecuta la semilla (punto 3) si
+necesitas tu propio usuario. Para una base nueva:
+
+1. Crear la base con la collation del proyecto:
+   `CREATE DATABASE DataHub CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`
+2. Ejecutar en orden de nombre todos los scripts de `db/Migraciones/` (cliente que entienda
+   `DELIMITER`: MySQL Workbench, HeidiSQL o la consola `mysql`).
+3. Editar `@correo` en `db/Semillas/dev_super_admin.sql`, ejecutarlo y guardar el enlace que
+   devuelve (activa el Super admin; vale 72 h).
+
+**3. Secretos de la API** (fuera del repo; una sola vez por equipo)
+
+La cadena de conexión a la base y la llave JWT **no están en el repositorio**: pídelas a tu
+compañero de equipo por un canal privado (nunca por el repo, issues ni PR).
+
+Con esos datos, crea el archivo `secrets.json` del proyecto Api:
+
+- Visual Studio: clic derecho en `DataGlobal.DataHub.Api` → **Administrar secretos de usuario**.
+  Se abre el `secrets.json` (vacío la primera vez).
+- Sin Visual Studio, se crea en
+  `%APPDATA%\Microsoft\UserSecrets\18391988-8eeb-4307-b866-8c1c9aeea7be\secrets.json`.
+
+Contenido (reemplaza los valores por los que te pasó tu compañero):
+
+```json
+{
+  "ConnectionStrings:DataHub": "<cadena de conexión que te pasó tu compañero>",
+  "Jwt:Clave": "<llave JWT que te pasó tu compañero>"
+}
+```
+
+Para comprobarlo: `dotnet user-secrets list --project api/DataGlobal.DataHub.Api` debe listar
+las dos claves. Si Visual Studio se abre con otra cuenta de Windows (por ejemplo, como
+administrador), crea el archivo desde ese menú para que quede en la cuenta que ejecuta la API.
+
+**4. Ejecutar la API** — perfil `http` (entorno Development; sin él no carga los secretos y no
+arranca)
+
+- Visual Studio: abrir `api/DataGlobal.DataHub.sln`, proyecto de inicio
+  `DataGlobal.DataHub.Api`, perfil `http`, F5.
+- Terminal: `dotnet run --project api/DataGlobal.DataHub.Api --launch-profile http`
+
+Comprobar `http://localhost:5080/health` → `Healthy`.
+
+**5. Ejecutar la web**
+
+```bash
+cd web
+npm ci
+npm run dev
+```
+
+Abrir `http://localhost:5173`. Vite reenvía `/api` a la API. Abrir el enlace del paso 2 para
+activar el Super admin e iniciar sesión.
+
+En desarrollo los correos (invitación, recuperación) no se envían: se guardan como `.html` en
+`correos-dev/`, en la raíz del repo.
+
+**6. Pruebas**
+
+```bash
+dotnet test api/DataGlobal.DataHub.sln   # requiere Docker Desktop abierto
+npm --prefix web test
+```
+
+Tras cambiar un endpoint o DTO, con la API corriendo: `npm --prefix web run tipos` y versionar
+`web/src/api/esquema.d.ts`.
 
 ### Prototipo visual
 

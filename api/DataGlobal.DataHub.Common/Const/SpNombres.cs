@@ -1,14 +1,21 @@
 namespace DataGlobal.DataHub.Common.Const;
 
-/// <summary>Nombres de procedimientos almacenados. Vive en Common porque Repository no ve Services.</summary>
+/// <summary>
+/// Nombres de procedimientos almacenados: &lt;prefijo de tabla&gt;_&lt;verbo&gt;&lt;Calificador&gt;
+/// (verbos: insertar, editar, consultar, eliminar). Vive en Common porque Repository no ve Services.
+/// </summary>
 public static class SpNombres
 {
-    public const string UsuarioObtenerPorCorreo = "sp_Usuario_ObtenerPorCorreo";
-    public const string UsuarioObtenerPorGuid = "sp_Usuario_ObtenerPorGuid";
-    public const string UsuarioRegistrarIntentoFallido = "sp_Usuario_RegistrarIntentoFallido";
-    public const string UsuarioRegistrarLoginExitoso = "sp_Usuario_RegistrarLoginExitoso";
-    public const string UsuarioAceptarInvitacion = "sp_Usuario_AceptarInvitacion";
-    public const string UsuarioRestablecerContrasena = "sp_Usuario_RestablecerContrasena";
-    public const string UsuarioTokenCrear = "sp_UsuarioToken_Crear";
-    public const string UsuarioTokenInvalidarPendientes = "sp_UsuarioToken_InvalidarPendientes";
+    public const string UsuarioObtenerPorCorreo = "usu_consultarPorCorreo";
+    public const string UsuarioObtenerPorGuid = "usu_consultarPorGuid";
+    public const string UsuarioRegistrarIntentoFallido = "usu_editarIntentoFallido";
+    public const string UsuarioRegistrarLoginExitoso = "usu_editarLoginExitoso";
+    public const string UsuarioAceptarInvitacion = "usu_editarAceptarInvitacion";
+    public const string UsuarioRestablecerContrasena = "usu_editarContrasena";
+    public const string UsuarioTokenCrear = "uto_insertar";
+    public const string UsuarioTokenInvalidarPendientes = "uto_editarInvalidarPendientes";
+    public const string ClienteListar = "cli_consultar";
+    public const string ClienteObtenerPorGuid = "cli_consultarPorGuid";
+    public const string ClienteCrearConAdmin = "cli_insertarConAdmin";
+    public const string ClienteActualizar = "cli_editar";
 }

@@ -4,65 +4,58 @@ tocó. La historia la guarda git._
 
 ## Común
 
-- **Fase:** MVP. Paso 1 (base) mergeado en `develop` (PR #1). Falta `CODEOWNERS`.
-- **Paso 2 — Acceso (módulo 1): CERRADO** en `feature/acceso-modulo-2` (pruebas 14/14 api,
-  4/4 web; probado por el usuario contra su BD). Pendiente: commit y PR a `develop`.
-- **Siguiente:** paso 3 — Clientes y Usuarios (módulos 2 y 3) y matriz `Can()`.
-- **Verificación:** `dotnet test api/DataGlobal.DataHub.sln` desde la raíz (requiere Docker
-  Desktop abierto; `global.json` raíz activa Microsoft.Testing.Platform). Web: `npm run build`
-  y `npm run lint` en `web/`.
-- **Local:** API con perfil `http` (Development; si no, no carga user-secrets y no arranca)
-  `http://localhost:5080` (`/health`, `/openapi/v1.json` en dev); Vite
-  `:5173` con proxy `/api` y `/health` → 5080.
-- **Despliegue:** solo local por ahora; sin `deploy.yml`. Objetivo final PRD §7.6.
-- **Entorno:** .NET SDK 10.0.401, Node 22.15, Docker 29.1. Sin `gh` CLI.
-- **GitHub (2026-10-08):** `main` y `develop` sin protección; la configura el usuario.
+- **Hecho:** paso 1 (base) y paso 2 (Acceso, módulo 1) mergeados en `develop`.
+- **En curso:** paso 3 en bloques. **3a** (matriz `Can()`, `permisos` en `/me`, Clientes) en
+  `feature/clientes-usuarios-paso-3a`: implementado, QA OK (api 75/75, web 10/10). Falta que el
+  usuario ejecute las migraciones `2026-10-15_01` y `_02` y lo pruebe. Luego 3b (Usuarios) y 3c (selector de
+  cliente + aislamiento).
+- **Decisiones 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta botones, menús y rutas
+  según `permisos`; crear cliente pide solo `correoAdmin`; `PUT` con `activo`; cliente inactivo
+  corta login y sesiones de todos sus usuarios.
+- **Arranque local y pruebas:** ver README "Guía de arranque". API con perfil `http` (si no, no
+  carga user-secrets y no arranca) en `:5080`; Vite `:5173` con proxy. `dotnet test` requiere
+  Docker. Solo local: sin `deploy.yml` (objetivo final PRD §7.6).
 
 ## Backend (api/ + db/)
 
-- Solución en 5 capas (Api, Services, Repository, Common, Tests). `Program.cs`: OpenAPI (dev),
-  ProblemDetails, `/health`, SPA desde `wwwroot` con fallback; `/api/*` inexistente → 404.
-- `DapperContext` (cadena `ConnectionStrings:DataHub` en user-secrets) y `BaseRepository`
-  (solo `CommandType.StoredProcedure`).
-- Paquetes: Dapper 2.1.89, MySqlConnector 2.6.2, Microsoft.AspNetCore.OpenApi 10.0.12,
-  xunit.v3 4.0.1, Mvc.Testing 10.0.12, Testcontainers.MySql 4.16.0 (mysql:8.0).
-- Vigente (ejecutado por el usuario, 2026-10-14): `db/Tablas/` Cliente, Usuario, UsuarioToken;
-  `db/Procedimientos/` 8 SP de acceso. Base y tablas en `utf8mb4_0900_ai_ci`.
-- Convenciones: esquema en español, PascalCase singular (PRD §6); escribir los nombres con
-  las mismas mayúsculas siempre. `Guid` CHAR(36) se lee como `System.Guid`; los DTOs exponen
-  `Guid`, nunca `Id`. `FechaActualizacion` la asigna cada SP con `UTC_TIMESTAMP()`. FK de `Usuario`
-  con `RESTRICT` (MySQL no admite CHECK con acción referencial).
-- **Acceso (módulo 1):** `/api/v1/auth` login, logout, me, aceptar-invitacion,
-  olvide-contrasena, restablecer-contrasena. JWT 60 min en cookie `datahub_sesion`; cada
-  petición valida usuario activo (`OnTokenValidated`); 401 con ProblemDetails; bloqueo 5/15 min;
-  rate limiting por IP; tiempo mínimo de 1 s en olvidé contraseña. Correo `Archivo`
-  (`correos-dev/`) o `Ses`. Sin endpoint de invitar (módulo 3).
-- user-secrets (Api): `ConnectionStrings:DataHub`, `Jwt:Clave` (≥32 bytes); AWS solo si `Ses`.
-- SP con parámetros de texto declaran `COLLATE utf8mb4_0900_ai_ci`; Testcontainers arranca con
-  `unicode_ci` de servidor para detectar mezclas. Semilla dev: `db/Semillas/dev_super_admin.sql` (imprime el enlace de invitación).
-- Paquetes nuevos: JwtBearer 10.0.13, AWSSDK.SimpleEmailV2 4.0.106.3, MimeKit 4.18.1,
-  System.Security.Cryptography.Pkcs 10.0.13 (parche de la transitiva de MimeKit).
-- Pruebas: 14/14 (unitarias, esquema y 6 flujos de acceso en Testcontainers).
-- Deuda: `UseForwardedHeaders` antes de desplegar (rate limit por IP real); `perfil` sale como
-  `string` en OpenAPI (no como unión).
+- 5 capas; `BaseRepository` solo SP; ProblemDetails; `/health`; SPA con fallback (`/api/*` → 404).
+- Convenciones: esquema español PascalCase; `Id` interno, `Guid` público (`System.Guid`);
+  `FechaActualizacion = UTC_TIMESTAMP()` en cada UPDATE; SP re-ejecutables y con parámetros de
+  texto `COLLATE utf8mb4_0900_ai_ci` (Testcontainers arranca con `unicode_ci` para detectarlo).
+- **Acceso:** `/api/v1/auth` (login, logout, me, aceptar-invitacion, olvide/restablecer). JWT 60
+  min en cookie `datahub_sesion`; cada petición valida usuario y cliente activos; bloqueo 5/15
+  min; rate limit por IP; correo `Archivo` (`correos-dev/`) o `Ses`.
+- **Permisos:** `MatrizPermisos` (Common/Enums/Permisos.cs, 13 acciones) +
+  `Autorizacion.Can(usuario, accion, clienteIdRecurso)`; `/me` → `permisos` y `perfil` (enum).
+- **Clientes:** `/api/v1/clientes` GET, GET {guid}, POST (cliente + Admin invitado + token en un
+  SP, luego correo), PUT `{nombre, slug, activo}`. 409 con extensión `campo`.
+- **SP:** estándar `<prefijo>_<verbo><Calificador>` (CLAUDE.md). **Pendiente de ejecutar, en
+  orden:** `2026-10-15_01_renombrar_sp_acceso.sql` (8 SP de acceso con nombre nuevo, borra los
+  `sp_*`) y `2026-10-15_02_clientes.sql` (4 `cli_*` nuevos, 4 `usu_*` modificados). Después:
+  `db/Procedimientos/` pasa a los nombres nuevos. Vigente hoy: `db/Tablas/` (Cliente, Usuario,
+  UsuarioToken) y `db/Procedimientos/` con los 8 `sp_*`. Semilla: `db/Semillas/dev_super_admin.sql`.
+- user-secrets: `ConnectionStrings:DataHub`, `Jwt:Clave`. Paquetes: Dapper, MySqlConnector,
+  OpenApi, JwtBearer, AWSSDK.SimpleEmailV2, MimeKit, Pkcs 10.0.13 (parche), xunit.v3,
+  Mvc.Testing, Testcontainers.MySql.
+- Deuda: `UseForwardedHeaders` antes de desplegar; carrera de slug duplicado da 500
+  (improbable, `ponytail:` en el SP); sin aviso si falla el correo al crear cliente (reenviar: 3b).
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4 (`@tailwindcss/vite`), oxlint (linter de la plantilla).
-- react-router 7, openapi-typescript (`npm run tipos`, `src/api/esquema.d.ts` versionado;
-  `overrides` por peer de TS 5), Vitest + Testing Library (`npm test`, 4 pruebas).
-- Pantallas: `/login`, `/aceptar-invitacion`, `/olvide-contrasena`, `/restablecer-contrasena`,
-  `/` protegida (Inicio placeholder con datos de `/me` y cerrar sesión).
-- Lint: 2 warnings en `Sesion.tsx` (estilo, no bloquean).
+- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, Vitest + Testing Library (10
+  pruebas). Tipos: `npm run tipos` → `src/api/esquema.d.ts` (versionado; `overrides` TS 5).
+- Pantallas: login, aceptar invitación, olvidé/restablecer; `Layout` con menú según
+  `puede(permiso)`; Inicio; `/clientes`, `/clientes/nuevo`, `/clientes/:guid` con
+  `RequierePermiso` (sin permiso → `/`). Componentes comunes en `src/ui.tsx`.
+- Lint: 2 warnings de estilo en `Sesion.tsx`.
 
 ## Decisiones vigentes
 
-- PRD §12. Añadidas: JWT 1 h; `Id` interno + `Guid` público; esquema en español PascalCase;
-  API/SP en español; correo archivo local + SES; JwtBearer; react-router, openapi-typescript,
-  Vitest + Testing Library.
+- PRD §12: JWT 1 h; `Id` + `Guid`; esquema y API en español; SP `usu_consultarX`; collation `utf8mb4_0900_ai_ci`;
+  correo archivo/SES; JwtBearer; react-router, openapi-typescript, Vitest.
 
 ## Pendientes conocidos
 
-- Usuario de GitHub del 2.º integrante para `CODEOWNERS` (conocido: `CristianLeonardoReyes`).
-- Proteger `main` (y `develop`) en GitHub (usuario).
+- `CODEOWNERS` (usuario GitHub del 2.º integrante) y proteger `main`/`develop` (usuario).
+- RF-USR-03 (asignar workspaces) se hace en el módulo 4 (decidido 2026-10-15).
 - PRD §12 pendiente: tamaño máximo de archivo (módulo 7).

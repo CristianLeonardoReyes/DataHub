@@ -85,6 +85,12 @@ El usuario revisa y ejecuta todo el SQL. Ningún agente ejecuta SQL contra MySQL
 - Collation `utf8mb4_0900_ai_ci` en base y tablas. Todo parámetro de texto de un SP declara
   `CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci`. Scripts de SP re-ejecutables
   (`DROP PROCEDURE IF EXISTS`).
+- **Nombres de SP:** `<prefijo>_<verbo><Calificador>`, verbos `insertar`, `editar`, `consultar`,
+  `eliminar` (p. ej. `usu_consultarPorCorreo`, `cli_editar`). Prefijos: `usu` Usuario, `uto`
+  UsuarioToken, `cli` Cliente, `wks` Workspace, `wkm` WorkspaceMiembro, `esp` Espacio, `col`
+  Coleccion, `pag` Pagina, `pco` PaginaContenido, `eti` Etiqueta, `pet` PaginaEtiqueta, `adj`
+  Adjunto. Parámetros `p_<Nombre>`. Constantes en `SpNombres`.
+- Migraciones del mismo día que dependen del orden: `AAAA-MM-DD_NN_<descripcion>.sql`.
 - Las pruebas de integración usan Testcontainers (MySQL en Docker) con esos scripts; eso sí
   está permitido.
 
