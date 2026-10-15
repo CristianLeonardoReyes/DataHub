@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import * as api from './api/clientes'
+import { useSesion } from './Sesion'
 import { Alerta, btnCls, btnSmCls, Campo, linkCls } from './ui'
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
@@ -17,6 +18,7 @@ const sugerirSlug = (nombre: string) =>
 const fecha = (iso: string) => new Date(iso).toLocaleDateString('es-CO')
 
 export function Clientes() {
+  const { clientesCambiaron } = useSesion()
   const aviso = (useLocation().state as { aviso?: string } | null)?.aviso
   const [lista, setLista] = useState<api.Cliente[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -34,7 +36,10 @@ export function Clientes() {
     setOcupado(c.guid)
     setError(null)
     const r = await api.actualizar(c.guid, { nombre: c.nombre, slug: c.slug, activo: !c.activo })
-    if (r.ok) setLista((l) => l?.map((x) => (x.guid === c.guid ? r.datos : x)) ?? null)
+    if (r.ok) {
+      setLista((l) => l?.map((x) => (x.guid === c.guid ? r.datos : x)) ?? null)
+      await clientesCambiaron()
+    }
     else setError(r.problema.detail ?? 'No se pudo cambiar el estado')
     setOcupado(null)
   }
@@ -94,6 +99,7 @@ export function Clientes() {
 // Nuevo (sin :guid) y edición (con :guid).
 export function ClienteForm() {
   const { guid } = useParams()
+  const { clientesCambiaron } = useSesion()
   const nav = useNavigate()
   const [nombre, setNombre] = useState('')
   const [slug, setSlug] = useState('')
@@ -140,6 +146,7 @@ export function ClienteForm() {
       ? await api.actualizar(guid, { nombre: n, slug: s, activo })
       : await api.crear({ nombre: n, slug: s, correoAdmin: c })
     if (r.ok) {
+      await clientesCambiaron()
       nav('/clientes', { state: { aviso: guid ? 'Cliente actualizado' : 'Cliente creado. Se envió la invitación al Admin' } })
       return
     }

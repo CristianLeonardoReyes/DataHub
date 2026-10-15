@@ -29,6 +29,12 @@ public class RestablecerContrasenaRequest
     [Required] public string Contrasena { get; set; } = "";
 }
 
+public class ClienteOperandoRequest
+{
+    /// <summary>Cliente en el que opera el Super admin; null = vista global.</summary>
+    public Guid? ClienteGuid { get; set; }
+}
+
 public record ClienteResumenDto(Guid Guid, string Nombre);
 
 /// <param name="Permisos">Acciones permitidas al perfil, en camelCase (p. ej. clientesGestionar).</param>

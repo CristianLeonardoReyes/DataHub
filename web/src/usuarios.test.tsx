@@ -112,9 +112,9 @@ test('cambiar perfil envía PUT con perfil y activo y actualiza la fila', async 
   expect(await screen.findByLabelText('Perfil de carla@b.co')).toHaveValue('colaborador')
 })
 
-test('super admin sin cliente ve el mensaje informativo del 400', async () => {
-  simular(SUPER, () => respuesta(400, { status: 400, detail: 'Selecciona un cliente para gestionar sus usuarios.' }))
+test('super admin sin cliente que va a /usuarios termina en /', async () => {
+  simular(SUPER, () => respuesta(200, []))
   montar('/usuarios')
-  expect(await screen.findByText('Selecciona un cliente para gestionar sus usuarios.')).toBeInTheDocument()
-  expect(screen.queryByRole('alert')).toBeNull()
+  expect(await screen.findByText('Bienvenido a Data Hub.')).toBeInTheDocument()
+  expect(llamadasA('GET').some(([u]) => u === '/api/v1/usuarios')).toBe(false)
 })

@@ -21,5 +21,6 @@ public static class SpNombres
     public const string ClienteListar = "cli_consultar";
     public const string ClienteObtenerPorGuid = "cli_consultarPorGuid";
     public const string ClienteCrearConAdmin = "cli_insertarConAdmin";
+    public const string ClienteConsultarOperando = "cli_consultarOperando";
     public const string ClienteActualizar = "cli_editar";
 }

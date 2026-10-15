@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using DataGlobal.DataHub.Common.DTOs;
 using DataGlobal.DataHub.Common.Enums;
 using DataGlobal.DataHub.Common.Models;
@@ -47,6 +48,21 @@ public class AuthController(IAuthService auth, UsuarioActual actual) : Controlle
         new UsuarioActualDto(actual.Guid, actual.Nombre, actual.Correo, MatrizPermisos.ParsearPerfil(actual.Perfil),
             actual.ClienteGuid is { } g ? new ClienteResumenDto(g, actual.ClienteNombre ?? "") : null,
             [.. MatrizPermisos.De(MatrizPermisos.ParsearPerfil(actual.Perfil)).Select(MatrizPermisos.Nombre)]);
+
+    /// <summary>Solo Super admin: elige el cliente activo en el que opera (null = ninguno). No alarga la sesión.</summary>
+    [HttpPost("cliente-operando")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ClienteOperando(ClienteOperandoRequest solicitud)
+    {
+        if (!long.TryParse(User.FindFirstValue("exp"), out var exp)) return Unauthorized();
+        var expira = DateTimeOffset.FromUnixTimeSeconds(exp).UtcDateTime;
+        var sesion = await auth.CambiarClienteOperandoAsync(solicitud.ClienteGuid, expira);
+        Response.Cookies.Append(Cookie, sesion.Token, OpcionesCookie(new DateTimeOffset(DateTime.SpecifyKind(sesion.Expira, DateTimeKind.Utc))));
+        return NoContent();
+    }
 
     /// <summary>Activa la cuenta invitada: fija nombre y contraseña.</summary>
     [HttpPost("aceptar-invitacion"), AllowAnonymous, EnableRateLimiting("token")]

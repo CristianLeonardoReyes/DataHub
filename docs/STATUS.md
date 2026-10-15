@@ -5,10 +5,10 @@ tocó. La historia la guarda git._
 ## Común
 
 - **Hecho:** paso 1 (base) y paso 2 (Acceso, módulo 1) mergeados en `develop`.
-- **Paso 3:** 3a mergeado (PR #4). **3b (Usuarios) terminado** en
-  `feature/clientes-usuarios-paso-3b-desde-develop`, QA OK (api 84/84, web 18/18); pendiente
-  commit/PR y ejecutar `2026-10-15_03_usuarios.sql`. Siguiente: 3c (selector
-  `POST /auth/cliente-operando` + aislamiento) y **punto de prueba completo**.
+- **Paso 3:** 3a (PR #4) y 3b (PR #5) mergeados. **3c terminado** en
+  `feature/clientes-usuarios-paso-3c` (api 90/90, web 23/23, QA completo de pasos 1–3 OK).
+  **PUNTO DE PRUEBA:** el usuario ejecuta `2026-10-15_04_cliente_operando.sql` y prueba todo de
+  punta a punta; luego commit/PR del 3c y paso 4 (módulo 4, incluye RF-USR-03).
 - **Decisiones 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta botones, menús y rutas
   según `permisos`; crear cliente pide solo `correoAdmin`; `PUT` con `activo`; cliente inactivo
   corta login y sesiones de todos sus usuarios.
@@ -30,26 +30,31 @@ tocó. La historia la guarda git._
 - **Usuarios (3b):** `/api/v1/usuarios` GET, POST `{correo, perfil}`, POST
   `{guid}/reenviar-invitacion`, PUT `{perfil, activo}`; cliente = `UsuarioActual.ClienteId`
   (Super admin sin cliente → 400 hasta 3c). RF-USR-04 en `usu_editarPerfilEstado` con FOR UPDATE.
+- **Cliente operando (3c):** `POST /auth/cliente-operando {clienteGuid|null}` solo Super admin,
+  solo clientes activos; re-emite la cookie con la misma expiración. `OnTokenValidated`: Super
+  admin con claim `clienteId` → `cli_consultarOperando`; inactivo/inexistente → sin cliente
+  (no 401). Otros perfiles: cliente siempre de BD.
 - **Clientes:** `/api/v1/clientes` GET, GET {guid}, POST (cliente + Admin invitado + token en un
   SP, luego correo), PUT `{nombre, slug, activo}`. 409 con extensión `campo`.
 - **SP:** estándar `<prefijo>_<verbo><Calificador>` (CLAUDE.md). BD vigente (ejecutado por el
-  usuario hasta `2026-10-15_02`): `db/Tablas/` (Cliente, Usuario, UsuarioToken) y
-  `db/Procedimientos/` (12: `usu_*`, `uto_*`, `cli_*`). Semilla: `db/Semillas/dev_super_admin.sql`.
+  usuario hasta `2026-10-15_03`): `db/Tablas/` (Cliente, Usuario, UsuarioToken) y
+  `db/Procedimientos/` (16: `usu_*`, `uto_*`, `cli_*`). Semilla: `db/Semillas/dev_super_admin.sql`.
 - user-secrets: `ConnectionStrings:DataHub`, `Jwt:Clave`. Paquetes: Dapper, MySqlConnector,
   OpenApi, JwtBearer, AWSSDK.SimpleEmailV2, MimeKit, Pkcs 10.0.13 (parche), xunit.v3,
   Mvc.Testing, Testcontainers.MySql.
 - Deuda: `UseForwardedHeaders` antes de desplegar; carrera de slug duplicado da 500
-  (improbable, `ponytail:` en el SP); sin aviso si falla el correo al crear cliente (se puede reenviar); `usu_insertarInvitado` no
-  comprueba cliente activo (revisar en 3c, cuando el Super admin opere clientes).
+  (improbable, `ponytail:` en el SP); sin aviso si falla el correo al crear cliente (se puede reenviar); invitar a
+  cliente inactivo queda impedido por el 3c.
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, Vitest + Testing Library (18
+- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, Vitest + Testing Library (23
   pruebas). Tipos: `npm run tipos` → `src/api/esquema.d.ts` (versionado; `overrides` TS 5).
 - Pantallas: login, aceptar invitación, olvidé/restablecer; `Layout` con menú según
   `puede(permiso)`; Inicio; `/clientes`, `/clientes/nuevo`, `/clientes/:guid` con
   `RequierePermiso` (sin permiso → `/`). Componentes comunes en `src/ui.tsx`. `/usuarios` y
-  `/usuarios/nuevo` (`usuariosGestionar`; fila propia sin acciones).
+  `/usuarios/nuevo` (`usuariosGestionar`; fila propia sin acciones). Selector
+  "Operar en:" (solo Super admin) en la cabecera; Usuarios para Super admin exige cliente.
 - Lint: 2 warnings de estilo en `Sesion.tsx`.
 
 ## Decisiones vigentes

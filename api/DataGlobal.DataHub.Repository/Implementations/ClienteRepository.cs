@@ -13,6 +13,9 @@ public class ClienteRepository(DapperContext context) : BaseRepository(context),
     public Task<ClienteDto?> ObtenerPorGuidAsync(Guid guid) =>
         QueryFirstOrNullAsync<ClienteDto>(SpNombres.ClienteObtenerPorGuid, new { p_Guid = guid });
 
+    public Task<ClienteOperando?> ObtenerOperandoAsync(Guid guid) =>
+        QueryFirstOrNullAsync<ClienteOperando>(SpNombres.ClienteConsultarOperando, new { p_Guid = guid });
+
     public async Task<ResultadoCrearCliente> CrearConAdminAsync(string nombre, string slug, string correoAdmin, string tokenHash, int horas) =>
         (await QueryFirstOrNullAsync<ResultadoCrearCliente>(SpNombres.ClienteCrearConAdmin,
             new { p_Nombre = nombre, p_Slug = slug, p_CorreoAdmin = correoAdmin, p_TokenHash = tokenHash, p_Horas = horas }))!;

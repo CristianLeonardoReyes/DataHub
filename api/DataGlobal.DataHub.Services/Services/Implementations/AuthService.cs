@@ -17,6 +17,8 @@ namespace DataGlobal.DataHub.Services.Services.Implementations;
 public class AuthService(
     IUsuarioRepository usuarios,
     IUsuarioTokenRepository tokens,
+    IClienteRepository clientes,
+    UsuarioActual actual,
     IEnviadorCorreo correo,
     IOptions<JwtOpciones> jwt,
     IOptions<AppOpciones> app,
@@ -55,6 +57,20 @@ public class AuthService(
     {
         var u = await usuarios.ObtenerPorGuidAsync(guid);
         return u is { Estado: "activo", ClienteActivo: true } ? u : null;
+    }
+
+    public async Task<ClienteOperando?> ObtenerClienteActivoAsync(Guid guid) =>
+        await clientes.ObtenerOperandoAsync(guid) is { Activo: true } c ? c : null;
+
+    public async Task<Sesion> CambiarClienteOperandoAsync(Guid? clienteGuid, DateTime expira)
+    {
+        if (actual.Perfil != "super_admin") throw new AccesoDenegadoException();
+        if (clienteGuid is { } g)
+        {
+            var c = await clientes.ObtenerOperandoAsync(g) ?? throw new NoEncontradoException("El cliente no existe.");
+            if (!c.Activo) throw new SolicitudInvalidaException("No puedes operar dentro de un cliente inactivo.");
+        }
+        return CrearToken(actual.Guid, actual.Perfil, clienteGuid, expira);
     }
 
     public async Task AceptarInvitacionAsync(AceptarInvitacionRequest s)
@@ -110,15 +126,17 @@ public class AuthService(
     private static SolicitudInvalidaException TokenInvalido() => new("El enlace no es válido o ya venció.");
 
     private Sesion CrearSesion(UsuarioAuth u)
+        => CrearToken(u.Guid, u.Perfil, u.ClienteGuid, DateTime.UtcNow.AddMinutes(jwt.Value.Minutos));
+
+    private Sesion CrearToken(Guid usuarioGuid, string perfil, Guid? clienteGuid, DateTime expira)
     {
         var o = jwt.Value;
-        var expira = DateTime.UtcNow.AddMinutes(o.Minutos);
         var claims = new Dictionary<string, object>
         {
-            ["usuarioId"] = u.Guid.ToString(),
-            ["perfil"] = u.Perfil
+            ["usuarioId"] = usuarioGuid.ToString(),
+            ["perfil"] = perfil
         };
-        if (u.ClienteGuid is { } c) claims["clienteId"] = c.ToString();
+        if (clienteGuid is { } c) claims["clienteId"] = c.ToString();
 
         var token = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
         {

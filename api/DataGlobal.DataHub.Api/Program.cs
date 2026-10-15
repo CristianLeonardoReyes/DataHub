@@ -98,6 +98,14 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
                 actual.ClienteId = u.ClienteId;
                 actual.ClienteGuid = u.ClienteGuid;
                 actual.ClienteNombre = u.ClienteNombre;
+                // RN-02: solo el Super admin elige cliente; si el elegido ya no existe o se desactivó, queda sin cliente.
+                if (u.Perfil == "super_admin" && Guid.TryParse(ctx.Principal?.FindFirstValue("clienteId"), out var cg)
+                    && await sp.GetRequiredService<IAuthService>().ObtenerClienteActivoAsync(cg) is { } c)
+                {
+                    actual.ClienteId = c.Id;
+                    actual.ClienteGuid = c.Guid;
+                    actual.ClienteNombre = c.Nombre;
+                }
                 actual.Correo = u.Correo;
                 actual.Nombre = u.Nombre;
                 actual.Perfil = u.Perfil;
