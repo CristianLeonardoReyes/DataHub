@@ -1,38 +1,8 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import * as auth from './api/auth'
 import { useSesion } from './Sesion'
-
-const inputCls =
-  'w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 aria-[invalid=true]:border-red-400'
-const btnCls =
-  'w-full rounded bg-violet-500 px-3 py-2 font-medium text-white hover:bg-violet-400 focus-visible:ring-2 focus-visible:ring-violet-300 focus:outline-none disabled:opacity-50'
-const linkCls = 'text-violet-300 underline hover:text-violet-200 focus-visible:ring-2 focus-visible:ring-violet-400 focus:outline-none'
-
-function Tarjeta({ titulo, children }: { titulo: string; children: ReactNode }) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-4 text-zinc-100">
-      <div className="w-full max-w-sm space-y-4 rounded-lg border border-zinc-800 bg-zinc-900/60 p-6">
-        <h1 className="text-xl font-semibold">Data Hub</h1>
-        <h2 className="text-zinc-400">{titulo}</h2>
-        {children}
-      </div>
-    </main>
-  )
-}
-
-function Campo(p: { id: string; label: string; type?: string; value: string; onChange: (v: string) => void; invalido?: boolean; auto?: string }) {
-  return (
-    <div className="space-y-1">
-      <label htmlFor={p.id} className="block text-sm text-zinc-300">{p.label}</label>
-      <input id={p.id} type={p.type ?? 'text'} value={p.value} onChange={(e) => p.onChange(e.target.value)}
-        required autoComplete={p.auto} aria-invalid={p.invalido || undefined} className={inputCls} />
-    </div>
-  )
-}
-
-const Alerta = ({ texto }: { texto: string | null }) =>
-  texto ? <p role="alert" className="text-sm text-red-300">{texto}</p> : null
+import { Alerta, btnCls, Campo, linkCls, Tarjeta } from './ui'
 
 const MUCHOS = 'Demasiados intentos, espera un minuto'
 
@@ -172,17 +142,12 @@ export function OlvideContrasena() {
 }
 
 export function Inicio() {
-  const { usuario, salir } = useSesion()
-  const nav = useNavigate()
+  const { usuario } = useSesion()
   if (!usuario) return null
   return (
-    <Tarjeta titulo={`Hola, ${usuario.nombre}`}>
-      <dl className="space-y-1 text-sm">
-        <div><dt className="inline text-zinc-400">Correo: </dt><dd className="inline">{usuario.correo}</dd></div>
-        <div><dt className="inline text-zinc-400">Perfil: </dt><dd className="inline">{usuario.perfil}</dd></div>
-        <div><dt className="inline text-zinc-400">Cliente: </dt><dd className="inline">{usuario.cliente?.nombre ?? 'Super admin'}</dd></div>
-      </dl>
-      <button type="button" className={btnCls} onClick={async () => { await salir(); nav('/login') }}>Cerrar sesión</button>
-    </Tarjeta>
+    <section className="space-y-2">
+      <h1 className="text-xl font-semibold">Hola, {usuario.nombre}</h1>
+      <p className="text-sm text-zinc-400">Bienvenido a Data Hub.</p>
+    </section>
   )
 }

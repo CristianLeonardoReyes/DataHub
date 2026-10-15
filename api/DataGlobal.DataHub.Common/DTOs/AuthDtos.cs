@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using DataGlobal.DataHub.Common.Enums;
 
 namespace DataGlobal.DataHub.Common.DTOs;
 
@@ -30,5 +31,5 @@ public class RestablecerContrasenaRequest
 
 public record ClienteResumenDto(Guid Guid, string Nombre);
 
-/// <param name="Perfil">super_admin | admin | coordinador | colaborador</param>
-public record UsuarioActualDto(Guid Guid, string Nombre, string Correo, string Perfil, ClienteResumenDto? Cliente);
+/// <param name="Permisos">Acciones permitidas al perfil, en camelCase (p. ej. clientesGestionar).</param>
+public record UsuarioActualDto(Guid Guid, string Nombre, string Correo, PerfilUsuario Perfil, ClienteResumenDto? Cliente, string[] Permisos);

@@ -4,17 +4,23 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DataGlobal.DataHub.Api.Middleware;
 
-/// <summary>Traduce SolicitudInvalidaException a 400 con ProblemDetails; el resto cae al manejador por defecto (500 sin detalles).</summary>
+/// <summary>Traduce las excepciones de negocio (400, 403, 404, 409) a ProblemDetails; el resto cae al manejador por defecto (500 sin detalles).</summary>
 public class SolicitudInvalidaHandler(IProblemDetailsService problemas) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext ctx, Exception ex, CancellationToken ct)
     {
-        if (ex is not SolicitudInvalidaException) return false;
-        ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
-        return await problemas.TryWriteAsync(new ProblemDetailsContext
+        var (status, titulo) = ex switch
         {
-            HttpContext = ctx,
-            ProblemDetails = new ProblemDetails { Status = 400, Title = "Solicitud inválida", Detail = ex.Message }
-        });
+            SolicitudInvalidaException => (400, "Solicitud inválida"),
+            AccesoDenegadoException => (403, "Acceso denegado"),
+            NoEncontradoException => (404, "No encontrado"),
+            ConflictoException => (409, "Conflicto"),
+            _ => (0, "")
+        };
+        if (status == 0) return false;
+        ctx.Response.StatusCode = status;
+        var problema = new ProblemDetails { Status = status, Title = titulo, Detail = ex.Message };
+        if (ex is ConflictoException { Campo: { } campo }) problema.Extensions["campo"] = campo;
+        return await problemas.TryWriteAsync(new ProblemDetailsContext { HttpContext = ctx, ProblemDetails = problema });
     }
 }

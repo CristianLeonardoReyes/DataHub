@@ -36,6 +36,8 @@ builder.Services.Configure<AppOpciones>(config.GetSection("App"));
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IUsuarioTokenRepository, UsuarioTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<UsuarioActual>();
 builder.Services.AddSingleton<IEnviadorCorreo>(sp =>
 {

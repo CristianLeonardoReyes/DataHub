@@ -30,7 +30,7 @@ public class AuthService(
     public async Task<Sesion?> LoginAsync(LoginRequest solicitud)
     {
         var u = await usuarios.ObtenerPorCorreoAsync(solicitud.Correo.Trim());
-        if (u is null || u.Estado != "activo" || u.ContrasenaHash is null)
+        if (u is null || u.Estado != "activo" || !u.ClienteActivo || u.ContrasenaHash is null)
         {
             Hasher.VerifyHashedPassword(new object(), HashRelleno, solicitud.Contrasena);
             return null;
@@ -54,7 +54,7 @@ public class AuthService(
     public async Task<UsuarioAuth?> ObtenerActivoAsync(Guid guid)
     {
         var u = await usuarios.ObtenerPorGuidAsync(guid);
-        return u is { Estado: "activo" } ? u : null;
+        return u is { Estado: "activo", ClienteActivo: true } ? u : null;
     }
 
     public async Task AceptarInvitacionAsync(AceptarInvitacionRequest s)
@@ -80,7 +80,7 @@ public class AuthService(
     private async Task GenerarRestablecimientoAsync(string correoUsuario)
     {
         var u = await usuarios.ObtenerPorCorreoAsync(correoUsuario.Trim());
-        if (u is not { Estado: "activo" }) return;
+        if (u is not { Estado: "activo", ClienteActivo: true }) return;
 
         await tokens.InvalidarPendientesAsync(u.Id, TipoReset);
         var token = TokenUtil.Generar();

@@ -1,4 +1,5 @@
 using DataGlobal.DataHub.Common.DTOs;
+using DataGlobal.DataHub.Common.Enums;
 using DataGlobal.DataHub.Common.Models;
 using DataGlobal.DataHub.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -43,8 +44,9 @@ public class AuthController(IAuthService auth, UsuarioActual actual) : Controlle
     [ProducesResponseType<UsuarioActualDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<UsuarioActualDto> Me() =>
-        new UsuarioActualDto(actual.Guid, actual.Nombre, actual.Correo, actual.Perfil,
-            actual.ClienteGuid is { } g ? new ClienteResumenDto(g, actual.ClienteNombre ?? "") : null);
+        new UsuarioActualDto(actual.Guid, actual.Nombre, actual.Correo, MatrizPermisos.ParsearPerfil(actual.Perfil),
+            actual.ClienteGuid is { } g ? new ClienteResumenDto(g, actual.ClienteNombre ?? "") : null,
+            [.. MatrizPermisos.De(MatrizPermisos.ParsearPerfil(actual.Perfil)).Select(MatrizPermisos.Nombre)]);
 
     /// <summary>Activa la cuenta invitada: fija nombre y contraseña.</summary>
     [HttpPost("aceptar-invitacion"), AllowAnonymous, EnableRateLimiting("token")]
