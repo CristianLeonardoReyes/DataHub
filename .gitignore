@@ -36,3 +36,6 @@ Thumbs.db
 
 # Correos de desarrollo (modo Archivo)
 correos-dev/
+
+# Exportaciones de Stitch (referencia visual local; se comparte como .zip, no se versiona)
+docs/diseno/stitch/

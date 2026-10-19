@@ -160,6 +160,12 @@ npm --prefix web test
 Tras cambiar un endpoint o DTO, con la API corriendo: `npm --prefix web run tipos` y versionar
 `web/src/api/esquema.d.ts`.
 
+### Diseño de interfaz
+
+- Sistema de diseño vigente: `docs/diseno/DESIGN.md`. Logo e icono: `docs/diseno/logo/`.
+- Las pantallas de referencia de Stitch (HTML y capturas) **no se versionan**: pide el `.zip` a
+  tu compañero y descomprímelo en `docs/diseno/stitch/` (ignorada por git).
+
 ### Prototipo visual
 
 ```bash
