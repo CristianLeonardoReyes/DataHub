@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary": "#426900", "tertiary-fixed-dim": "#ffb68d", "inverse-on-surface": "#eef0ff", "tertiary-fixed": "#ffdbc9", "on-tertiary-fixed-variant": "#753403", "surface-container": "#eaedff", "surface-dim": "#d3d9f4", "surface-container-high": "#e2e7ff", "surface-bright": "#faf8ff", "on-tertiary-container": "#f49962", "on-error": "#ffffff", "on-secondary": "#ffffff", "primary-fixed": "#dee0ff", "secondary-fixed-dim": "#9dd84f", "primary": "#102178", "primary-fixed-dim": "#bbc3ff", "on-primary-container": "#9caaff", "on-secondary-container": "#467000", "outline-variant": "#c6c5d3", "surface-variant": "#dbe2fd", "on-secondary-fixed": "#112000", "on-background": "#141b2f", "inverse-primary": "#bbc3ff", "surface-container-low": "#f2f3ff", "secondary-fixed": "#b8f568", "on-tertiary": "#ffffff", "tertiary-container": "#6f3000", "on-secondary-fixed-variant": "#304f00", "on-surface": "#141b2f", "on-error-container": "#93000a", "outline": "#767683", "on-primary-fixed-variant": "#303e93", "on-primary-fixed": "#000f5c", "error": "#ba1a1a", "primary-container": "#2b3a8f", "tertiary": "#4d1f00", "background": "#faf8ff", "inverse-surface": "#293045", "surface-container-highest": "#dbe2fd", "on-primary": "#ffffff", "error-container": "#ffdad6", "secondary-container": "#b8f568", "surface-tint": "#4957ad", "surface": "#faf8ff", "on-surface-variant": "#454651", "surface-container-lowest": "#ffffff", "on-tertiary-fixed": "#331200" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "margin": "1rem", "space-lg": "1rem", "gutter-desktop": "1.5rem", "space-xl": "1.5rem", "gutter": "1rem", "space-sm": "0.5rem", "space-md": "0.75rem", "margin-desktop": "2rem" }, "fontFamily": { "headline-md": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"], "code-sm": ["Geist Mono"], "body-sm": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "label-mono": ["Geist Mono"], "label-md": ["Inter"], "headline-xl": ["Inter"], "headline-xl-mobile": ["Inter"], "code-md": ["Geist Mono"], "label-sm": ["Inter"], "body-lg": ["Inter"] }, "fontSize": { "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "code-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "code-md": ["13px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "400" }] } } } };</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-[260px] bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none"><div class="flex flex-col h-[calc(100%-64px)]"><div class="h-14 px-space-md border-b border-outline-variant/20 flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><img alt="DataHub Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XgDZYzXsCQWRaOf2BaeoouLhGGelJi3U5jtgOEwv0RB2C4F3jEuN2tL89OX4F195DTee7kd1UWmscP1ccG-AllpWwnfwcDpGh7TSq7RZkktaW09fIEyl8BOCunWlwStB-UEHuBEMN3Putkbw2sb4CY2gAOJ-K3hHWxyZRYEOOyAZ4d6nTWfU9WABuQFRnq06yOJl2uvJWaMeENkVwGysqyt9JwFp-bJ96G0p2IXAeDDz-hybE7-BKTiw"/><span class="font-label-mono text-label-mono text-outline uppercase tracking-wider">v2.4</span></div><button class="p-1 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded transition-colors" title="Plegar panel lateral" type="button"><span class="material-symbols-outlined text-[18px]">first_page</span></button></div><div class="flex-1 overflow-y-auto px-space-sm py-space-sm space-y-space-md"><nav class="space-y-0.5" data-active-classes="bg-surface-container-high text-primary font-medium"><a class="block px-2.5 py-1.5 rounded-lg text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="inicio" href="#">Inicio</a><button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors text-left" type="button"><span class="flex items-center gap-2"><span class="material-symbols-outlined text-[17px]">search</span><span>Buscar</span></span><kbd class="font-label-mono text-label-mono text-outline bg-surface-container px-1.5 py-0.5 rounded border border-outline-variant/40">Ctrl+K</kbd></button></nav><div class="pt-1"><div class="px-2.5 pb-1 flex items-center justify-between"><span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Administración</span></div><nav class="space-y-0.5" data-active-classes="bg-surface-container-high text-primary font-medium"><a class="flex items-center justify-between px-2.5 py-1.5 rounded-lg font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="clientes" href="#"><span>Clientes</span><span class="font-label-mono text-[10px] uppercase px-1.5 py-0.2 rounded bg-primary/10 text-primary font-semibold">Super Admin</span></a><a aria-current="page" class="flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-colors bg-surface-container-high text-primary font-medium" data-path="usuarios" href="#"><span>Usuarios</span><span class="font-label-mono text-[10px] uppercase px-1.5 py-0.2 rounded bg-surface-container-high text-outline font-semibold">Admin</span></a></nav></div><div class="pt-1"><div class="px-2.5 pb-1 flex items-center justify-between group"><span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Espacios de Trabajo</span><button class="opacity-0 group-hover:opacity-100 p-0.5 text-on-surface-variant hover:text-primary transition-opacity rounded" title="Crear espacio nuevo" type="button"><span class="material-symbols-outlined text-[16px]">add</span></button></div><div class="space-y-0.5 font-body-sm text-body-sm"><div class="group/node"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-on-surface hover:bg-surface-container cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-outline hover:text-on-surface" type="button"><span class="material-symbols-outlined text-[16px]">expand_more</span></button><span class="material-symbols-outlined text-[16px] text-primary">folder</span><span class="truncate font-medium">Workspace Core</span></div><button class="opacity-0 group-hover/node:opacity-100 text-outline hover:text-on-surface px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div><div class="ml-3 pl-2 border-l border-outline-variant/30 space-y-0.5 mt-0.5"><div class="group/subnode"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-outline hover:text-on-surface" type="button"><span class="material-symbols-outlined text-[16px]">expand_more</span></button><span class="material-symbols-outlined text-[16px] text-outline">folder_open</span><span class="truncate">Infraestructura</span></div><button class="opacity-0 group-hover/subnode:opacity-100 text-outline hover:text-on-surface px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div><div class="ml-3 pl-2 border-l border-outline-variant/30 space-y-0.5 mt-0.5"><a class="flex items-center justify-between px-1.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container" data-path="runbooks-produccion" href="#"><span class="truncate font-code-sm text-code-sm">runbooks-prod.md</span></a><a class="flex items-center justify-between px-1.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container" data-path="esquemas-lakehouse" href="#"><span class="truncate font-code-sm text-code-sm">lakehouse-v2.sql</span></a></div></div><div class="group/subnode"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-outline hover:text-on-surface" type="button"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button><span class="material-symbols-outlined text-[16px] text-outline">folder</span><span class="truncate">Pipelines ETL</span></div><button class="opacity-0 group-hover/subnode:opacity-100 text-outline hover:text-on-surface px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div></div></div></div><div class="group/node"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-outline hover:text-on-surface" type="button"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button><span class="material-symbols-outlined text-[16px] text-outline">folder</span><span class="truncate">Catálogo Semántico</span></div><button class="opacity-0 group-hover/node:opacity-100 text-outline hover:text-on-surface px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div></div></div></div></div></div><div class="h-16 px-space-md border-t border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest"><div class="flex items-center gap-2.5 min-w-0"><div class="relative flex-shrink-0 w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-semibold">CR<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary-fixed ring-2 ring-surface-container-lowest" title="Activo"></span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-1.5"><span class="truncate font-body-sm text-body-sm font-medium text-on-surface">Carlos Ramos</span></div><div class="flex items-center gap-1"><span class="font-label-mono text-label-mono text-primary font-semibold">SUPER ADMIN</span></div></div></div><button class="text-outline hover:text-on-surface p-1 rounded hover:bg-surface-container transition-colors" title="Opciones de cuenta" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-14 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 z-40 px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm min-w-0"><nav aria-label="Breadcrumb" class="flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant min-w-0"><a class="hover:text-on-surface truncate" href="#">Workspace Core</a><span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span><a class="hover:text-on-surface truncate" href="#">Infraestructura</a><span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span><span class="font-code-sm text-code-sm text-on-surface font-medium truncate">runbooks-prod.md</span></nav></div><div class="flex items-center gap-space-md flex-shrink-0"><div class="flex items-center gap-2 pl-2 border-l border-outline-variant/30"><span class="font-body-sm text-body-sm text-outline hidden xl:inline">Operar en:</span><div class="relative"><button class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low border border-outline-variant/40 font-body-sm text-body-sm text-on-surface hover:bg-surface-container transition-colors" type="button"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span class="font-medium">Banco Santander Tech</span><span class="material-symbols-outlined text-[16px] text-outline">unfold_more</span></button></div><span class="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-label-mono bg-secondary-fixed/30 text-on-secondary-container border border-secondary-fixed-dim/40"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Operando: Santander</span></div><div class="flex items-center gap-1"><button class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg transition-colors" title="Alternar modo claro / oscuro" type="button"><span class="material-symbols-outlined text-[19px]">light_mode</span></button><div class="relative"><button class="flex items-center gap-2 p-1 pl-1.5 rounded-lg hover:bg-surface-container transition-colors" type="button"><div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[16px]">person</span></div><span class="material-symbols-outlined text-[16px] text-outline">keyboard_arrow_down</span></button></div></div></div></header><main class="w-full pt-14 bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Interactive View Switcher Utility Toolbar -->
+<aside aria-label="Simulador de estados" class="w-full bg-surface-container-low px-margin-desktop py-2 flex flex-wrap items-center justify-between gap-3 shadow-sm select-none">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">tune</span>
+<span class="font-label-mono text-label-mono text-on-surface uppercase tracking-wider font-semibold">Simulador de Estado de Vista:</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest p-1 rounded-lg shadow-sm">
+<button class="px-3 py-1 rounded text-body-sm font-label-md transition-all bg-primary-container text-on-primary shadow-sm flex items-center gap-1.5" id="btn-state-normal" onclick="switchViewState('normal')" type="button">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed"></span>
+<span>Normal (Completo)</span>
+</button>
+<button class="px-3 py-1 rounded text-body-sm font-label-md transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container flex items-center gap-1.5" id="btn-state-empty" onclick="switchViewState('empty')" type="button">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<span>Estado Vacío</span>
+</button>
+<button class="px-3 py-1 rounded text-body-sm font-label-md transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container flex items-center gap-1.5" id="btn-state-loading" onclick="switchViewState('loading')" type="button">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container animate-pulse"></span>
+<span>Carga (Skeleton)</span>
+</button>
+</div>
+</aside>
+<!-- Page Content Container -->
+<div class="w-full max-w-[1400px] mx-auto px-margin-desktop py-space-xl flex flex-col gap-space-lg">
+<!-- 1. Context & Header Section -->
+<header class="flex flex-col gap-space-md">
+<!-- Breadcrumb badge & Organization context -->
+<div class="flex flex-wrap items-center justify-between gap-3">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm">
+<span class="material-symbols-outlined text-[18px] text-outline">domain</span>
+<span class="font-medium text-on-surface">Fintech Nova S.A.</span>
+<span class="text-outline">·</span>
+<span class="font-label-mono text-label-mono px-2 py-0.5 rounded-full bg-surface-container text-primary font-semibold">182 usuarios</span>
+<span class="text-outline">·</span>
+<span class="text-body-sm text-outline">Directorio de Acceso Corporativo</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-mono text-label-mono text-outline uppercase tracking-wider">Modo Operativo:</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-high text-on-surface font-label-md">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+            Super Admin en Santander Tech
+          </span>
+</div>
+</div>
+<!-- Main Action Title bar -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-lg pt-1">
+<div class="flex flex-col gap-1 max-w-2xl">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Usuarios</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Administra el equipo técnico, roles de acceso y estado de las invitaciones corporativas.
+          </p>
+</div>
+<div class="flex items-center gap-3 flex-shrink-0">
+<button class="h-9 px-4 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md flex items-center gap-2 shadow-sm transition-all hover:shadow hover:-translate-y-0.5 active:translate-y-0" onclick="openModal()" type="button">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span>Invitar usuario</span>
+</button>
+</div>
+</div>
+<!-- Filters & Search Toolbar -->
+<div class="bg-surface-container-lowest p-2 rounded-xl shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mt-1">
+<!-- Search input -->
+<div class="relative flex-1 min-w-[280px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full h-9 pl-9 pr-12 rounded-lg bg-surface-container-low text-on-surface placeholder:text-outline font-body-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" id="user-search-input" oninput="handleSearch(this.value)" placeholder="Buscar por nombre o correo corporativo..." type="text"/>
+<kbd class="absolute right-2.5 top-1/2 -translate-y-1/2 font-label-mono text-label-mono text-outline bg-surface-container px-1.5 py-0.5 rounded">⌘K</kbd>
+</div>
+<!-- Filter Controls -->
+<div class="flex flex-wrap items-center gap-2">
+<!-- Profile Filter -->
+<div class="relative">
+<label class="sr-only" for="filter-profile">Filtrar por perfil</label>
+<div class="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container-low text-on-surface font-body-sm">
+<span class="material-symbols-outlined text-outline text-[16px]">badge</span>
+<span class="text-outline text-body-sm">Perfil:</span>
+<select class="bg-transparent text-on-surface font-label-md font-medium text-body-sm focus:outline-none cursor-pointer pr-1" id="filter-profile" onchange="applyFilters()">
+<option value="all">Todos los perfiles</option>
+<option value="Admin">Admin</option>
+<option value="Coordinador">Coordinador</option>
+<option value="Colaborador">Colaborador</option>
+</select>
+</div>
+</div>
+<!-- Status Filter -->
+<div class="relative">
+<label class="sr-only" for="filter-status">Filtrar por estado</label>
+<div class="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container-low text-on-surface font-body-sm">
+<span class="material-symbols-outlined text-outline text-[16px]">radio_button_checked</span>
+<span class="text-outline text-body-sm">Estado:</span>
+<select class="bg-transparent text-on-surface font-label-md font-medium text-body-sm focus:outline-none cursor-pointer pr-1" id="filter-status" onchange="applyFilters()">
+<option value="all">Todos los estados</option>
+<option value="Activo">Activo</option>
+<option value="Invitado">Invitado</option>
+<option value="Inactivo">Inactivo</option>
+</select>
+</div>
+</div>
+<button class="h-9 px-2.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors flex items-center justify-center" onclick="resetFilters()" title="Limpiar filtros" type="button">
+<span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+</button>
+</div>
+</div>
+</header>
+<!-- 2. Business Rule Validation Alert Banner -->
+<section class="w-full bg-tertiary-fixed/30 rounded-xl p-space-md shadow-sm transition-all duration-300 flex items-start justify-between gap-space-md" id="admin-rule-banner">
+<div class="flex items-start gap-3">
+<div class="w-7 h-7 rounded-lg bg-tertiary-container text-tertiary-fixed flex items-center justify-center flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-on-surface font-semibold">Regla de Gobernanza de Clientes</span>
+<span class="font-label-mono text-label-mono text-tertiary px-1.5 py-0.2 rounded bg-tertiary-fixed-dim/40 font-medium">REQUISITO CRÍTICO</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            El cliente debe conservar al menos un Admin activo. No es posible desactivar o degradar al único administrador de esta organización.
+          </p>
+</div>
+</div>
+<button class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-high transition-colors" onclick="dismissBanner()" title="Descartar aviso de gobernanza" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</section>
+<!-- 3. Dynamic Views Container -->
+<!-- VIEW A: Normal State (Table with Real Rows) -->
+<div class="w-full flex flex-col gap-space-md" id="view-normal">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[880px]">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider select-none">
+<th class="py-3 px-space-lg font-semibold">Usuario</th>
+<th class="py-3 px-space-lg font-semibold">Correo Corporativo</th>
+<th class="py-3 px-space-lg font-semibold w-48">Perfil / Rol</th>
+<th class="py-3 px-space-lg font-semibold w-36">Estado</th>
+<th class="py-3 px-space-lg font-semibold w-40">Fecha</th>
+<th class="py-3 px-space-lg font-semibold text-right w-44">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high font-body-sm" id="users-tbody">
+<!-- ROW 1: Carlos Ramos (Tú) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors" data-email="carlos.ramos@dataglobal.io" data-name="Carlos Ramos" data-role="Admin" data-status="Activo">
+<td class="py-3.5 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md font-semibold flex-shrink-0 shadow-sm ring-2 ring-surface-container-highest">
+                      CR
+                    </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-medium text-on-surface font-body-sm">Carlos Ramos</span>
+<span class="px-1.5 py-0.2 rounded font-label-mono text-[10px] uppercase font-bold bg-primary text-on-primary">Tú</span>
+</div>
+<span class="text-outline text-label-mono font-code-sm">Staff Architecture</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-on-surface-variant select-all">carlos.ramos@dataglobal.io</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<!-- Readonly for current user to enforce governance -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container font-label-mono text-label-mono text-primary font-semibold">
+<span class="material-symbols-outlined text-[15px]">verified_user</span>
+<span>Super admin</span>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-fixed/30 text-on-secondary-container font-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Activo</span>
+</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-outline">04 Mar 2024</span>
+</td>
+<td class="py-3.5 px-space-lg text-right">
+<span class="inline-block px-2.5 py-1 rounded bg-surface-container-high text-outline font-label-mono text-label-mono font-medium">
+                    Sin acciones (Tú)
+                  </span>
+</td>
+</tr>
+<!-- ROW 2: Elena Salgado -->
+<tr class="hover:bg-surface-container-low/60 transition-colors" data-email="elena.s@fintechnova.com" data-name="Elena Salgado" data-role="Admin" data-status="Activo">
+<td class="py-3.5 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-label-md font-semibold flex-shrink-0">
+                      ES
+                    </div>
+<div class="flex flex-col min-w-0">
+<span class="font-medium text-on-surface font-body-sm">Elena Salgado</span>
+<span class="text-outline text-label-mono font-code-sm">Lead Data Engineer</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-on-surface-variant select-all">elena.s@fintechnova.com</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<!-- Inline interactive combobox -->
+<div class="relative inline-block w-full max-w-[150px]">
+<select class="w-full h-8 pl-2.5 pr-6 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm font-medium focus:ring-2 focus:ring-primary-container focus:outline-none appearance-none cursor-pointer" onchange="updateUserRole(this, 'Elena Salgado')">
+<option selected="" value="Admin">Admin</option>
+<option value="Coordinador">Coordinador</option>
+<option value="Colaborador">Colaborador</option>
+</select>
+<span class="material-symbols-outlined text-[16px] text-outline absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">unfold_more</span>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-fixed/30 text-on-secondary-container font-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Activo</span>
+</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-outline">10 Mar 2024</span>
+</td>
+<td class="py-3.5 px-space-lg text-right">
+<button class="px-2.5 py-1 rounded-lg text-body-sm font-label-md text-error hover:bg-error-container hover:text-on-error-container transition-colors inline-flex items-center gap-1" onclick="toggleUserStatus(this, 'Elena Salgado', 'desactivar')" type="button">
+<span class="material-symbols-outlined text-[16px]">block</span>
+<span>Desactivar</span>
+</button>
+</td>
+</tr>
+<!-- ROW 3: Marcos Díaz (Invitado) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors bg-surface-container-lowest" data-email="marcos.diaz@fintechnova.com" data-name="Marcos Díaz" data-role="Coordinador" data-status="Invitado">
+<td class="py-3.5 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container text-outline flex items-center justify-center font-label-md font-semibold flex-shrink-0">
+                      MD
+                    </div>
+<div class="flex flex-col min-w-0">
+<span class="font-medium text-on-surface font-body-sm">Marcos Díaz</span>
+<span class="text-outline text-label-mono font-code-sm">Analytics Governance</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-on-surface-variant select-all">marcos.diaz@fintechnova.com</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<div class="relative inline-block w-full max-w-[150px]">
+<select class="w-full h-8 pl-2.5 pr-6 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm font-medium focus:ring-2 focus:ring-primary-container focus:outline-none appearance-none cursor-pointer" onchange="updateUserRole(this, 'Marcos Díaz')">
+<option value="Admin">Admin</option>
+<option selected="" value="Coordinador">Coordinador</option>
+<option value="Colaborador">Colaborador</option>
+</select>
+<span class="material-symbols-outlined text-[16px] text-outline absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">unfold_more</span>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-tertiary-fixed/40 text-tertiary font-label-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">mail</span>
+<span>Invitado</span>
+</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-outline">Hace 2 días</span>
+</td>
+<td class="py-3.5 px-space-lg text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="px-2.5 py-1 rounded-lg text-body-sm font-label-md bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-primary transition-all inline-flex items-center gap-1" onclick="resendInvite('marcos.diaz@fintechnova.com')" type="button">
+<span class="material-symbols-outlined text-[15px]">send</span>
+<span>Reenviar</span>
+</button>
+<button class="p-1 rounded-lg text-outline hover:text-error hover:bg-error-container/40 transition-colors" onclick="toggleUserStatus(this, 'Marcos Díaz', 'desactivar')" title="Revocar invitación" type="button">
+<span class="material-symbols-outlined text-[17px]">close</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- ROW 4: Lucía Rivas -->
+<tr class="hover:bg-surface-container-low/60 transition-colors" data-email="lucia.r@fintechnova.com" data-name="Lucía Rivas" data-role="Colaborador" data-status="Activo">
+<td class="py-3.5 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-label-md font-semibold flex-shrink-0">
+                      LR
+                    </div>
+<div class="flex flex-col min-w-0">
+<span class="font-medium text-on-surface font-body-sm">Lucía Rivas</span>
+<span class="text-outline text-label-mono font-code-sm">BI Specialist</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-on-surface-variant select-all">lucia.r@fintechnova.com</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<div class="relative inline-block w-full max-w-[150px]">
+<select class="w-full h-8 pl-2.5 pr-6 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-body-sm font-medium focus:ring-2 focus:ring-primary-container focus:outline-none appearance-none cursor-pointer" onchange="updateUserRole(this, 'Lucía Rivas')">
+<option value="Admin">Admin</option>
+<option value="Coordinador">Coordinador</option>
+<option selected="" value="Colaborador">Colaborador</option>
+</select>
+<span class="material-symbols-outlined text-[16px] text-outline absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">unfold_more</span>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-fixed/30 text-on-secondary-container font-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Activo</span>
+</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-outline">18 Abr 2024</span>
+</td>
+<td class="py-3.5 px-space-lg text-right">
+<button class="px-2.5 py-1 rounded-lg text-body-sm font-label-md text-error hover:bg-error-container hover:text-on-error-container transition-colors inline-flex items-center gap-1" onclick="toggleUserStatus(this, 'Lucía Rivas', 'desactivar')" type="button">
+<span class="material-symbols-outlined text-[16px]">block</span>
+<span>Desactivar</span>
+</button>
+</td>
+</tr>
+<!-- ROW 5: Rodrigo Vega (Inactivo) -->
+<tr class="hover:bg-surface-container-low/60 transition-colors opacity-80" data-email="rodrigo.v@fintechnova.com" data-name="Rodrigo Vega" data-role="Colaborador" data-status="Inactivo">
+<td class="py-3.5 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high text-outline flex items-center justify-center font-label-md font-semibold flex-shrink-0">
+                      RV
+                    </div>
+<div class="flex flex-col min-w-0">
+<span class="font-medium text-on-surface font-body-sm">Rodrigo Vega</span>
+<span class="text-outline text-label-mono font-code-sm">Ex-Data Steward</span>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-outline select-all">rodrigo.v@fintechnova.com</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<div class="relative inline-block w-full max-w-[150px]">
+<select class="w-full h-8 pl-2.5 pr-6 rounded bg-surface-container-low hover:bg-surface-container text-outline font-body-sm focus:ring-2 focus:ring-primary-container focus:outline-none appearance-none cursor-pointer" onchange="updateUserRole(this, 'Rodrigo Vega')">
+<option value="Admin">Admin</option>
+<option value="Coordinador">Coordinador</option>
+<option selected="" value="Colaborador">Colaborador</option>
+</select>
+<span class="material-symbols-outlined text-[16px] text-outline absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">unfold_more</span>
+</div>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container-high text-outline font-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span>Inactivo</span>
+</span>
+</td>
+<td class="py-3.5 px-space-lg">
+<span class="font-code-sm text-code-sm text-outline">02 Ene 2024</span>
+</td>
+<td class="py-3.5 px-space-lg text-right">
+<button class="px-2.5 py-1 rounded-lg text-body-sm font-label-md text-secondary hover:bg-secondary-fixed/30 transition-colors inline-flex items-center gap-1" onclick="toggleUserStatus(this, 'Rodrigo Vega', 'activar')" type="button">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Activar</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table pagination & counter footer -->
+<div class="px-space-lg py-3 bg-surface-container-low flex flex-wrap items-center justify-between gap-3 text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span>Mostrando <strong class="text-on-surface font-semibold" id="users-count-label">5</strong> de 182 integrantes registrados</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-mono">
+<button class="p-1.5 rounded text-outline cursor-not-allowed" disabled="" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest text-primary font-semibold shadow-sm">1</span>
+<span class="px-2 py-0.5 text-outline">2</span>
+<span class="px-2 py-0.5 text-outline">...</span>
+<span class="px-2 py-0.5 text-outline">19</span>
+<button class="p-1.5 rounded hover:bg-surface-container hover:text-on-surface text-outline transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- VIEW B: Empty State (Default Hidden) -->
+<div class="hidden w-full bg-surface-container-lowest rounded-xl shadow-sm py-16 px-space-lg flex flex-col items-center justify-center text-center" id="view-empty">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-high text-primary flex items-center justify-center mb-space-md shadow-sm">
+<span class="material-symbols-outlined text-[36px]">group_off</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Aún no hay usuarios invitados</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-lg mb-space-xl">
+        Invita a tu equipo de desarrollo y arquitectura para comenzar a redactar y aprobar documentación técnica.
+      </p>
+<button class="h-9 px-4 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md flex items-center gap-2 shadow-sm transition-all hover:shadow hover:-translate-y-0.5" onclick="openModal()" type="button">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+<span>+ Invitar usuario</span>
+</button>
+</div>
+<!-- VIEW C: Loading State / Skeleton (Default Hidden) -->
+<div class="hidden w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden p-space-md space-y-4" id="view-loading">
+<div class="h-10 bg-surface-container-low rounded-lg animate-pulse w-full"></div>
+<!-- Skeleton Row 1 -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low/50 rounded-lg animate-pulse gap-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-high"></div>
+<div class="space-y-1.5">
+<div class="w-32 h-3.5 bg-surface-container-high rounded"></div>
+<div class="w-20 h-2.5 bg-surface-container-high rounded"></div>
+</div>
+</div>
+<div class="w-48 h-3.5 bg-surface-container-high rounded hidden md:block"></div>
+<div class="w-24 h-6 bg-surface-container-high rounded"></div>
+<div class="w-16 h-5 bg-surface-container-high rounded-full"></div>
+<div class="w-20 h-3 bg-surface-container-high rounded hidden lg:block"></div>
+<div class="w-16 h-6 bg-surface-container-high rounded"></div>
+</div>
+<!-- Skeleton Row 2 -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low/50 rounded-lg animate-pulse gap-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-high"></div>
+<div class="space-y-1.5">
+<div class="w-40 h-3.5 bg-surface-container-high rounded"></div>
+<div class="w-28 h-2.5 bg-surface-container-high rounded"></div>
+</div>
+</div>
+<div class="w-44 h-3.5 bg-surface-container-high rounded hidden md:block"></div>
+<div class="w-24 h-6 bg-surface-container-high rounded"></div>
+<div class="w-16 h-5 bg-surface-container-high rounded-full"></div>
+<div class="w-20 h-3 bg-surface-container-high rounded hidden lg:block"></div>
+<div class="w-16 h-6 bg-surface-container-high rounded"></div>
+</div>
+<!-- Skeleton Row 3 -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low/50 rounded-lg animate-pulse gap-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-high"></div>
+<div class="space-y-1.5">
+<div class="w-36 h-3.5 bg-surface-container-high rounded"></div>
+<div class="w-24 h-2.5 bg-surface-container-high rounded"></div>
+</div>
+</div>
+<div class="w-52 h-3.5 bg-surface-container-high rounded hidden md:block"></div>
+<div class="w-24 h-6 bg-surface-container-high rounded"></div>
+<div class="w-16 h-5 bg-surface-container-high rounded-full"></div>
+<div class="w-20 h-3 bg-surface-container-high rounded hidden lg:block"></div>
+<div class="w-16 h-6 bg-surface-container-high rounded"></div>
+</div>
+</div>
+</div>
+<!-- 4. Modal "Invitar usuario" -->
+<div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden items-center justify-center p-4" id="modal-invite">
+<div class="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all duration-200">
+<!-- Modal Header -->
+<div class="px-space-xl py-space-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-lg bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[17px]">person_add</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Invitar usuario a Fintech Nova S.A.</h3>
+</div>
+<button class="text-outline hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition-colors" onclick="closeModal()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Form -->
+<form class="p-space-xl flex flex-col gap-space-lg" onsubmit="handleInviteSubmit(event)">
+<!-- Field 1: Corporate Email -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface font-semibold flex items-center justify-between" for="invite-email">
+<span>Correo corporativo</span>
+<span class="font-label-mono text-label-mono text-outline font-normal">Obligatorio</span>
+</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-container-low text-on-surface placeholder:text-outline font-body-sm focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" id="invite-email" placeholder="usuario@empresa.com" required="" type="email"/>
+</div>
+<p class="font-body-sm text-body-sm text-outline">
+            Enviaremos un enlace único para que active su cuenta y defina su contraseña.
+          </p>
+</div>
+<!-- Field 2: Role Selector with Descriptions -->
+<div class="flex flex-col gap-2">
+<label class="font-label-md text-label-md text-on-surface font-semibold">Perfil de acceso</label>
+<div class="grid grid-cols-1 gap-2.5">
+<!-- Option 1: Colaborador (Default checked) -->
+<label class="flex items-start gap-3 p-3 rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors has-[:checked]:bg-primary-container/10 has-[:checked]:ring-1 has-[:checked]:ring-primary-container">
+<input checked="" class="mt-1 text-primary focus:ring-primary-container" name="invite-role" type="radio" value="Colaborador"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-on-surface font-semibold flex items-center gap-1.5">
+<span>Colaborador</span>
+<span class="px-1.5 py-0.2 rounded font-label-mono text-[10px] bg-surface-container-high text-primary uppercase font-bold">Por defecto</span>
+</span>
+<span class="font-body-sm text-on-surface-variant text-[12px] leading-tight mt-0.5">
+                  Lectura global de catálogos y edición de documentación en sus espacios asignados.
+                </span>
+</div>
+</label>
+<!-- Option 2: Coordinador -->
+<label class="flex items-start gap-3 p-3 rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors has-[:checked]:bg-primary-container/10 has-[:checked]:ring-1 has-[:checked]:ring-primary-container">
+<input class="mt-1 text-primary focus:ring-primary-container" name="invite-role" type="radio" value="Coordinador"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-on-surface font-semibold">Coordinador</span>
+<span class="font-body-sm text-on-surface-variant text-[12px] leading-tight mt-0.5">
+                  Aprobación técnica de pull-requests de metadatos y gestión de linajes en su dominio.
+                </span>
+</div>
+</label>
+<!-- Option 3: Admin -->
+<label class="flex items-start gap-3 p-3 rounded-xl bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors has-[:checked]:bg-primary-container/10 has-[:checked]:ring-1 has-[:checked]:ring-primary-container">
+<input class="mt-1 text-primary focus:ring-primary-container" name="invite-role" type="radio" value="Admin"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-on-surface font-semibold">Admin</span>
+<span class="font-body-sm text-on-surface-variant text-[12px] leading-tight mt-0.5">
+                  Control total sobre usuarios, integraciones con almacenes de datos y gobernanza del cliente.
+                </span>
+</div>
+</label>
+</div>
+</div>
+<!-- Modal Actions -->
+<div class="flex items-center justify-end gap-2.5 pt-2">
+<button class="h-9 px-4 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md transition-colors" onclick="closeModal()" type="button">
+            Cancelar
+          </button>
+<button class="h-9 px-4 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-label-md shadow-sm transition-all flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[17px]">send</span>
+<span>Enviar invitación</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- 5. Toast Notification (Success) -->
+<aside aria-live="polite" class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 bg-surface-container-lowest rounded-xl shadow-xl transition-all duration-300 translate-y-0 opacity-100" id="toast-success">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] font-bold">check</span>
+</div>
+<div class="flex flex-col min-w-0 pr-2">
+<span class="font-label-md text-on-surface font-semibold text-body-sm">Invitación enviada con éxito</span>
+<span class="font-body-sm text-on-surface-variant text-[12px]" id="toast-message-text">Invitación enviada a marcos.diaz@fintechnova.com</span>
+</div>
+<button class="p-1 rounded text-outline hover:text-on-surface transition-colors" onclick="closeToast()" title="Cerrar notificación" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</aside>
+<!-- Micro-interactions Script -->
+<script>
+    function switchViewState(state) {
+      const normalView = document.getElementById('view-normal');
+      const emptyView = document.getElementById('view-empty');
+      const loadingView = document.getElementById('view-loading');
+
+      const btnNormal = document.getElementById('btn-state-normal');
+      const btnEmpty = document.getElementById('btn-state-empty');
+      const btnLoading = document.getElementById('btn-state-loading');
+
+      // Hide all views
+      normalView.classList.add('hidden');
+      emptyView.classList.add('hidden');
+      loadingView.classList.add('hidden');
+
+      // Reset button styles
+      [btnNormal, btnEmpty, btnLoading].forEach(btn => {
+        btn.className = "px-3 py-1 rounded text-body-sm font-label-md transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container flex items-center gap-1.5";
+      });
+
+      if (state === 'normal') {
+        normalView.classList.remove('hidden');
+        btnNormal.className = "px-3 py-1 rounded text-body-sm font-label-md transition-all bg-primary-container text-on-primary shadow-sm flex items-center gap-1.5";
+      } else if (state === 'empty') {
+        emptyView.classList.remove('hidden');
+        btnEmpty.className = "px-3 py-1 rounded text-body-sm font-label-md transition-all bg-primary-container text-on-primary shadow-sm flex items-center gap-1.5";
+      } else if (state === 'loading') {
+        loadingView.classList.remove('hidden');
+        btnLoading.className = "px-3 py-1 rounded text-body-sm font-label-md transition-all bg-primary-container text-on-primary shadow-sm flex items-center gap-1.5";
+      }
+    }
+
+    function dismissBanner() {
+      const banner = document.getElementById('admin-rule-banner');
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateY(-10px)';
+      setTimeout(() => banner.style.display = 'none', 300);
+    }
+
+    function openModal() {
+      const modal = document.getElementById('modal-invite');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('invite-email').focus();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal-invite');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast-success');
+      document.getElementById('toast-message-text').textContent = message;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+    }
+
+    function closeToast() {
+      const toast = document.getElementById('toast-success');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('translate-y-24', 'opacity-0');
+    }
+
+    function handleInviteSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('invite-email').value;
+      closeModal();
+      showToast(`Invitación enviada a ${email}`);
+      document.getElementById('invite-email').value = '';
+    }
+
+    function resendInvite(email) {
+      showToast(`Invitación enviada a ${email}`);
+    }
+
+    function updateUserRole(selectElem, userName) {
+      const newRole = selectElem.value;
+      showToast(`Rol de ${userName} actualizado a ${newRole}`);
+    }
+
+    function toggleUserStatus(buttonElem, userName, action) {
+      if (action === 'desactivar') {
+        if (confirm(`¿Estás seguro de desactivar a ${userName}? Perderá acceso inmediato a los esquemas.`)) {
+          showToast(`El usuario ${userName} ha sido desactivado`);
+        }
+      } else {
+        showToast(`El usuario ${userName} ha sido reactivado satisfactoriamente`);
+      }
+    }
+
+    function applyFilters() {
+      const profileFilter = document.getElementById('filter-profile').value;
+      const statusFilter = document.getElementById('filter-status').value;
+      const rows = document.querySelectorAll('#users-tbody tr');
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const role = row.getAttribute('data-role');
+        const status = row.getAttribute('data-status');
+
+        const roleMatch = (profileFilter === 'all' || role === profileFilter);
+        const statusMatch = (statusFilter === 'all' || status === statusFilter);
+
+        if (roleMatch && statusMatch) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      document.getElementById('users-count-label').textContent = visibleCount;
+    }
+
+    function handleSearch(query) {
+      const lower = query.toLowerCase().trim();
+      const rows = document.querySelectorAll('#users-tbody tr');
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const name = (row.getAttribute('data-name') || '').toLowerCase();
+        const email = (row.getAttribute('data-email') || '').toLowerCase();
+
+        if (name.includes(lower) || email.includes(lower)) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      document.getElementById('users-count-label').textContent = visibleCount;
+    }
+
+    function resetFilters() {
+      document.getElementById('user-search-input').value = '';
+      document.getElementById('filter-profile').value = 'all';
+      document.getElementById('filter-status').value = 'all';
+      applyFilters();
+    }
+  </script>
+</div></main></div></body></html>

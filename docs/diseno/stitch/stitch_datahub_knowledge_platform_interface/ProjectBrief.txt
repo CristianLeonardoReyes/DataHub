@@ -1,0 +1,148 @@
+# PRD & Product Brief: DataHub SaaS Platform
+
+---
+
+## 1. Executive Summary & Product Vision
+
+**DataHub** es una plataforma SaaS multiempresa de gestión del conocimiento e ingeniería documental diseñada específicamente para equipos de desarrollo, arquitectura de software, DevOps/SRE y liderazgo técnico. 
+
+A diferencia de las herramientas de documentación tradicionales de propósito general (wikis no estructuradas), DataHub está orientada a la ingeniería de misión crítica: centraliza Architecture Decision Records (ADRs), Runbooks operativos de resiliencia, esquemas de eventos/APIs (OpenAPI, Avro, Protobuf) y diagramas de arquitectura en un entorno gobernado, auditable y con soporte multitenant nativo.
+
+El sistema se presenta en dos temas visuales completos (**Tema Claro** y **Tema Oscuro**) garantizando accesibilidad WCAG 2.1 AA, densidad de información técnica, velocidad y precisión operativa.
+
+---
+
+## 2. Target Personas & Stakeholders
+
+| Rol / Persona | Descripción y Objetivos | Necesidades Clave en DataHub |
+| :--- | :--- | :--- |
+| **Super Admin** (Global) | Administrador de plataforma o proveedor del SaaS que gestiona clientes corporativos y políticas globales de acceso. | Gestión multi-tenant de clientes (empresas), aislamiento de datos, asignación de cuotas, suplantación o auditoría cruzada con banner de aviso visual inequívoco. |
+| **Admin de Organización** | Responsable técnico o IT Manager de la empresa cliente (tenant). | Administración de miembros/usuarios corporativos, reglas de gobernanza (e.g. regla obligatoria de mantener siempre un Admin activo), emisión y revocación de invitaciones. |
+| **Staff / Lead Architect** | Líderes técnicos y arquitectos de soluciones que definen estándares tecnológicos. | Creación y versionado de ADRs, bloqueo y control de concurrencia, esquemas de datos, etiquetado formal, taxonomía por espacios. |
+| **SRE / DevOps Engineer** | Ingenieros de confiabilidad encargados de incidentes, SLAs y mitigación. | Acceso ultra-rápido a Runbooks de infraestructura (Kafka, K8s, Cloud), scripts de recuperación, visor de archivos/topologías, búsqueda con baja latencia. |
+| **Colaborador / Developer** | Ingenieros de software y analistas técnicos del día a día. | Búsqueda semántica global, navegación por espacios técnicos, consulta de contratos de API, previsualización de adjuntos y diagramas. |
+
+---
+
+## 3. Core Architecture & Multi-Tenancy Model
+
+### 3.1. Aislamiento Multi-Empresa (Multi-Tenant)
+- **Tenancy Context**: Cada solicitud y sesión está contextualizada por el Tenant ID (`tenantId`).
+- **Modo Operativo Super Admin**: El Super Admin puede operar en el contexto de un cliente específico (e.g., *Banco Santander Tech*, *Fintech Nova S.A.*). La interfaz destaca de forma permanente una barra de contexto de ejecución (`Operando en: [Cliente]`) para prevenir acciones erróneas.
+- **Gobernanza**: Regla crítica inviolable: una organización cliente no puede quedar desprovista de administradores activos; se bloquea la desactivación del último Admin.
+
+### 3.2. Espacios de Información (Information Architecture)
+1. **Workspace Core / Nivel Raíz**:
+   - Agrupación por dominios técnicos (e.g., *Core Banking*, *Infraestructura*, *Data Pipelines Lake*).
+2. **Espacios (Spaces)**:
+   - Contenedores de colecciones técnicas y proyectos con metadatos de sincronización Git (`repo: branch:main`).
+3. **Colecciones (Collections)**:
+   - Categorización técnica especializada: *Integraciones API*, *Runbooks & Resiliencia*, *Modelos de Datos & Schemas*, *Seguridad & Criptografía*.
+4. **Páginas / Documentos de Ingeniería**:
+   - Tipos de artefacto: `ADR` (Decisión de Arquitectura), `Runbook SRE`, `OpenAPI / AsyncAPI Spec`, `Schema Registry`, `Guías de Onboarding`.
+   - Soporte para subpáginas anidadas y adjuntos multimedia vinculados.
+
+---
+
+## 4. Key Functional Modules & Screen Breakdown
+
+### Módulo 1: Flujo de Acceso, Autenticación y Seguridad
+- **Login Unificado (Pantalla 1 - Claro / Oscuro)**:
+  - Formato minimalista centrado, sin registro público ni login social abierto.
+  - Validación de credenciales con estados de interacción (*Normal*, *Error de credenciales*, *Éxito*, *Cargando/Spinner*).
+- **Activación de Cuenta (Pantalla 2)**:
+  - Flujo de bienvenida mediante token/invitación con formulario para configurar contraseña inicial segura y confirmación de datos corporativos.
+- **Recuperación de Contraseña (Pantalla 3)**:
+  - Petición de reseteo mediante correo verificado con feedback instantáneo y enlace de retorno.
+- **Establecimiento de Nueva Contraseña (Pantalla 4)**:
+  - Medidor visual de robustez de contraseña, verificación de políticas (longitud, caracteres especiales, números) y confirmación obligatoria.
+- **Bloqueo por Intentos Fallidos (Pantalla 5)**:
+  - Mecanismo de defensa contra fuerza bruta: bloqueo temporal con cuenta regresiva de 60 segundos y opción de contacto con soporte IT corporativo.
+
+### Módulo 2: Layout Base y Dashboards de Inicio
+- **Shell de Aplicación**:
+  - Barra lateral izquierda colapsable con árbol jerárquico de carpetas de documentación técnica, atajos de búsqueda rápida (`Ctrl+K` / `⌘K`) y perfil de usuario con rol.
+  - Barra superior persistente con breadcrumbs de ubicación, selector de entorno/cliente, toggle de tema Claro/Oscuro y menú de perfil.
+- **Inicio Super Admin**:
+  - Vista general de clientes monitorizados, métricas de volumen de conocimiento, estado de clusters y tabla de actividad reciente en tiempo real.
+- **Inicio Colaborador**:
+  - Espacio de trabajo enfocado en los proyectos asignados, accesos directos a ADRs prioritarios, runbooks críticos y documentos actualizados recientemente.
+
+### Módulo 3: Administración y Gobernanza
+- **Administración de Clientes (Solo Super Admin)**:
+  - Tabla con estado operativo, usuarios activos, espacio consumido, nivel de suscripción y accesos rápidos de auditoría o apertura de drawer lateral para gestión de contrato.
+- **Administración de Usuarios**:
+  - Directorio corporativo con filtro por perfil (`Super admin`, `Admin`, `Coordinador`, `Colaborador`) y por estado (`Activo`, `Invitado`, `Inactivo`).
+  - Modal interactivo de invitación de usuario corporativo y acciones seguras (activar, desactivar, reenviar invitación).
+  - Banner permanente con la regla crítica de gobernanza de clientes.
+
+### Módulo 4: Editor Técnico y Documentación de Ingeniería
+- **Vista de Espacio / Colección**:
+  - Panel superior con resumen de colecciones, total de páginas y estado de sincronización con repositorio GitHub.
+  - Rejilla de colecciones temáticas con etiquetas técnicas (`REST`, `gRPC`, `PCI-DSS`, `KMS`, `Vault`).
+  - Listado facetado de documentos con badges de estado formal (`Aprobado`, `En revisión`, `Borrador`).
+- **Editor Especializado de ADR & Runbooks**:
+  - Edición en bloques con soporte Markdown y atajos de barra oblicua (`/ list`, `/ h1`, etc.).
+  - Detección y notificación en vivo de **conflictos de edición concurrente** (*"Otra persona guardó cambios en esta página recientemente"*) con opciones de recarga y visualización de diferencias (`diff`).
+  - Resaltador de sintaxis para bloques de código (e.g., Rust, YAML, SQL) con botón de copiado al portapapeles.
+  - Checklist técnica de gobernanza e implementación (e.g., PCI-DSS tokenization, validación de esquemas).
+  - Sección de subpáginas vinculadas jerárquicamente.
+
+### Módulo 5: Gestión de Archivos y Previsualizador Multimedia
+- **Visor de Adjuntos de una Página**:
+  - Zona drag & drop con indicación de tamaño máximo (100 MB).
+  - Previsualizador modal integrado para múltiples formatos:
+    - **Imágenes / Diagramas**: Diagramas de arquitectura generados con Graphviz/Mermaid (e.g. topologías de clusters Kafka y MirrorMaker).
+    - **PDF**: Especificaciones técnicas y reportes.
+    - **Video / Audio**: Grabaciones de post-mortems y demos técnicas.
+    - **Fichas binarias**: Dumps y bundles de configuración con metadata y sumas de verificación (hashes).
+
+### Módulo 6: Búsqueda Semántica Global y Paleta de Comandos
+- **Motor de Búsqueda Rápida (`⌘K` / `Ctrl+K`)**:
+  - Búsqueda en tiempo real por títulos, contenido indexado en Elastic Lucene, tags técnicos y autores.
+  - Filtros facetados: por espacio de trabajo, por tipo de documento (`ADR`, `Runbook SRE`, `AsyncAPI`, `Adjuntos`), por estado (`Aprobado`, `En revisión`) y por autor.
+  - Paginación estándar de 20 resultados por vista con indicador de latencia y estado de sincronización de clusters.
+  - Estados alternativos modelados: *Resultados completos*, *Paleta rápida modal*, *Sin resultados* (con recomendaciones) y *Esqueleto de carga (Skeleton)*.
+
+---
+
+## 5. Design System & Visual Tokens Reference
+
+El proyecto cuenta con un sistema de diseño formal bautizado **DataHub Minimal Precision**, configurado para proyectar rigurosidad técnica, alta densidad y sobriedad:
+
+### 5.1. Paleta de Colores
+| Token | Tema Claro | Tema Oscuro | Aplicación / Rol |
+| :--- | :--- | :--- | :--- |
+| **Background (Canvas)** | `#FAFAFC` / `#FFFFFF` | `#0F1117` | Fondo principal del viewport |
+| **Surface (Contenedores)** | `#F3F4F8` / `#FFFFFF` | `#1C2030` | Tarjetas, barras de navegación y modales |
+| **Surface Elevated / Hover** | `#EBEFF8` | `#22283C` / `#252B40` | Inputs, dropdowns y elementos activos |
+| **Borders & Dividers** | `#E2E6EE` | `#2A3042` | Líneas divisorias y contornos estructurales |
+| **Primary Brand** | `#2B3A8F` | `#7F8FE0` | Botones de acción, enlaces activos, foco |
+| **Brand Accent (Verde)** | `#8DC63F` | `#8DC63F` | Identidad corporativa, estado `Aprobado` |
+| **Text Primary** | `#161A2E` | `#E6E8F0` | Títulos, encabezados y código legible |
+| **Text Secondary / Muted** | `#6B7280` / `#8C94AC` | `#9BA3BF` / `#8C94AC` | Slugs, metadatos, fechas, tamaños de archivo |
+| **Warning / Conflicto** | `#D97706` | `#F59E0B` | Banners de concurrencia y advertencias |
+
+### 5.2. Tipografía & Radios
+- **Fuente Principal**: Inter (`sans-serif`) optimizada para interfaces y legibilidad de cadenas técnicas.
+- **Fuente Monoespaciada**: JetBrains Mono / Fira Code para rutas, slugs, hashes de commit y bloques de código.
+- **Radios de curvatura**: `ROUND_EIGHT` (4px a 8px controlados), evitando formas excesivamente lúdicas.
+
+---
+
+## 6. Non-Functional & Technical Requirements
+
+1. **Rendimiento**: Latencia media de búsqueda semántica < 20ms en índices distribuidos; carga de páginas estáticas con soporte de Skeleton loaders para perceived performance óptimo.
+2. **Control de Concurrencia**: Detección de edición basada en versionado optimista (`ETag` / commit hash). En caso de conflicto, la UI nunca sobrescribe silenciosamente datos.
+3. **Accesibilidad**: Cumplimiento estricto con WCAG 2.1 AA en relaciones de contraste de texto tanto en modo claro como en modo oscuro.
+4. **Seguridad**: Autenticación estricta con rate-limiting en endpoints de login, control de acceso basado en roles (RBAC) y sanitización estricta en el visor de adjuntos.
+
+---
+
+## 7. Roadmap & Future Horizons
+
+- **Fase 1 (Completada)**: Flujos de acceso completos, shell responsive de aplicación, pantallas de administración (clientes y usuarios), visualización y edición de documentos ADR con resolución de conflictos, visor multimedia y búsqueda semántica en ambos temas.
+- **Fase 2 (Próxima iteración)**:
+  - Integración nativa de GitHub Actions y GitLab CI para validación automática de schemas directamente en el editor.
+  - Comparador visual de diferencias (*Visual Diff viewer*) línea por línea en documentos y esquemas de base de datos.
+  - Exportación de paquetes documentales a PDF/Confluence/Docusaurus.

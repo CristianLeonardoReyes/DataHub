@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary": "#10b981", "tertiary-fixed-dim": "#ffb68d", "inverse-on-surface": "#0F1117", "tertiary-fixed": "#ffdbc9", "on-tertiary-fixed-variant": "#f49962", "surface-container": "#24293D", "surface-dim": "#12151F", "surface-container-high": "#282F45", "surface-bright": "#24293D", "on-tertiary-container": "#f49962", "on-error": "#ffffff", "on-secondary": "#ffffff", "primary-fixed": "#7F8FE0", "secondary-fixed-dim": "#34d399", "primary": "#7F8FE0", "primary-fixed-dim": "#6374ce", "on-primary-container": "#ffffff", "on-secondary-container": "#34d399", "outline-variant": "#2A3042", "surface-variant": "#1C2030", "on-secondary-fixed": "#064e3b", "on-background": "#E6E8F0", "inverse-primary": "#102178", "surface-container-low": "#161A26", "secondary-fixed": "#059669", "on-tertiary": "#ffffff", "tertiary-container": "#451a03", "on-secondary-fixed-variant": "#065f46", "on-surface": "#E6E8F0", "on-error-container": "#ffdad6", "outline": "#8E9BAE", "on-primary-fixed-variant": "#1c2452", "on-primary-fixed": "#000f5c", "error": "#f87171", "primary-container": "#7F8FE0", "tertiary": "#f97316", "background": "#0F1117", "inverse-surface": "#E6E8F0", "surface-container-highest": "#2E3650", "on-primary": "#ffffff", "error-container": "#450a0a", "secondary-container": "#064e3b", "surface-tint": "#7F8FE0", "surface": "#1C2030", "on-surface-variant": "#94A3B8", "surface-container-lowest": "#1C2030", "on-tertiary-fixed": "#331200" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "margin": "1rem", "space-lg": "1rem", "gutter-desktop": "1.5rem", "space-xl": "1.5rem", "gutter": "1rem", "space-sm": "0.5rem", "space-md": "0.75rem", "margin-desktop": "2rem" }, "fontFamily": { "headline-md": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"], "code-sm": ["Geist Mono"], "body-sm": ["Inter"], "body-md": ["Inter"], "headline-lg-mobile": ["Inter"], "label-mono": ["Geist Mono"], "label-md": ["Inter"], "headline-xl": ["Inter"], "headline-xl-mobile": ["Inter"], "code-md": ["Geist Mono"], "label-sm": ["Inter"], "body-lg": ["Inter"] }, "fontSize": { "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "code-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }], "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-mono": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "500" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }], "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "code-md": ["13px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "400" }] } } } };</script></head><body class="bg-[#0F1117] font-body-md text-[#E6E8F0] antialiased selection:bg-[#7F8FE0]/30 selection:text-white"><aside class="fixed left-0 top-0 h-full w-[260px] bg-[#1C2030] border-r border-[#2A3042] z-50 flex flex-col justify-between select-none"><div class="flex flex-col h-[calc(100%-64px)]"><div class="h-14 px-space-md border-b border-[#2A3042] flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><img alt="DataHub Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1W16o4R7ZF1sGW7NR5MoNJPSJANkBV7zqqyJHd6-3ZySqw66JVv0d74wtYQ-ignGF3tDCNxlLw7V3Hu3K9SHPM5Jg4eJVGeT52ahl4FK-MVx5h1s8Ch2htzfqeZjhCvE0BOqs5P5EX8NJSNEW4TMzV_WqjbEXGFeweANVWEV6rScC3zD81MjHJ_dJmviacBV34W_jECr9D0EDCK3FuyebAMiKI3wm6tuS5J020xDlFwuAr4DNymlYxg_0o"/><span class="font-label-mono text-label-mono text-[#8E9BAE] uppercase tracking-wider">v2.4</span></div><button class="p-1 text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] rounded transition-colors" title="Plegar panel lateral" type="button"><span class="material-symbols-outlined text-[18px]">first_page</span></button></div><div class="flex-1 overflow-y-auto px-space-sm py-space-sm space-y-space-md"><nav class="space-y-0.5" data-active-classes="bg-[#24293D] text-[#7F8FE0] font-medium"><a class="block px-2.5 py-1.5 rounded-lg text-body-sm font-body-sm text-[#94A3B8] hover:bg-[#24293D] hover:text-[#E6E8F0] transition-colors" data-path="inicio" href="#">Inicio</a><button class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg font-body-sm text-body-sm text-[#94A3B8] hover:bg-[#24293D] hover:text-[#E6E8F0] transition-colors text-left" onclick="toggleModal(true)" type="button"><span class="flex items-center gap-2"><span class="material-symbols-outlined text-[17px]">search</span><span>Buscar</span></span><kbd class="font-label-mono text-label-mono text-[#8E9BAE] bg-[#161A26] px-1.5 py-0.5 rounded border border-[#2A3042]">Ctrl+K</kbd></button></nav><div class="pt-1"><div class="px-2.5 pb-1 flex items-center justify-between"><span class="font-label-sm text-label-sm text-[#8E9BAE] uppercase tracking-wider">Administración</span></div><nav class="space-y-0.5" data-active-classes="bg-[#24293D] text-[#7F8FE0] font-medium"><a class="flex items-center justify-between px-2.5 py-1.5 rounded-lg font-body-sm text-body-sm text-[#94A3B8] hover:bg-[#24293D] hover:text-[#E6E8F0] transition-colors" data-path="clientes" href="#"><span>Clientes</span><span class="font-label-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-[#7F8FE0]/20 text-[#7F8FE0] border border-[#7F8FE0]/30 font-semibold">Super Admin</span></a><a class="flex items-center justify-between px-2.5 py-1.5 rounded-lg font-body-sm text-body-sm text-[#94A3B8] hover:bg-[#24293D] hover:text-[#E6E8F0] transition-colors" data-path="usuarios" href="#"><span>Usuarios</span><span class="font-label-mono text-[10px] uppercase px-1.5 py-0.5 rounded bg-[#24293D] text-[#8E9BAE] border border-[#2A3042] font-semibold">Admin</span></a></nav></div><div class="pt-1"><div class="px-2.5 pb-1 flex items-center justify-between group"><span class="font-label-sm text-label-sm text-[#8E9BAE] uppercase tracking-wider">Espacios de Trabajo</span><button class="opacity-0 group-hover:opacity-100 p-0.5 text-[#94A3B8] hover:text-[#7F8FE0] transition-opacity rounded" title="Crear espacio nuevo" type="button"><span class="material-symbols-outlined text-[16px]">add</span></button></div><div class="space-y-0.5 font-body-sm text-body-sm"><div class="group/node"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-[#E6E8F0] hover:bg-[#24293D] cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-[#8E9BAE] hover:text-[#E6E8F0]" type="button"><span class="material-symbols-outlined text-[16px]">expand_more</span></button><span class="material-symbols-outlined text-[16px] text-[#7F8FE0]">folder</span><span class="truncate font-medium">Workspace Core</span></div><button class="opacity-0 group-hover/node:opacity-100 text-[#8E9BAE] hover:text-[#E6E8F0] px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div><div class="ml-3 pl-2 border-l border-[#2A3042] space-y-0.5 mt-0.5"><div class="group/subnode"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-[#8E9BAE] hover:text-[#E6E8F0]" type="button"><span class="material-symbols-outlined text-[16px]">expand_more</span></button><span class="material-symbols-outlined text-[16px] text-[#8E9BAE]">folder_open</span><span class="truncate">Infraestructura</span></div><button class="opacity-0 group-hover/subnode:opacity-100 text-[#8E9BAE] hover:text-[#E6E8F0] px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div><div class="ml-3 pl-2 border-l border-[#2A3042] space-y-0.5 mt-0.5"><a class="flex items-center justify-between px-1.5 py-1 rounded-lg text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D]" data-path="runbooks-produccion" href="#"><span class="truncate font-code-sm text-code-sm">runbooks-prod.md</span></a><a class="flex items-center justify-between px-1.5 py-1 rounded-lg text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D]" data-path="esquemas-lakehouse" href="#"><span class="truncate font-code-sm text-code-sm">lakehouse-v2.sql</span></a></div></div><div class="group/subnode"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-[#8E9BAE] hover:text-[#E6E8F0]" type="button"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button><span class="material-symbols-outlined text-[16px] text-[#8E9BAE]">folder</span><span class="truncate">Pipelines ETL</span></div><button class="opacity-0 group-hover/subnode:opacity-100 text-[#8E9BAE] hover:text-[#E6E8F0] px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div></div></div></div><div class="group/node"><div class="flex items-center justify-between px-1.5 py-1 rounded-lg text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] cursor-pointer"><div class="flex items-center gap-1.5 min-w-0"><button class="text-[#8E9BAE] hover:text-[#E6E8F0]" type="button"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button><span class="material-symbols-outlined text-[16px] text-[#8E9BAE]">folder</span><span class="truncate">Catálogo Semántico</span></div><button class="opacity-0 group-hover/node:opacity-100 text-[#8E9BAE] hover:text-[#E6E8F0] px-1" type="button"><span class="material-symbols-outlined text-[15px]">add</span></button></div></div></div></div></div><div class="h-16 px-space-md border-t border-[#2A3042] flex items-center justify-between bg-[#1C2030]"><div class="flex items-center gap-2.5 min-w-0"><div class="relative flex-shrink-0 w-8 h-8 rounded-full bg-[#7F8FE0]/25 border border-[#7F8FE0]/40 text-[#7F8FE0] flex items-center justify-center font-label-md text-label-md font-semibold">CR<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#1C2030]" title="Activo"></span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-1.5"><span class="truncate font-body-sm text-body-sm font-medium text-[#E6E8F0]">Carlos Ramos</span></div><div class="flex items-center gap-1"><span class="font-label-mono text-label-mono text-[#7F8FE0] font-semibold">SUPER ADMIN</span></div></div></div><button class="text-[#8E9BAE] hover:text-[#E6E8F0] p-1 rounded hover:bg-[#24293D] transition-colors" title="Opciones de cuenta" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></div></aside><div class="pl-[260px]"><header class="fixed top-0 left-[260px] right-0 h-14 bg-[#1C2030]/90 backdrop-blur-md border-b border-[#2A3042] z-40 px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm min-w-0"><nav aria-label="Breadcrumb" class="flex items-center gap-1 font-body-sm text-body-sm text-[#94A3B8] min-w-0"><a class="hover:text-[#E6E8F0] truncate" href="#">Workspace Core</a><span class="material-symbols-outlined text-[14px] text-[#8E9BAE]">chevron_right</span><a class="hover:text-[#E6E8F0] truncate" href="#">Infraestructura</a><span class="material-symbols-outlined text-[14px] text-[#8E9BAE]">chevron_right</span><span class="font-code-sm text-code-sm text-[#E6E8F0] font-medium truncate">runbooks-prod.md</span></nav></div><div class="flex items-center gap-space-md flex-shrink-0"><div class="flex items-center gap-2 pl-2 border-l border-[#2A3042]"><span class="font-body-sm text-body-sm text-[#8E9BAE] hidden xl:inline">Operar en:</span><div class="relative"><button class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#161A26] border border-[#2A3042] font-body-sm text-body-sm text-[#E6E8F0] hover:bg-[#24293D] transition-colors" type="button"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span class="font-medium">Banco Santander Tech</span><span class="material-symbols-outlined text-[16px] text-[#8E9BAE]">unfold_more</span></button></div><span class="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-label-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800/40"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Operando: Santander</span></div><div class="flex items-center gap-1"><button class="p-1.5 text-[#E6E8F0] hover:bg-[#24293D] rounded-lg transition-colors" title="Modo oscuro activo" type="button"><span class="material-symbols-outlined text-[19px] text-[#7F8FE0]">dark_mode</span></button><div class="relative"><button class="flex items-center gap-2 p-1 pl-1.5 rounded-lg hover:bg-[#24293D] transition-colors" type="button"><div class="w-7 h-7 rounded-full bg-[#7F8FE0] flex items-center justify-center text-white"><span class="material-symbols-outlined text-white text-[16px]">person</span></div><span class="material-symbols-outlined text-[16px] text-[#8E9BAE]">keyboard_arrow_down</span></button></div></div></div></header><main class="w-full pt-14 bg-[#0F1117] min-h-screen"><div class="flex flex-col w-full">
+<!-- Interactive State Engine Bar (Demo Controls) -->
+<div class="sticky top-14 z-30 bg-[#161A26] border-b border-[#2A3042] px-space-lg py-2 flex flex-wrap items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#7F8FE0]/20 text-[#7F8FE0] font-label-mono text-[10px] font-bold border border-[#7F8FE0]/30">⌘</span>
+<span class="font-label-mono text-label-mono text-[#94A3B8] font-medium uppercase tracking-wider">Simulador de Vistas Técnicas:</span>
+<div class="inline-flex rounded-lg bg-[#1C2030] p-0.5 gap-1 border border-[#2A3042]">
+<button class="px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all bg-[#7F8FE0] text-white shadow-sm" id="btn-state-results" onclick="switchState('results')" type="button">
+          Resultados (64)
+        </button>
+<button class="px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all text-[#94A3B8] hover:text-[#E6E8F0]" id="btn-state-modal" onclick="switchState('modal')" type="button">
+          Paleta Rápida (Ctrl+K)
+        </button>
+<button class="px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all text-[#94A3B8] hover:text-[#E6E8F0]" id="btn-state-empty" onclick="switchState('empty')" type="button">
+          Sin Resultados
+        </button>
+<button class="px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all text-[#94A3B8] hover:text-[#E6E8F0]" id="btn-state-loading" onclick="switchState('loading')" type="button">
+          Cargando (Skeleton)
+        </button>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-label-mono text-label-mono text-[#8E9BAE] hidden sm:inline">Índice: Elastic Lucene v8.11 • Latencia: 14ms</span>
+<button class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#1C2030] text-[#94A3B8] hover:text-[#7F8FE0] border border-[#2A3042] font-label-mono text-label-mono shadow-sm transition-colors" onclick="toggleModal(true)" type="button">
+<span class="material-symbols-outlined text-[15px]">keyboard_command_key</span>
+<span>Abrir Modal</span>
+</button>
+</div>
+</div>
+<!-- Main Search Container (Centered & Fluid Grid) -->
+<div class="w-full max-w-[1340px] mx-auto px-space-md sm:px-space-lg lg:px-space-xl py-space-xl space-y-space-xl">
+<!-- Section 1: Prominent Search Input & Scope Bar -->
+<section class="bg-[#1C2030] border border-[#2A3042] rounded-xl p-space-lg shadow-sm space-y-space-md">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm pb-1">
+<div>
+<span class="font-label-mono text-label-mono text-[#7F8FE0] font-semibold uppercase tracking-wider">Búsqueda Semántica Global</span>
+<h1 class="font-headline-lg text-headline-lg text-[#E6E8F0] mt-0.5 tracking-tight">Buscar en DataHub</h1>
+</div>
+<div class="flex items-center gap-space-sm font-code-sm text-code-sm text-[#94A3B8]">
+<span class="inline-flex items-center gap-1.5 bg-[#161A26] border border-[#2A3042] px-2 py-1 rounded text-[#94A3B8] font-label-mono text-label-mono">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 4 Espacios Sincronizados
+          </span>
+<span class="hidden md:inline text-[#2A3042]">•</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">Cluster Santander-Prod</span>
+</div>
+</div>
+<!-- Input Box 52px Prominent -->
+<div class="relative flex items-center">
+<div class="absolute left-4 pointer-events-none text-[#7F8FE0] flex items-center">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</div>
+<input class="w-full h-[52px] pl-12 pr-32 rounded-xl bg-[#161A26] border border-[#2A3042] text-[#E6E8F0] font-body-lg text-body-lg placeholder:text-[#64748B] focus:outline-none focus:border-[#7F8FE0] focus:ring-1 focus:ring-[#7F8FE0] focus:bg-[#161A26] transition-all" id="main-search-input" placeholder="Buscar especificaciones técnicas, runbooks, esquemas SQL, eventos o linajes..." type="text" value="Kafka"/>
+<div class="absolute right-3 flex items-center gap-1.5">
+<button class="w-7 h-7 flex items-center justify-center rounded-lg text-[#8E9BAE] hover:text-[#E6E8F0] hover:bg-[#24293D] transition-colors" onclick="clearSearchInput()" title="Limpiar búsqueda" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+<div class="h-5 w-[1px] bg-[#2A3042] hidden sm:block"></div>
+<kbd class="hidden sm:inline-flex items-center gap-0.5 font-label-mono text-label-mono text-[#8E9BAE] bg-[#24293D] border border-[#2A3042] px-2 py-1 rounded shadow-sm">
+<span>⌘</span><span>K</span>
+</kbd>
+<button class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#7F8FE0] text-white font-label-md text-label-md shadow-sm hover:bg-[#6c7ecc] transition-colors" type="button">
+<span>Buscar</span>
+</button>
+</div>
+</div>
+<!-- Quick Context Chips -->
+<div class="flex flex-wrap items-center gap-space-sm pt-1">
+<span class="font-label-mono text-label-mono text-[#8E9BAE] uppercase tracking-wider">Filtros Rápidos:</span>
+<button class="px-2.5 py-1 rounded-full bg-[#7F8FE0] text-white font-label-sm text-label-sm font-medium flex items-center gap-1 shadow-sm">
+<span>Todo el catálogo</span>
+<span class="font-label-mono text-[10px] bg-white/20 px-1 rounded-full text-white">64</span>
+</button>
+<button class="px-2.5 py-1 rounded-full bg-[#161A26] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] font-label-sm text-label-sm transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">menu_book</span>
+<span>Runbooks</span>
+</button>
+<button class="px-2.5 py-1 rounded-full bg-[#161A26] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] font-label-sm text-label-sm transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span>Esquemas SQL &amp; DDL</span>
+</button>
+<button class="px-2.5 py-1 rounded-full bg-[#161A26] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] font-label-sm text-label-sm transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">hub</span>
+<span>Arquitectura (ADR)</span>
+</button>
+<button class="px-2.5 py-1 rounded-full bg-[#161A26] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] hover:bg-[#24293D] font-label-sm text-label-sm transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">api</span>
+<span>Especificaciones OpenAPI</span>
+</button>
+</div>
+</section>
+<!-- Section 2: Main Dynamic Container (Results, Empty State, or Skeleton) -->
+<div class="w-full" id="dynamic-content-area">
+<!-- SUB-VIEW 1: Standard Search Results (Default) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start" id="view-results">
+<!-- Left Column: Faceted Filters (4 Columns Desktop) -->
+<aside class="lg:col-span-4 xl:col-span-3 space-y-space-lg">
+<div class="bg-[#1C2030] border border-[#2A3042] rounded-xl p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-[#E6E8F0] font-semibold uppercase tracking-wider">Filtros Facetados</span>
+<button class="font-label-mono text-label-mono text-[#7F8FE0] hover:underline" type="button">Restablecer</button>
+</div>
+<!-- Facet: Espacios de Trabajo -->
+<div class="space-y-2 pt-1">
+<span class="font-label-mono text-[10px] uppercase font-bold text-[#8E9BAE] tracking-wider">Por Espacio Técnico</span>
+<div class="space-y-1">
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer group">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#E6E8F0] font-medium">
+<input checked="" class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span>Todos los espacios</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE] group-hover:text-[#7F8FE0]">64</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer group">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input checked="" class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="truncate">Arquitectura &amp; Pagos</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">38</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer group">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="truncate">Core Banking</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">18</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer group">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="truncate">Data Pipelines Lake</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">8</span>
+</label>
+</div>
+</div>
+<!-- Facet: Tipo de Documento -->
+<div class="space-y-2 pt-2 border-t border-[#2A3042]">
+<span class="font-label-mono text-[10px] uppercase font-bold text-[#8E9BAE] tracking-wider">Tipo de Documento</span>
+<div class="space-y-1">
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input checked="" class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#7F8FE0]"></span> ADR (Decisiones)</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">12</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input checked="" class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Runbooks SRE</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">15</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input checked="" class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-indigo-400"></span> API Specs Async</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">18</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#8E9BAE]"></span> Guías de Onboarding</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">9</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-[#24293D] cursor-pointer">
+<span class="flex items-center gap-2 font-body-sm text-body-sm text-[#94A3B8]">
+<input checked="" class="w-4 h-4 rounded bg-[#161A26] border-[#2A3042] text-[#7F8FE0] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Archivos Adjuntos / Dumps</span>
+</span>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">10</span>
+</label>
+</div>
+</div>
+<!-- Facet: Estado -->
+<div class="space-y-2 pt-2 border-t border-[#2A3042]">
+<span class="font-label-mono text-[10px] uppercase font-bold text-[#8E9BAE] tracking-wider">Estado Técnico</span>
+<div class="flex flex-wrap gap-1.5">
+<button class="px-2.5 py-1 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-label-mono text-[11px] font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Aprobado
+                </button>
+<button class="px-2.5 py-1 rounded bg-[#161A26] border border-[#2A3042] text-[#94A3B8] hover:bg-[#24293D] hover:text-[#E6E8F0] font-label-mono text-[11px]">
+                  En Revisión
+                </button>
+<button class="px-2.5 py-1 rounded bg-[#161A26] border border-[#2A3042] text-[#94A3B8] hover:bg-[#24293D] hover:text-[#E6E8F0] font-label-mono text-[11px]">
+                  Borrador
+                </button>
+</div>
+</div>
+<!-- Facet: Autoría -->
+<div class="space-y-2 pt-2 border-t border-[#2A3042]">
+<span class="font-label-mono text-[10px] uppercase font-bold text-[#8E9BAE] tracking-wider">Autores Principales</span>
+<div class="space-y-1">
+<div class="flex items-center justify-between p-1 rounded hover:bg-[#24293D] cursor-pointer">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-5 h-5 rounded-full bg-[#7F8FE0]/25 border border-[#7F8FE0]/40 text-[#7F8FE0] text-[9px] font-semibold flex items-center justify-center">CR</span>
+<span class="font-body-sm text-body-sm text-[#E6E8F0] truncate">Carlos Ramos</span>
+</div>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">24</span>
+</div>
+<div class="flex items-center justify-between p-1 rounded hover:bg-[#24293D] cursor-pointer">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-5 h-5 rounded-full bg-emerald-950/80 border border-emerald-700/50 text-emerald-400 text-[9px] font-semibold flex items-center justify-center">ES</span>
+<span class="font-body-sm text-body-sm text-[#E6E8F0] truncate">Elena Salgado</span>
+</div>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">19</span>
+</div>
+<div class="flex items-center justify-between p-1 rounded hover:bg-[#24293D] cursor-pointer">
+<div class="flex items-center gap-2 min-w-0">
+<span class="w-5 h-5 rounded-full bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 text-[9px] font-semibold flex items-center justify-center">MD</span>
+<span class="font-body-sm text-body-sm text-[#E6E8F0] truncate">Marcos Díaz</span>
+</div>
+<span class="font-label-mono text-label-mono text-[#8E9BAE]">11</span>
+</div>
+</div>
+</div>
+<!-- Sparkline Activity Visual -->
+<div class="p-space-sm bg-[#161A26] border border-[#2A3042] rounded-lg space-y-1">
+<div class="flex items-center justify-between text-[#8E9BAE]">
+<span class="font-label-mono text-[10px]">Hits en últimas 24h</span>
+<span class="font-label-mono text-[10px] text-emerald-400 font-semibold">+18.4%</span>
+</div>
+<svg class="w-full h-8 text-[#7F8FE0]" fill="none" viewbox="0 0 100 24">
+<path d="M0 20 L15 17 L30 19 L45 11 L60 14 L75 6 L90 8 L100 2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M0 20 L15 17 L30 19 L45 11 L60 14 L75 6 L90 8 L100 2 L100 24 L0 24 Z" fill="currentColor" fill-opacity="0.15"></path>
+</svg>
+</div>
+</div>
+</aside>
+<!-- Right Column: Results Stream (8 Columns Desktop) -->
+<main class="lg:col-span-8 xl:col-span-9 space-y-space-md">
+<!-- Results Metrics & Order Bar -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm bg-[#1C2030] border border-[#2A3042] px-space-lg py-space-sm rounded-xl shadow-sm">
+<div class="flex items-center gap-2">
+<span class="font-body-sm text-body-sm text-[#E6E8F0]">
+                Mostrando <strong class="font-semibold text-[#7F8FE0]">1 - 20</strong> de <strong class="font-semibold text-[#7F8FE0]">64</strong> resultados para 
+                <span class="font-code-sm text-code-sm bg-[#7F8FE0]/20 text-[#7F8FE0] border border-[#7F8FE0]/30 px-1.5 py-0.5 rounded ml-1 font-semibold">«Kafka»</span>
+</span>
+</div>
+<div class="flex items-center gap-2">
+<label class="font-label-mono text-label-mono text-[#8E9BAE]" for="sort-select">Ordenar por:</label>
+<select class="bg-[#161A26] border border-[#2A3042] text-[#E6E8F0] font-body-sm text-body-sm py-1 px-2.5 rounded-lg focus:outline-none focus:border-[#7F8FE0]" id="sort-select">
+<option selected="">Más relevantes</option>
+<option>Más recientes (Git Commit)</option>
+<option>Alfabético (A-Z)</option>
+<option>Frecuencia de accesos</option>
+</select>
+</div>
+</div>
+<!-- Cards Stack (Bespoke Technical Result Cards) -->
+<div class="space-y-space-sm">
+<!-- Result 1: Architecture Decision Record (ADR) -->
+<article class="bg-[#1C2030] hover:bg-[#24293D] border border-[#2A3042] hover:border-[#7F8FE0]/40 transition-all rounded-xl p-space-lg shadow-sm hover:shadow-md space-y-space-sm group cursor-pointer">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-2 min-w-0">
+<span class="px-2 py-0.5 rounded font-label-mono text-label-mono bg-[#7F8FE0]/15 text-[#7F8FE0] border border-[#7F8FE0]/30 font-bold inline-flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[14px]">hub</span> ADR-042
+                  </span>
+<nav aria-label="Ruta" class="font-code-sm text-code-sm text-[#8E9BAE] truncate">
+                    Core Banking <span class="text-[#2A3042]">/</span> Arquitectura &amp; Pagos <span class="text-[#2A3042]">/</span> Integraciones Event-Driven
+                  </nav>
+</div>
+<span class="px-2 py-0.5 rounded-full font-label-mono text-[11px] bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-semibold flex-shrink-0 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Aprobado
+                </span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-[#E6E8F0] group-hover:text-[#7F8FE0] transition-colors">
+                  ADR-042: Migración de Pasarela de Pagos a Arquitectura <mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">Kafka</mark> Event-Driven
+                </h2>
+<p class="font-body-md text-body-md text-[#94A3B8] mt-1 leading-relaxed">
+                  ...formaliza la transición del orquestador central de cobros hacia un clúster Apache <mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">Kafka</mark> multi-AZ asistido por Debezium CDC y particionado por <code class="font-code-sm text-code-sm bg-[#12151F] px-1 py-0.5 rounded text-[#7F8FE0] border border-[#2A3042]">tenantId</code> con garantía de entrega at-least-once y replicación síncrona en tres zonas de disponibilidad AWS eu-west-1...
+                </p>
+</div>
+<!-- Metadata Footer -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2 border-t border-[#2A3042] font-label-mono text-label-mono text-[#8E9BAE]">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-[#7F8FE0]/25 border border-[#7F8FE0]/40 text-[#7F8FE0] text-[10px] flex items-center justify-center font-bold">CR</span>
+<span class="text-[#E6E8F0] font-medium">Carlos Ramos</span>
+</div>
+<span>•</span>
+<span>Actualizado hace 2 días</span>
+<span>•</span>
+<span>Rev: <span class="font-code-sm text-code-sm text-[#7F8FE0]">git#a8f92cd</span></span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#7F8FE0]">#kafka</span>
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#pagos-core</span>
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#cdc-debezium</span>
+</div>
+</div>
+</article>
+<!-- Result 2: Runbook SRE Ops -->
+<article class="bg-[#1C2030] hover:bg-[#24293D] border border-[#2A3042] hover:border-[#7F8FE0]/40 transition-all rounded-xl p-space-lg shadow-sm hover:shadow-md space-y-space-sm group cursor-pointer">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-2 min-w-0">
+<span class="px-2 py-0.5 rounded font-label-mono text-label-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-bold inline-flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[14px]">bolt</span> RUNBOOK-SRE
+                  </span>
+<nav aria-label="Ruta" class="font-code-sm text-code-sm text-[#8E9BAE] truncate">
+                    Workspace Core <span class="text-[#2A3042]">/</span> Infraestructura <span class="text-[#2A3042]">/</span> Procedimientos de Contingencia
+                  </nav>
+</div>
+<span class="px-2 py-0.5 rounded-full font-label-mono text-[11px] bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-semibold flex-shrink-0 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Aprobado
+                </span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-[#E6E8F0] group-hover:text-[#7F8FE0] transition-colors">
+                  RBK-109: Procedimiento de Failover y Rebalanceo de Brokers <mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">Kafka</mark> en Modo KRaft
+                </h2>
+<p class="font-body-md text-body-md text-[#94A3B8] mt-1 leading-relaxed">
+                  ...guía operativa ante degradación de quórum de controladores en Apache <mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">Kafka</mark> 3.6. Ejecutar script de diagnóstico de ISR: <code class="font-code-sm text-code-sm bg-[#12151F] border border-[#2A3042] px-1 py-0.5 rounded text-[#7F8FE0]">kafka-topics.sh --describe --under-replicated-partitions</code> y validación de logs en <code class="font-code-sm text-code-sm bg-[#12151F] border border-[#2A3042] px-1 py-0.5 rounded text-[#E6E8F0]">/var/log/kafka/server.log</code> antes de invocar la rotación forzada del broker primario...
+                </p>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2 border-t border-[#2A3042] font-label-mono text-label-mono text-[#8E9BAE]">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-emerald-950/80 border border-emerald-700/50 text-emerald-400 text-[10px] flex items-center justify-center font-bold">ES</span>
+<span class="text-[#E6E8F0] font-medium">Elena Salgado</span>
+</div>
+<span>•</span>
+<span>Actualizado hace 5 horas</span>
+<span>•</span>
+<span class="text-amber-400 font-semibold">Alta Criticidad (P1)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#kraft-cluster</span>
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#sre-runbook</span>
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#high-availability</span>
+</div>
+</div>
+</article>
+<!-- Result 3: API Specification AsyncAPI -->
+<article class="bg-[#1C2030] hover:bg-[#24293D] border border-[#2A3042] hover:border-[#7F8FE0]/40 transition-all rounded-xl p-space-lg shadow-sm hover:shadow-md space-y-space-sm group cursor-pointer">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-2 min-w-0">
+<span class="px-2 py-0.5 rounded font-label-mono text-label-mono bg-indigo-950/80 text-indigo-300 border border-indigo-700/50 font-bold inline-flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[14px]">terminal</span> ASYNC-API 2.6
+                  </span>
+<nav aria-label="Ruta" class="font-code-sm text-code-sm text-[#8E9BAE] truncate">
+                    Catálogo Semántico <span class="text-[#2A3042]">/</span> Eventos Financieros <span class="text-[#2A3042]">/</span> Topic: santander.transactions.v2
+                  </nav>
+</div>
+<span class="px-2 py-0.5 rounded-full font-label-mono text-[11px] bg-indigo-950/80 text-indigo-300 border border-indigo-700/50 font-semibold flex-shrink-0 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Producción
+                </span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-[#E6E8F0] group-hover:text-[#7F8FE0] transition-colors">
+                  Contrato de Esquema Avro: Tópicos de Streaming de Eventos <mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">Kafka</mark> para Débito Inmediato
+                </h2>
+<p class="font-body-md text-body-md text-[#94A3B8] mt-1 leading-relaxed">
+                  ...especificación del esquema Avro alojado en Confluent Schema Registry ID #8492. Define la estructura JSON del payload para transacciones STP vinculadas a los tópicos de <mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">Kafka</mark> con serialización compacta y validación estricta de compatibilidad BACKWARD...
+                </p>
+</div>
+<!-- Mini code snippet preview -->
+<div class="bg-[#12151F] border border-[#2A3042] text-[#E6E8F0] p-2.5 rounded-lg font-code-sm text-code-sm overflow-x-auto">
+<span class="text-[#7F8FE0]">channel:</span> <span class="text-emerald-400">santander.transactions.core</span> | <span class="text-[#7F8FE0]">binding:</span> <mark class="bg-[#7F8FE0]/30 text-white font-bold px-1 rounded border border-[#7F8FE0]/50">kafka</mark> | <span class="text-[#8E9BAE]">partitions: 64, replication-factor: 3</span>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2 border-t border-[#2A3042] font-label-mono text-label-mono text-[#8E9BAE]">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-indigo-950/80 border border-indigo-700/50 text-indigo-300 text-[10px] flex items-center justify-center font-bold">MD</span>
+<span class="text-[#E6E8F0] font-medium">Marcos Díaz</span>
+</div>
+<span>•</span>
+<span>Schema Registry v2.4</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#avro-schema</span>
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#confluent</span>
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#fintech</span>
+</div>
+</div>
+</article>
+<!-- Result 4: Diagram / Architecture Asset -->
+<article class="bg-[#1C2030] hover:bg-[#24293D] border border-[#2A3042] hover:border-[#7F8FE0]/40 transition-all rounded-xl p-space-lg shadow-sm hover:shadow-md space-y-space-sm group cursor-pointer">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-2 min-w-0">
+<span class="px-2 py-0.5 rounded font-label-mono text-label-mono bg-amber-950/60 text-amber-300 border border-amber-800/50 font-bold inline-flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[14px]">image</span> ASSET-PNG
+                  </span>
+<nav aria-label="Ruta" class="font-code-sm text-code-sm text-[#8E9BAE] truncate">
+                    Data Pipelines Lake <span class="text-[#2A3042]">/</span> Esquemas Visuales <span class="text-[#2A3042]">/</span> Topologías 2024
+                  </nav>
+</div>
+<span class="px-2 py-0.5 rounded-full font-label-mono text-[11px] bg-[#161A26] border border-[#2A3042] text-[#94A3B8] font-medium flex-shrink-0">
+                  PNG • 2.4 MB
+                </span>
+</div>
+<div class="flex flex-col md:flex-row gap-space-md items-start">
+<div class="w-full md:w-44 h-24 rounded-lg bg-[#161A26] border border-[#2A3042] overflow-hidden flex-shrink-0 relative">
+<img class="w-full h-full object-cover opacity-85 hover:opacity-100 transition-opacity" data-alt="Technical architectural diagram of Apache Kafka cluster topology showing brokers, zookeeper Kraft nodes, producer services and consumer groups with data flow lines in navy blue and lime green accents on a technical grid background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdybvSMCaE4U3of4kY9gAAIiFkJr2ZbC0ToNBan-mfcxwjAhqbl14XUmwaLK1HMPX766uAkFiLb9Sbd6HgaLvi99trLUYbmgU9Oo-Cc1ZI4Ktub334h5YKrSdK-99cl2IHhe44YrPzleXP_CcpfejeHlAZAGWMg_2camVMT-NbhmCsIF_k45zvWZ_VDiaLLQwxhu_BLZWlVXlgPLQI_7kxVribRtgWCDsgkDAirYbe_h7MT626v_0r"/>
+<div class="absolute bottom-1 right-1 bg-[#0F1117]/90 border border-[#2A3042] text-[#E6E8F0] font-label-mono text-[9px] px-1 rounded">2560x1440</div>
+</div>
+<div class="flex-1 min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-[#E6E8F0] group-hover:text-[#7F8FE0] transition-colors">
+                    topologia-cluster-<mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">kafka</mark>-santander-prod-2024.png
+                  </h2>
+<p class="font-body-md text-body-md text-[#94A3B8] mt-1 leading-relaxed">
+                    Diagrama vectorial detallado que plasma la topología en malla de los 9 brokers de <mark class="bg-[#7F8FE0]/30 text-[#E6E8F0] border-b-2 border-[#7F8FE0] rounded-sm px-1 py-0.2 font-semibold">Kafka</mark>, particionado por hash geográfico, subredes privadas VPC y balanceador NLB interno.
+                  </p>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-2 border-t border-[#2A3042] font-label-mono text-label-mono text-[#8E9BAE]">
+<div class="flex items-center gap-space-md">
+<span class="text-[#E6E8F0] font-medium">Carlos Ramos</span>
+<span>•</span>
+<span>Subido el 12 Feb 2025</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#diagrama</span>
+<span class="bg-[#12151F] border border-[#2A3042] px-2 py-0.5 rounded text-[#94A3B8]">#infra-aws</span>
+</div>
+</div>
+</article>
+</div>
+<!-- Pagination Bar (Strict SaaS 20-by-20) -->
+<nav aria-label="Paginación" class="bg-[#1C2030] border border-[#2A3042] px-space-lg py-space-md rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="font-body-sm text-body-sm text-[#94A3B8]">
+              Página <strong class="text-[#E6E8F0] font-semibold">1</strong> de <strong class="text-[#E6E8F0] font-semibold">4</strong> (20 de 64 páginas encontradas)
+            </div>
+<div class="flex items-center gap-1.5 font-label-md text-label-md">
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#161A26] border border-[#2A3042] text-[#8E9BAE] opacity-50 cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[16px]">chevron_left</span>
+<span>Anterior</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-[#7F8FE0] text-white font-semibold flex items-center justify-center shadow-sm">
+                1
+              </button>
+<button class="w-8 h-8 rounded-lg bg-[#161A26] border border-[#2A3042] hover:bg-[#24293D] text-[#E6E8F0] transition-colors flex items-center justify-center">
+                2
+              </button>
+<button class="w-8 h-8 rounded-lg bg-[#161A26] border border-[#2A3042] hover:bg-[#24293D] text-[#E6E8F0] transition-colors flex items-center justify-center">
+                3
+              </button>
+<button class="w-8 h-8 rounded-lg bg-[#161A26] border border-[#2A3042] hover:bg-[#24293D] text-[#E6E8F0] transition-colors flex items-center justify-center">
+                4
+              </button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#161A26] border border-[#2A3042] hover:bg-[#24293D] text-[#E6E8F0] transition-colors">
+<span>Siguiente</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</nav>
+</main>
+</div>
+<!-- SUB-VIEW 2: Empty State (Initially Hidden via inline style or activated by state) -->
+<div class="hidden w-full bg-[#1C2030] border border-[#2A3042] rounded-xl p-space-xl text-center space-y-space-lg shadow-sm" id="view-empty">
+<div class="max-w-md mx-auto space-y-space-md py-space-xl">
+<!-- Minimalist Geometric Graphic -->
+<div class="w-16 h-16 mx-auto rounded-2xl bg-[#161A26] border border-[#2A3042] flex items-center justify-center text-[#8E9BAE]">
+<span class="material-symbols-outlined text-[36px]">search_off</span>
+</div>
+<div class="space-y-1">
+<h3 class="font-headline-md text-headline-md text-[#E6E8F0]">No se encontraron resultados para «xyz-invalido»</h3>
+<p class="font-body-md text-body-md text-[#94A3B8]">
+              No hay documentos técnicos, runbooks o esquemas que coincidan con los términos y filtros seleccionados en Santander Tech.
+            </p>
+</div>
+<div class="bg-[#161A26] border border-[#2A3042] rounded-xl p-space-md text-left space-y-2">
+<span class="font-label-mono text-label-mono text-[#7F8FE0] font-bold uppercase tracking-wider">Sugerencias para optimizar la búsqueda:</span>
+<ul class="font-body-sm text-body-sm text-[#94A3B8] space-y-1 list-disc list-inside">
+<li>Verifica la ortografía o elimina caracteres especiales.</li>
+<li>Prueba con palabras clave más generales (ej: <code class="font-code-sm text-code-sm bg-[#12151F] border border-[#2A3042] px-1 py-0.5 rounded text-[#7F8FE0]">streaming</code>, <code class="font-code-sm text-code-sm bg-[#12151F] border border-[#2A3042] px-1 py-0.5 rounded text-[#7F8FE0]">cluster</code>, <code class="font-code-sm text-code-sm bg-[#12151F] border border-[#2A3042] px-1 py-0.5 rounded text-[#7F8FE0]">broker</code>).</li>
+<li>Desactiva temporalmente los filtros facetados de estado o autor.</li>
+<li>Habilita la búsqueda en documentos archivados o repositorios legacy.</li>
+</ul>
+</div>
+<div class="flex items-center justify-center gap-space-sm pt-2">
+<button class="px-4 py-2 rounded-lg bg-[#7F8FE0] text-white font-label-md text-label-md shadow-sm hover:bg-[#6c7ecc] transition-colors" onclick="restoreSearchTerm()">
+              Buscar de nuevo con «Kafka»
+            </button>
+<button class="px-4 py-2 rounded-lg bg-[#24293D] border border-[#2A3042] text-[#E6E8F0] font-label-md text-label-md hover:bg-[#282F45] transition-colors" onclick="switchState('results')">
+              Limpiar todos los filtros
+            </button>
+</div>
+</div>
+</div>
+<!-- SUB-VIEW 3: Loading Skeleton State -->
+<div class="hidden w-full grid grid-cols-1 lg:grid-cols-12 gap-space-xl" id="view-loading">
+<div class="lg:col-span-4 xl:col-span-3 space-y-space-md">
+<div class="bg-[#1C2030] border border-[#2A3042] rounded-xl p-space-lg space-y-space-md shadow-sm animate-pulse">
+<div class="h-4 bg-[#24293D] rounded w-1/3"></div>
+<div class="space-y-2">
+<div class="h-3 bg-[#24293D] rounded w-full"></div>
+<div class="h-3 bg-[#24293D] rounded w-5/6"></div>
+<div class="h-3 bg-[#24293D] rounded w-4/6"></div>
+</div>
+<div class="h-20 bg-[#24293D] rounded-lg"></div>
+</div>
+</div>
+<div class="lg:col-span-8 xl:col-span-9 space-y-space-sm">
+<div class="bg-[#1C2030] border border-[#2A3042] p-space-md rounded-xl h-12 animate-pulse shadow-sm"></div>
+<!-- Skeleton Card 1 -->
+<div class="bg-[#1C2030] border border-[#2A3042] rounded-xl p-space-lg space-y-3 shadow-sm animate-pulse">
+<div class="flex justify-between items-center">
+<div class="h-4 bg-[#24293D] rounded w-36"></div>
+<div class="h-4 bg-[#24293D] rounded w-16"></div>
+</div>
+<div class="h-6 bg-[#24293D] rounded w-3/4"></div>
+<div class="space-y-1.5">
+<div class="h-3 bg-[#24293D] rounded w-full"></div>
+<div class="h-3 bg-[#24293D] rounded w-5/6"></div>
+</div>
+<div class="h-4 bg-[#24293D] rounded w-1/2 pt-2"></div>
+</div>
+<!-- Skeleton Card 2 -->
+<div class="bg-[#1C2030] border border-[#2A3042] rounded-xl p-space-lg space-y-3 shadow-sm animate-pulse">
+<div class="flex justify-between items-center">
+<div class="h-4 bg-[#24293D] rounded w-40"></div>
+<div class="h-4 bg-[#24293D] rounded w-20"></div>
+</div>
+<div class="h-6 bg-[#24293D] rounded w-2/3"></div>
+<div class="space-y-1.5">
+<div class="h-3 bg-[#24293D] rounded w-full"></div>
+<div class="h-3 bg-[#24293D] rounded w-4/5"></div>
+</div>
+<div class="h-4 bg-[#24293D] rounded w-1/3 pt-2"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- FLOATING QUICK SEARCH PALETTE (Cmd+K Modal Overlay) -->
+<div class="fixed inset-0 z-50 bg-[#0F1117]/80 backdrop-blur-md hidden items-start justify-center pt-16 sm:pt-24 px-4 overflow-y-auto" id="quick-palette-modal">
+<div class="w-full max-w-2xl bg-[#1C2030] border border-[#2A3042] rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-all duration-200">
+<!-- Modal Input Header -->
+<div class="p-4 bg-[#1C2030] border-b border-[#2A3042] flex items-center gap-3">
+<span class="material-symbols-outlined text-[#7F8FE0] text-[24px]">search</span>
+<input class="w-full bg-transparent text-[#E6E8F0] font-body-lg text-body-lg placeholder:text-[#64748B] focus:outline-none" id="modal-search-input" placeholder="Escribe un comando o busca en el conocimiento..." type="text" value="Kafka"/>
+<button class="p-1 rounded-lg text-[#8E9BAE] hover:text-[#E6E8F0] hover:bg-[#24293D] transition-colors" onclick="toggleModal(false)" title="Cerrar modal">
+<kbd class="font-label-mono text-[11px] bg-[#161A26] px-1.5 py-0.5 rounded text-[#8E9BAE] border border-[#2A3042]">ESC</kbd>
+</button>
+</div>
+<!-- Quick Filter Chips Inside Palette -->
+<div class="px-4 py-2 bg-[#161A26] border-b border-[#2A3042] flex items-center gap-1.5 overflow-x-auto text-nowrap scrollbar-none">
+<button class="px-2.5 py-0.5 rounded-full bg-[#7F8FE0] text-white font-label-mono text-[11px] font-semibold">Todo</button>
+<button class="px-2.5 py-0.5 rounded-full bg-[#24293D] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] font-label-mono text-[11px]">Páginas técnicas</button>
+<button class="px-2.5 py-0.5 rounded-full bg-[#24293D] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] font-label-mono text-[11px]">Runbooks</button>
+<button class="px-2.5 py-0.5 rounded-full bg-[#24293D] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] font-label-mono text-[11px]">APIs</button>
+<button class="px-2.5 py-0.5 rounded-full bg-[#24293D] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] font-label-mono text-[11px]">ADRs</button>
+<button class="px-2.5 py-0.5 rounded-full bg-[#24293D] border border-[#2A3042] text-[#94A3B8] hover:text-[#E6E8F0] font-label-mono text-[11px]">Archivos</button>
+</div>
+<!-- Modal Body (Results Stream grouped by context) -->
+<div class="max-h-[420px] overflow-y-auto p-2 space-y-3">
+<!-- Group: Mejores Coincidencias -->
+<div>
+<div class="px-3 py-1 font-label-mono text-[10px] uppercase font-bold text-[#8E9BAE] tracking-wider">
+            Mejores Coincidencias Técnicas
+          </div>
+<div class="space-y-0.5 mt-1">
+<div class="p-2.5 rounded-xl bg-[#24293D] border border-[#7F8FE0]/30 hover:bg-[#282F45] flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-8 h-8 rounded-lg bg-[#7F8FE0]/20 text-[#7F8FE0] border border-[#7F8FE0]/40 flex items-center justify-center font-label-mono text-label-mono font-bold">
+                  ADR
+                </span>
+<div class="min-w-0">
+<div class="font-body-sm text-body-sm font-semibold text-[#E6E8F0] truncate">
+                    ADR-042: Migración Pasarela Pagos a <mark class="bg-[#7F8FE0]/30 text-white rounded px-1">Kafka</mark> Event-Driven
+                  </div>
+<div class="font-code-sm text-code-sm text-[#8E9BAE] truncate">
+                    Core Banking › Arquitectura &amp; Pagos
+                  </div>
+</div>
+</div>
+<span class="font-label-mono text-[10px] text-[#7F8FE0] font-bold opacity-0 group-hover:opacity-100 flex items-center gap-0.5">
+                Abrir <kbd class="bg-[#161A26] border border-[#2A3042] px-1 rounded text-[#E6E8F0]">↵</kbd>
+</span>
+</div>
+<div class="p-2.5 rounded-xl hover:bg-[#24293D] flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-8 h-8 rounded-lg bg-emerald-950/80 border border-emerald-700/50 text-emerald-400 flex items-center justify-center font-label-mono text-label-mono font-bold">
+                  SRE
+                </span>
+<div class="min-w-0">
+<div class="font-body-sm text-body-sm font-semibold text-[#E6E8F0] truncate">
+                    Failover y Rebalanceo de Brokers <mark class="bg-[#7F8FE0]/30 text-white rounded px-1">Kafka</mark> (KRaft)
+                  </div>
+<div class="font-code-sm text-code-sm text-[#8E9BAE] truncate">
+                    Infraestructura › Runbooks
+                  </div>
+</div>
+</div>
+<span class="font-label-mono text-[10px] text-[#8E9BAE] opacity-0 group-hover:opacity-100 flex items-center gap-0.5">
+<kbd class="bg-[#161A26] border border-[#2A3042] px-1 rounded text-[#8E9BAE]">↵</kbd>
+</span>
+</div>
+</div>
+</div>
+<!-- Group: Comandos Rápidos de Acción -->
+<div>
+<div class="px-3 py-1 font-label-mono text-[10px] uppercase font-bold text-[#8E9BAE] tracking-wider">
+            Comandos Rápidos
+          </div>
+<div class="space-y-0.5 mt-1">
+<div class="p-2.5 rounded-xl hover:bg-[#24293D] flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-8 h-8 rounded-lg bg-[#161A26] border border-[#2A3042] flex items-center justify-center text-[#7F8FE0]">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+</span>
+<span class="font-body-sm text-body-sm text-[#E6E8F0] font-medium">Crear nueva especificación técnica con tag #kafka</span>
+</div>
+<span class="font-label-mono text-[10px] text-[#8E9BAE]"><kbd class="bg-[#161A26] border border-[#2A3042] px-1 rounded">Alt+C</kbd></span>
+</div>
+<div class="p-2.5 rounded-xl hover:bg-[#24293D] flex items-center justify-between cursor-pointer group">
+<div class="flex items-center gap-3 min-w-0">
+<span class="w-8 h-8 rounded-lg bg-[#161A26] border border-[#2A3042] flex items-center justify-center text-[#94A3B8]">
+<span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+</span>
+<span class="font-body-sm text-body-sm text-[#E6E8F0] font-medium">Ir a gestión de Permisos y Usuarios</span>
+</div>
+<span class="font-label-mono text-[10px] text-[#8E9BAE]"><kbd class="bg-[#161A26] border border-[#2A3042] px-1 rounded">G then U</kbd></span>
+</div>
+</div>
+</div>
+<!-- Group: Recientes en Workspace -->
+<div>
+<div class="px-3 py-1 font-label-mono text-[10px] uppercase font-bold text-[#8E9BAE] tracking-wider">
+            Visitados Recientemente
+          </div>
+<div class="space-y-0.5 mt-1">
+<div class="p-2.5 rounded-xl hover:bg-[#24293D] flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-3 min-w-0">
+<span class="material-symbols-outlined text-[#8E9BAE] text-[18px]">history</span>
+<span class="font-code-sm text-code-sm text-[#E6E8F0] truncate">runbooks-prod.md (Infraestructura Core)</span>
+</div>
+<span class="font-label-mono text-[10px] text-[#8E9BAE]">Hace 18m</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Footer (Keyboard Navigation Legend) -->
+<div class="px-4 py-2.5 bg-[#161A26] border-t border-[#2A3042] flex flex-wrap items-center justify-between text-[#8E9BAE] font-label-mono text-[11px]">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1">
+<kbd class="bg-[#24293D] border border-[#2A3042] px-1 py-0.5 rounded text-[#E6E8F0] font-bold">↑</kbd>
+<kbd class="bg-[#24293D] border border-[#2A3042] px-1 py-0.5 rounded text-[#E6E8F0] font-bold">↓</kbd>
+<span>para navegar</span>
+</span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<kbd class="bg-[#24293D] border border-[#2A3042] px-1.5 py-0.5 rounded text-[#E6E8F0] font-bold">↵</kbd>
+<span>para abrir</span>
+</span>
+<span>•</span>
+<span class="flex items-center gap-1">
+<kbd class="bg-[#24293D] border border-[#2A3042] px-1 py-0.5 rounded text-[#E6E8F0] font-bold">esc</kbd>
+<span>para cerrar</span>
+</span>
+</div>
+<div class="hidden sm:inline-flex items-center gap-1 text-[#7F8FE0]">
+<span class="material-symbols-outlined text-[13px]">tune</span>
+<span>Filtro activo: Santander Tech</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive JavaScript Engine -->
+<script>
+    function switchState(state) {
+      const viewResults = document.getElementById('view-results');
+      const viewEmpty = document.getElementById('view-empty');
+      const viewLoading = document.getElementById('view-loading');
+      const modal = document.getElementById('quick-palette-modal');
+      const input = document.getElementById('main-search-input');
+
+      // Buttons
+      const btnRes = document.getElementById('btn-state-results');
+      const btnMod = document.getElementById('btn-state-modal');
+      const btnEmp = document.getElementById('btn-state-empty');
+      const btnLoa = document.getElementById('btn-state-loading');
+
+      const buttons = [btnRes, btnMod, btnEmp, btnLoa];
+      buttons.forEach(b => {
+        b.className = "px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all text-[#94A3B8] hover:text-[#E6E8F0]";
+      });
+
+      // Hide all primary views
+      viewResults.classList.add('hidden');
+      viewEmpty.classList.add('hidden');
+      viewLoading.classList.add('hidden');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+
+      if (state === 'results') {
+        viewResults.classList.remove('hidden');
+        btnRes.className = "px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all bg-[#7F8FE0] text-white shadow-sm";
+        input.value = "Kafka";
+      } else if (state === 'modal') {
+        viewResults.classList.remove('hidden');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        btnMod.className = "px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all bg-[#7F8FE0] text-white shadow-sm";
+        document.getElementById('modal-search-input').focus();
+      } else if (state === 'empty') {
+        viewEmpty.classList.remove('hidden');
+        btnEmp.className = "px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all bg-[#7F8FE0] text-white shadow-sm";
+        input.value = "xyz-invalido";
+      } else if (state === 'loading') {
+        viewLoading.classList.remove('hidden');
+        btnLoa.className = "px-2.5 py-1 rounded font-label-sm text-label-sm font-semibold transition-all bg-[#7F8FE0] text-white shadow-sm";
+      }
+    }
+
+    function toggleModal(show) {
+      const modal = document.getElementById('quick-palette-modal');
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('modal-search-input').focus();
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function clearSearchInput() {
+      const input = document.getElementById('main-search-input');
+      input.value = '';
+      input.focus();
+    }
+
+    function restoreSearchTerm() {
+      const input = document.getElementById('main-search-input');
+      input.value = 'Kafka';
+      switchState('results');
+    }
+
+    // Keyboard Shortcuts: Ctrl+K or Cmd+K toggles palette
+    window.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const modal = document.getElementById('quick-palette-modal');
+        const isHidden = modal.classList.contains('hidden');
+        toggleModal(isHidden);
+      }
+      if (e.key === 'Escape') {
+        toggleModal(false);
+      }
+    });
+
+    // Close modal on click backdrop
+    document.getElementById('quick-palette-modal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        toggleModal(false);
+      }
+    });
+  </script>
+</div></main></div></body></html>
