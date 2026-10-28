@@ -1,22 +1,25 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Data Hub</title>
-    <meta name="description" content="Technical knowledge platform and engineering architecture hub for systems, ADRs, runbooks, and specifications." />
-    <meta property="og:title" content="Data Hub" />
-    <meta property="og:description" content="Technical knowledge platform and engineering architecture hub for systems, ADRs, runbooks, and specifications." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet" />
+    <title>DataHub</title>
+    <meta name="description" content="DataHub — base de conocimiento técnico de DataGlobal. Prototipo visual con datos de ejemplo." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script>
+      // Aplica el tema antes de pintar para evitar el destello.
+      try {
+        var t = localStorage.getItem('dh-tema');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
+        document.documentElement.dataset.theme = t === 'oscuro' ? 'dark' : 'light';
+      } catch (e) {}
+    </script>
   </head>
-  <body class="bg-[#121316] text-[#e3e2e6] font-sans antialiased selection:bg-[#4634a9] selection:text-[#b8afff]">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

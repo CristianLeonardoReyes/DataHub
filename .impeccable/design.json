@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T00:00:00Z",
+  "title": "Design System: DataHub",
+  "extensions": {
+    "colorMeta": {
+      "brand": { "role": "primary", "displayName": "Azul DataGlobal", "canonical": "#2b3a8f", "dark": "#7f8fe0", "tonalRamp": ["#141b45", "#1d275f", "#23307a", "#2b3a8f", "#5563b0", "#8f99cc", "#c4cae8", "#eceffb"] },
+      "leaf": { "role": "secondary", "displayName": "Verde DataGlobal (solo Aprobado)", "canonical": "#8dc63f", "dark": "#8dc63f", "tonalRamp": ["#1d2b10", "#2c4f08", "#4a7a18", "#6aa02c", "#8dc63f", "#a8db69", "#cdeaa6", "#e9f5d9"] },
+      "review-signal": { "role": "tertiary", "displayName": "Ámbar de revisión", "canonical": "#e5a03a", "dark": "#e5a03a", "tonalRamp": ["#2e2412", "#5a3a0a", "#7f4500", "#b06f18", "#e5a03a", "#f0b860", "#f8d9a6", "#fff3dc"] },
+      "ground": { "role": "neutral", "displayName": "Suelo gris azulado", "canonical": "#f4f5f9", "dark": "#0f1013", "tonalRamp": ["#12141c", "#424757", "#676c7c", "#cdd2dc", "#e2e5ec", "#e7e9f1", "#f4f5f9", "#ffffff"] },
+      "surface": { "role": "neutral", "displayName": "Superficie", "canonical": "#ffffff", "dark": "#16171b" },
+      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#12141c", "dark": "#eceef3" },
+      "danger": { "role": "neutral", "displayName": "Vencida / error", "canonical": "#b3261e", "dark": "#f08a82", "tonalRamp": ["#331b1a", "#5e1712", "#8c1d18", "#b3261e", "#d95a52", "#f08a82", "#f6c3be", "#fdecea"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Título de pantalla", "purpose": "h1 de cada pantalla, 24/32 600." },
+      "title": { "displayName": "Título de panel", "purpose": "Cabeceras de panel; 15px en diálogos y panel lateral." },
+      "doc-body": { "displayName": "Cuerpo de documento", "purpose": "Lector y editor, máx. 720px." },
+      "doc-h2": { "displayName": "Encabezado de documento", "purpose": "h2 dentro del contenido de página." },
+      "body": { "displayName": "Interfaz", "purpose": "Texto por defecto de la interfaz, 14/20." },
+      "label": { "displayName": "Etiqueta", "purpose": "Botones, migas, metadatos." },
+      "caption": { "displayName": "Nota", "purpose": "Cabeceras de tabla, grupos de barra lateral, leyendas; minúscula de oración." },
+      "mono": { "displayName": "Dato técnico", "purpose": "Fechas ISO, rutas, código y atajos en Geist Mono." }
+    },
+    "shadows": [
+      { "name": "float", "value": "0 12px 32px rgb(18 20 28 / 0.14), 0 2px 6px rgb(18 20 28 / 0.06)", "dark": "0 16px 40px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3)", "purpose": "Solo capas flotantes: diálogos, panel lateral, paleta, menús, aviso." }
+    ],
+    "motion": [
+      { "name": "rise", "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrada de diálogos, menús y avisos (translateY 6px, scale .99)." },
+      { "name": "fade", "value": "140ms ease-out", "purpose": "Velo de capas modales." },
+      { "name": "slide", "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrada del panel lateral (translateX 24px)." },
+      { "name": "control", "value": "150ms", "purpose": "Transiciones de color en botones; se anulan con prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px", "purpose": "Aparece la barra lateral de 248px; desaparece la barra superior móvil." },
+      { "name": "xl", "value": "1280px", "purpose": "Rejilla 8/4 en Inicio." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Única acción principal de la pantalla.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Nueva página</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:6px; font:500 13px/1 Inter, system-ui, sans-serif; border:0; cursor:pointer; transition:background-color 150ms, transform 150ms; } .ds-btn:active { transform:translateY(1px); } .ds-btn:focus-visible { outline:2px solid var(--brand, #2b3a8f); outline-offset:2px; } .ds-btn-primary { background:var(--brand, #2b3a8f); color:var(--on-brand, #fff); } .ds-btn-primary:hover { background:var(--brand-hover, #23307a); }"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Variante por defecto para el resto de acciones.",
+      "html": "<button class=\"ds-btn2\">Exportar a Markdown</button>",
+      "css": ".ds-btn2 { display:inline-flex; align-items:center; height:32px; padding:0 12px; border-radius:6px; border:1px solid var(--control, #cdd2dc); background:var(--surface, #fff); color:var(--ink, #12141c); font:500 13px/1 Inter, system-ui, sans-serif; cursor:pointer; transition:background-color 150ms; } .ds-btn2:hover { background:var(--raised, #f8f9fc); } .ds-btn2:focus-visible { outline:2px solid var(--brand, #2b3a8f); outline-offset:2px; }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo con etiqueta arriba y ayuda o error debajo.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Nombre</span><input class=\"ds-input\" placeholder=\"Publicación y operación\"><span class=\"ds-field-help\">Visible para todo el workspace.</span></label>",
+      "css": ".ds-field { display:flex; flex-direction:column; gap:8px; font-family:Inter, system-ui, sans-serif; } .ds-field-label { font-size:14px; font-weight:500; color:var(--ink, #12141c); } .ds-field-help { font-size:13px; color:var(--muted, #555a6a); } .ds-input { height:40px; padding:0 12px; border-radius:6px; border:1px solid var(--control, #cdd2dc); background:var(--surface, #fff); color:var(--ink, #12141c); font-size:14px; transition:border-color 150ms; } .ds-input::placeholder { color:var(--faint, #676c7c); } .ds-input:hover { border-color:var(--faint, #676c7c); } .ds-input:focus { outline:none; border-color:var(--brand, #2b3a8f); box-shadow:0 0 0 2px rgb(43 58 143 / 0.2); }"
+    },
+    {
+      "name": "Pastillas de estado",
+      "kind": "chip",
+      "refersTo": "pill-aprobado",
+      "description": "Borrador, En revisión, Aprobado (con punto verde) y Archivado.",
+      "html": "<span class=\"ds-pill ds-draft\">Borrador</span> <span class=\"ds-pill ds-review\">En revisión</span> <span class=\"ds-pill ds-ok\"><i class=\"ds-dot\"></i>Aprobado</span> <span class=\"ds-pill ds-arch\">Archivado</span>",
+      "css": ".ds-pill { display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; border-radius:4px; font:500 12px/1 Inter, system-ui, sans-serif; white-space:nowrap; } .ds-dot { width:6px; height:6px; border-radius:999px; background:var(--leaf, #8dc63f); } .ds-ok { background:var(--ok-bg, #e9f5d9); color:var(--ok-ink, #2c4f08); } .ds-review { background:var(--review-bg, #fff3dc); color:var(--review-ink, #7f4500); } .ds-draft { background:var(--draft-bg, #eef0f4); color:var(--draft-ink, #424757); } .ds-arch { background:var(--archived-bg, #f1f1f2); color:var(--archived-ink, #5c5c63); }"
+    },
+    {
+      "name": "Barra de vigencia",
+      "kind": "custom",
+      "refersTo": "vigencia-bar",
+      "description": "Proporción de páginas aprobadas, en revisión, en borrador y vencidas por espacio.",
+      "html": "<div class=\"ds-vig\" role=\"img\" aria-label=\"12 aprobadas y vigentes, 3 en revisión, 4 borrador, 2 revisión vencida\"><span style=\"flex:12;background:var(--leaf,#8dc63f)\"></span><span style=\"flex:3;background:#e5a03a\"></span><span style=\"flex:4;background:var(--control,#cdd2dc)\"></span><span style=\"flex:2;background:var(--danger,#b3261e)\"></span></div>",
+      "css": ".ds-vig { display:flex; gap:2px; width:280px; height:8px; border-radius:999px; overflow:hidden; }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Contenedor plano con cabecera y filas divididas.",
+      "html": "<section class=\"ds-panel\"><header class=\"ds-panel-h\">Actualizadas recientemente</header><a class=\"ds-row\">Runbook de publicación<span class=\"ds-mono\">2026-10-12</span></a><a class=\"ds-row\">ADR-014 Colas<span class=\"ds-mono\">2026-10-09</span></a></section>",
+      "css": ".ds-panel { width:420px; border:1px solid var(--border, #e2e5ec); border-radius:8px; background:var(--surface, #fff); font:14px/20px Inter, system-ui, sans-serif; color:var(--ink, #12141c); } .ds-panel-h { min-height:52px; display:flex; align-items:center; padding:12px 20px; border-bottom:1px solid var(--rule, #eef0f4); font-weight:600; } .ds-row { display:flex; justify-content:space-between; padding:12px 20px; border-bottom:1px solid var(--rule, #eef0f4); font-weight:500; cursor:pointer; transition:background-color 150ms; } .ds-row:last-child { border-bottom:0; } .ds-row:hover { background:var(--raised, #f8f9fc); } .ds-mono { font:400 13px 'Geist Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; color:var(--muted, #555a6a); }"
+    },
+    {
+      "name": "Navegación lateral",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Ítems de 32px sobre el suelo; el actual en tono activo.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-i\" aria-current=\"page\">Inicio</a><a class=\"ds-nav-i\">Proyectos</a><a class=\"ds-nav-i\">Plataforma</a></nav>",
+      "css": ".ds-nav { width:228px; padding:10px; background:var(--ground, #f4f5f9); display:flex; flex-direction:column; gap:2px; font:14px Inter, system-ui, sans-serif; } .ds-nav-i { height:32px; display:flex; align-items:center; padding:0 10px; border-radius:6px; color:var(--muted, #555a6a); cursor:pointer; transition:background-color 150ms; } .ds-nav-i:hover { background:rgb(231 233 241 / 0.6); color:var(--ink, #12141c); } .ds-nav-i[aria-current=page] { background:var(--active, #e7e9f1); color:var(--ink, #12141c); font-weight:500; }"
+    },
+    {
+      "name": "Indicador de autosave",
+      "kind": "custom",
+      "refersTo": "autosave",
+      "description": "Editando / Guardando… / Guardado HH:MM / Error al guardar.",
+      "html": "<span class=\"ds-save\" role=\"status\"><i style=\"background:var(--leaf,#8dc63f)\"></i>Guardado 09:42</span> <span class=\"ds-save\"><i style=\"background:#e5a03a\"></i>Guardando…</span> <span class=\"ds-save\"><i style=\"background:var(--danger,#b3261e)\"></i><b>Error al guardar</b></span>",
+      "css": ".ds-save { display:inline-flex; align-items:center; gap:6px; margin-right:16px; font:13px Inter, system-ui, sans-serif; color:var(--muted, #555a6a); } .ds-save i { width:6px; height:6px; border-radius:999px; } .ds-save b { font-weight:500; color:var(--danger, #b3261e); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El libro mayor acromático",
+    "overview": "DataHub se ve como un registro contable: suelo gris azulado, superficies blancas delimitadas por un borde de 1px, tinta casi negra y densidad de herramienta de trabajo (texto base 14/20). El color no decora; informa. El azul DataGlobal señala la acción principal, el elemento activo y los enlaces de nombre; el verde DataGlobal solo aparece en \"Aprobado\". Estado, responsable y vigencia son datos de primera clase en cada lista y página.\n\nEl tono es minimalista tipo Notion/Linear: sin degradados, sin tarjetas con iconos de KPI, sin sombras en reposo. La profundidad se logra con capas tonales (suelo → superficie → elevado → activo) y bordes, y la sombra queda reservada a lo que flota.",
+    "keyCharacteristics": [
+      "Suelo gris azulado compartido por barra lateral, barra superior y fondo de página; los paneles blancos son lo único que se levanta.",
+      "Un único azul de marca por pantalla en el botón primario.",
+      "Geist Mono para rutas, fechas ISO, conteos y atajos; cifras tabulares siempre.",
+      "Radios pequeños y escalonados (8 / 6 / 4).",
+      "Temas claro y oscuro con los mismos roles."
+    ],
+    "rules": [
+      { "name": "La regla de la tinta única", "body": "El azul de marca rellena solo un botón por pantalla. Todo lo demás es tinta, gris o semántica.", "section": "colors" },
+      { "name": "La regla del verde ganado", "body": "`leaf` significa \"aprobado y vigente\" (o \"guardado\"). Nunca decora, nunca marca una acción.", "section": "colors" },
+      { "name": "La regla de la cifra tabular", "body": "Todo conteo, fecha o número en columna usa `font-variant-numeric: tabular-nums`; las fechas ISO además van en Geist Mono.", "section": "typography" },
+      { "name": "La regla del suelo plano", "body": "Paneles, filas y campos nunca llevan sombra; si algo tiene sombra, flota sobre la página y se cierra con Escape.", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** usar un solo botón primario `brand` por pantalla; el resto en secundario o fantasma.",
+      "**Do** montar la jerarquía con capas tonales (`ground` → `surface` → `raised` → `active`) y bordes de 1px.",
+      "**Do** mostrar estado, responsable y vigencia en cada lista de páginas con las pastillas y el texto de vigencia aquí descritos.",
+      "**Do** usar Geist Mono y cifras tabulares para fechas ISO, rutas, conteos y atajos.",
+      "**Do** definir cada color como variable con valor claro y oscuro; en `web/`, tokenizar también `review-signal`.",
+      "**Do** imitar en `web/` estos tokens y medidas, escribiendo su propio código."
+    ],
+    "donts": [
+      "**Don't** usar `leaf` fuera del estado aprobado / guardado.",
+      "**Don't** poner sombra en paneles, filas o campos; solo en capas flotantes.",
+      "**Don't** construir inicios con saludo, tarjetas de KPI con iconos ni degradados.",
+      "**Don't** usar etiquetas en mayúsculas con tracking sobre los títulos; los grupos van en 12px de oración.",
+      "**Don't** superar 8px de radio en contenedores en página (12px solo para diálogos y paleta).",
+      "**Don't** importar ni copiar código de `prototipo/` en `web/`."
+    ]
+  }
+}
