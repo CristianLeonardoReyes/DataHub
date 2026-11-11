@@ -4,13 +4,15 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Dapper;
 using DataGlobal.DataHub.Services.Seguridad;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using MySqlConnector;
 
 namespace DataGlobal.DataHub.Tests.Integration;
 
 public class AccesoTests : IClassFixture<MySqlFixture>, IAsyncDisposable
 {
-    private const string Clave = "ClaveSegura123";
+    private const string Clave = "ClaveSegura@123";
     private readonly MySqlFixture _db;
     private readonly ApiFactory _factory;
     private readonly HttpClient _http;
@@ -55,8 +57,32 @@ public class AccesoTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         return correo;
     }
 
-    private Task<HttpResponseMessage> LoginAsync(string correo, string contrasena) =>
-        _http.PostAsJsonAsync("/api/v1/auth/login", new { correo, contrasena }, Ct);
+    private Task<HttpResponseMessage> LoginAsync(string correo, string contrasena, bool recordarme = false) =>
+        _http.PostAsJsonAsync("/api/v1/auth/login", new { correo, contrasena, recordarme }, Ct);
+
+    /// <summary>JWT firmado como el de la API, con exp y max relativos a ahora.</summary>
+    private async Task<string> TokenAsync(string correo, TimeSpan exp, TimeSpan max)
+    {
+        await using var cn = new MySqlConnection(_db.ConnectionString);
+        var guid = await cn.ExecuteScalarAsync<string>("SELECT CAST(Guid AS CHAR) FROM Usuario WHERE Correo = @correo", new { correo });
+        var token = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+        {
+            Issuer = "datahub-test",
+            Audience = "datahub-test",
+            Expires = DateTime.UtcNow + exp,
+            Claims = new Dictionary<string, object>
+            {
+                ["usuarioId"] = guid!,
+                ["perfil"] = "super_admin",
+                ["max"] = DateTimeOffset.UtcNow.Add(max).ToUnixTimeSeconds(),
+                ["rec"] = "0"
+            },
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(new string('k', 48).Select(c => (byte)c).ToArray()), SecurityAlgorithms.HmacSha256)
+        });
+        return "datahub_sesion=" + token;
+    }
+
+    private static DateTime Expira(JsonElement me) => me.GetProperty("sesionExpira").GetDateTime().ToUniversalTime();
 
     private static string SetCookieSesion(HttpResponseMessage r) =>
         r.Headers.GetValues("Set-Cookie").First(c => c.StartsWith("datahub_sesion="));
@@ -91,6 +117,10 @@ public class AccesoTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         Assert.Equal(correo, json.GetProperty("correo").GetString());
         Assert.Equal("super_admin", json.GetProperty("perfil").GetString());
         Assert.Equal(JsonValueKind.Null, json.GetProperty("cliente").ValueKind);
+        var expira = json.GetProperty("sesionExpira").GetDateTime().ToUniversalTime();
+        Assert.InRange(expira, DateTime.UtcNow.AddMinutes(55), DateTime.UtcNow.AddMinutes(61));
+        Assert.DoesNotContain("expires=", setCookie);
+        Assert.True(me.Headers.Contains("X-Sesion-Expira"));
 
         var logout = await _http.PostAsync("/api/v1/auth/logout", null, Ct);
         Assert.Equal(HttpStatusCode.NoContent, logout.StatusCode);
@@ -152,7 +182,7 @@ public class AccesoTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var token = Regex.Match(await File.ReadAllTextAsync(archivo, Ct), "token=([0-9a-f]{64})").Groups[1].Value;
         Assert.NotEmpty(token);
 
-        const string nueva = "OtraClave456789";
+        const string nueva = "OtraClave@456789";
         var rest = await _http.PostAsJsonAsync("/api/v1/auth/restablecer-contrasena", new { token, contrasena = nueva }, Ct);
         Assert.Equal(HttpStatusCode.NoContent, rest.StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, (await LoginAsync(correo, nueva)).StatusCode);
@@ -165,5 +195,45 @@ public class AccesoTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var correo = Correo();
         await SembrarInvitadoAsync(correo);
         Assert.Equal(HttpStatusCode.Unauthorized, (await LoginAsync(correo, Clave)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Login_con_recordarme_deja_cookie_persistente_de_7_dias()
+    {
+        var correo = await CrearActivoAsync();
+        var login = await LoginAsync(correo, Clave, recordarme: true);
+        var m = Regex.Match(SetCookieSesion(login), "expires=([^;]+)", RegexOptions.IgnoreCase);
+        Assert.True(m.Success);
+        Assert.InRange(DateTime.Parse(m.Groups[1].Value).ToUniversalTime(), DateTime.UtcNow.AddDays(7).AddMinutes(-2), DateTime.UtcNow.AddDays(7).AddMinutes(1));
+    }
+
+    [Fact]
+    public async Task Sesion_con_poco_tiempo_se_renueva_con_el_uso()
+    {
+        var correo = await CrearActivoAsync();
+        var me = await MeAsync(await TokenAsync(correo, TimeSpan.FromMinutes(10), TimeSpan.FromHours(8)));
+        Assert.Equal(HttpStatusCode.OK, me.StatusCode);
+        Assert.Contains(me.Headers.GetValues("Set-Cookie"), c => c.StartsWith("datahub_sesion="));
+        var json = await me.Content.ReadFromJsonAsync<JsonElement>(Ct);
+        Assert.InRange(Expira(json), DateTime.UtcNow.AddMinutes(59), DateTime.UtcNow.AddMinutes(61));
+    }
+
+    [Fact]
+    public async Task Renovacion_no_pasa_del_maximo_absoluto()
+    {
+        var correo = await CrearActivoAsync();
+        var me = await MeAsync(await TokenAsync(correo, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(20)));
+        Assert.Contains(me.Headers.GetValues("Set-Cookie"), c => c.StartsWith("datahub_sesion="));
+        var json = await me.Content.ReadFromJsonAsync<JsonElement>(Ct);
+        Assert.InRange(Expira(json), DateTime.UtcNow.AddMinutes(19), DateTime.UtcNow.AddMinutes(21));
+    }
+
+    [Fact]
+    public async Task Sesion_recien_emitida_no_se_renueva()
+    {
+        var correo = await CrearActivoAsync();
+        var me = await MeAsync(SetCookieSesion(await LoginAsync(correo, Clave)));
+        Assert.Equal(HttpStatusCode.OK, me.StatusCode);
+        Assert.False(me.Headers.Contains("Set-Cookie"));
     }
 }

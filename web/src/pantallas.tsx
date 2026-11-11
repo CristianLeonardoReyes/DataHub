@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
-import { Lock, Mail, User } from 'lucide-react'
+import { Check, Circle, Lock, Mail, User } from 'lucide-react'
 import * as auth from './api/auth'
 import { useSesion } from './Sesion'
 import { Aviso, BotonAcceso, CampoAcceso, InsigniaInvitacion, linkAccesoCls, PantallaAcceso } from './acceso-ui'
@@ -18,9 +18,10 @@ function destinoInterno(from?: Origen) {
 
 export function Login() {
   const { usuario, cargando, recargar } = useSesion()
-  const state = useLocation().state as { aviso?: string; from?: Origen } | null
+  const state = useLocation().state as { aviso?: string; tipoAviso?: 'ok' | 'info'; from?: Origen } | null
   const [correo, setCorreo] = useState('')
   const [contrasena, setContrasena] = useState('')
+  const [recordarme, setRecordarme] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
@@ -31,7 +32,7 @@ export function Login() {
     e.preventDefault()
     setEnviando(true)
     setError(null)
-    const r = await auth.login({ correo, contrasena })
+    const r = await auth.login({ correo, contrasena, recordarme })
     if (r.ok) {
       await recargar() // con la sesión cargada, el redirect de arriba lleva al destino
       return
@@ -50,16 +51,48 @@ export function Login() {
 
   return (
     <PantallaAcceso titulo="Inicia sesión" subtitulo="Plataforma de documentación técnica">
-      {state?.aviso && <Aviso tipo="ok">{state.aviso}</Aviso>}
+      {state?.aviso && <Aviso tipo={state.tipoAviso ?? 'ok'}>{state.aviso}</Aviso>}
       <form onSubmit={enviar} className="space-y-4">
         <CampoAcceso id="correo" label="Correo corporativo" type="email" auto="username" icono={Mail} value={correo} onChange={setCorreo} invalido={!!error} />
         <CampoAcceso id="contrasena" label="Contraseña" type="password" auto="current-password" icono={Lock} value={contrasena} onChange={setContrasena} invalido={!!error}
           accion={<Link to="/olvide-contrasena" className={linkAccesoCls}>¿Olvidaste tu contraseña?</Link>} />
+        <label className="flex items-center gap-2 text-[13px] text-muted">
+          <input type="checkbox" className="size-4 accent-brand" checked={recordarme} onChange={(e) => setRecordarme(e.target.checked)} />
+          Recordarme en este equipo
+        </label>
         {error && <Aviso tipo="error">{error}</Aviso>}
         <BotonAcceso cargando={enviando} textoCarga="Entrando…">Entrar</BotonAcceso>
       </form>
       <InsigniaInvitacion />
     </PantallaAcceso>
+  )
+}
+
+// Solo UX: la regla la aplica la API (RF-ACC-07).
+const REQUISITOS: [string, (c: string) => boolean][] = [
+  ['10 caracteres o más', (c) => c.length >= 10],
+  ['Una mayúscula', (c) => /\p{Lu}/u.test(c)],
+  ['Una minúscula', (c) => /\p{Ll}/u.test(c)],
+  ['Un número', (c) => /\d/.test(c)],
+  ['Un símbolo (por ejemplo @)', (c) => /[^\p{L}\d\s]/u.test(c)],
+]
+
+/** Lista en vivo de requisitos; desaparece cuando todos se cumplen. Tras un intento fallido, los que faltan van en rojo. */
+function RequisitosClave({ id, clave, intento }: { id: string; clave: string; intento: boolean }) {
+  if (REQUISITOS.every(([, ok]) => ok(clave))) return null
+  return (
+    <ul id={id} aria-live="polite" className="space-y-0.5 text-xs">
+      {REQUISITOS.map(([texto, ok]) => {
+        const cumple = ok(clave)
+        const Icono = cumple ? Check : Circle
+        return (
+          <li key={texto} className={`flex items-center gap-1.5 ${cumple ? 'text-ok-ink' : intento ? 'text-danger' : 'text-muted'}`}>
+            <Icono aria-hidden className="size-3 shrink-0" />
+            {texto}<span className="sr-only">{cumple ? ': cumple' : ': falta'}</span>
+          </li>
+        )
+      })}
+    </ul>
   )
 }
 
@@ -80,8 +113,7 @@ function FormContrasena({ titulo, subtitulo, conNombre, textoBoton, textoCarga, 
   const [nombre, setNombre] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [confirmar, setConfirmar] = useState('')
-  const [errorClave, setErrorClave] = useState<string | null>(null)
-  const [errorConfirmar, setErrorConfirmar] = useState<string | null>(null)
+  const [intento, setIntento] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
@@ -93,13 +125,13 @@ function FormContrasena({ titulo, subtitulo, conNombre, textoBoton, textoCarga, 
       </PantallaAcceso>
     )
 
+  const claveOk = REQUISITOS.every(([, ok]) => ok(contrasena))
+
   async function enviar(e: FormEvent) {
     e.preventDefault()
-    setErrorClave(null)
-    setErrorConfirmar(null)
     setError(null)
-    if (contrasena.length < 10) return setErrorClave('La contraseña debe tener al menos 10 caracteres')
-    if (contrasena !== confirmar) return setErrorConfirmar('Las contraseñas no coinciden')
+    setIntento(true)
+    if (!claveOk || contrasena !== confirmar) return
     setEnviando(true)
     const r = await enviarApi(token!, nombre, contrasena)
     if (r.ok) return nav('/login', { state: { aviso: avisoOk } })
@@ -111,10 +143,13 @@ function FormContrasena({ titulo, subtitulo, conNombre, textoBoton, textoCarga, 
     <PantallaAcceso titulo={titulo} subtitulo={subtitulo}>
       <form onSubmit={enviar} className="space-y-4">
         {conNombre && <CampoAcceso id="nombre" label="Nombre" auto="name" icono={User} value={nombre} onChange={setNombre} />}
-        <CampoAcceso id="contrasena" label="Contraseña" type="password" auto="new-password" icono={Lock} value={contrasena} onChange={setContrasena}
-          ayuda="Mínimo 10 caracteres" error={errorClave} />
+        <div className="space-y-2">
+          <CampoAcceso id="contrasena" label="Contraseña" type="password" auto="new-password" icono={Lock} value={contrasena} onChange={setContrasena}
+            invalido={intento && !claveOk} describe={claveOk ? undefined : 'contrasena-requisitos'} />
+          <RequisitosClave id="contrasena-requisitos" clave={contrasena} intento={intento} />
+        </div>
         <CampoAcceso id="confirmar" label="Confirmar contraseña" type="password" auto="new-password" icono={Lock} value={confirmar} onChange={setConfirmar}
-          error={errorConfirmar} />
+          error={intento && confirmar !== contrasena ? 'Las contraseñas no coinciden' : null} />
         {error && <Aviso tipo="error">{error}</Aviso>}
         <BotonAcceso cargando={enviando} textoCarga={textoCarga}>{textoBoton}</BotonAcceso>
       </form>

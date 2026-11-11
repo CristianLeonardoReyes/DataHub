@@ -9,6 +9,8 @@ public partial class EnviadorCorreoArchivo(string carpeta) : IEnviadorCorreo
     {
         Directory.CreateDirectory(carpeta);
         var nombre = $"{DateTime.UtcNow:yyyyMMdd-HHmmss-fff}_{NoAlfanumerico().Replace(asunto, "-").Trim('-')}.html";
+        // Un .html local no resuelve cid:, así que el logo va como data URI.
+        html = html.Replace($"cid:{PlantillasCorreo.LogoCid}", $"data:image/png;base64,{Convert.ToBase64String(PlantillasCorreo.LogoPng)}");
         await File.WriteAllTextAsync(Path.Combine(carpeta, nombre), $"<!-- Para: {destino} -->\n{html}");
     }
 

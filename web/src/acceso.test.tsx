@@ -39,15 +39,19 @@ test('ruta protegida con /me 401 redirige a /login', async () => {
   expect(await screen.findByRole('button', { name: 'Entrar' })).toBeInTheDocument()
 })
 
-test('aceptar invitación con 9 caracteres no llama a la API', async () => {
+test('aceptar invitación con contraseña débil no llama a la API', async () => {
   fetchMock.mockResolvedValue(respuesta(401, {}))
   montar('/aceptar-invitacion?token=abc')
   await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1)) // solo /me
   await userEvent.type(screen.getByLabelText('Nombre'), 'Ana')
-  await userEvent.type(screen.getByLabelText('Contraseña'), '123456789')
-  await userEvent.type(screen.getByLabelText('Confirmar contraseña'), '123456789')
+  await userEvent.type(screen.getByLabelText('Contraseña'), 'ClaveSegura123') // sin símbolo
+  await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'ClaveSegura123')
+  expect(screen.getByText('Un símbolo (por ejemplo @)')).toHaveClass('text-muted')
   await userEvent.click(screen.getByRole('button', { name: 'Activar cuenta' }))
-  expect(await screen.findByRole('alert')).toHaveTextContent('al menos 10')
+  expect(screen.getByText('Un símbolo (por ejemplo @)')).toHaveClass('text-danger')
+  // Al cumplir todo, la lista desaparece.
+  await userEvent.type(screen.getByLabelText('Contraseña'), '@')
+  expect(screen.queryByText('Un símbolo (por ejemplo @)')).toBeNull()
   expect(fetchMock).toHaveBeenCalledTimes(1)
 })
 

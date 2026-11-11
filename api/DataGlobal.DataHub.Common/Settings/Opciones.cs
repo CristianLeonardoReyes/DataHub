@@ -5,7 +5,9 @@ public class JwtOpciones
     public string Clave { get; set; } = "";
     public string Emisor { get; set; } = "";
     public string Audiencia { get; set; } = "";
-    public int Minutos { get; set; } = 60;
+    public int MinutosInactividad { get; set; } = 60;
+    public int HorasMaximas { get; set; } = 8;
+    public int DiasRecordarme { get; set; } = 7;
 }
 
 public class CorreoOpciones

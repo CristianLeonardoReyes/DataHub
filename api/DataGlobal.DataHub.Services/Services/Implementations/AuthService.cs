@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using DataGlobal.DataHub.Common.DTOs;
 using DataGlobal.DataHub.Common.Models;
@@ -50,7 +51,7 @@ public class AuthService(
         }
 
         await usuarios.RegistrarLoginExitosoAsync(u.Id);
-        return CrearSesion(u);
+        return CrearSesion(u, solicitud.Recordarme);
     }
 
     public async Task<UsuarioAuth?> ObtenerActivoAsync(Guid guid)
@@ -62,7 +63,7 @@ public class AuthService(
     public async Task<ClienteOperando?> ObtenerClienteActivoAsync(Guid guid) =>
         await clientes.ObtenerOperandoAsync(guid) is { Activo: true } c ? c : null;
 
-    public async Task<Sesion> CambiarClienteOperandoAsync(Guid? clienteGuid, DateTime expira)
+    public async Task<Sesion> CambiarClienteOperandoAsync(Guid? clienteGuid, DateTime expira, ClaimsPrincipal principal)
     {
         if (actual.Perfil != "super_admin") throw new AccesoDenegadoException();
         if (clienteGuid is { } g)
@@ -70,7 +71,7 @@ public class AuthService(
             var c = await clientes.ObtenerOperandoAsync(g) ?? throw new NoEncontradoException("El cliente no existe.");
             if (!c.Activo) throw new SolicitudInvalidaException("No puedes operar dentro de un cliente inactivo.");
         }
-        return CrearToken(actual.Guid, actual.Perfil, clienteGuid, expira);
+        return CrearToken(actual.Guid, actual.Perfil, clienteGuid, expira, MaxDe(principal), RecDe(principal));
     }
 
     public async Task AceptarInvitacionAsync(AceptarInvitacionRequest s)
@@ -125,18 +126,43 @@ public class AuthService(
 
     private static SolicitudInvalidaException TokenInvalido() => new("El enlace no es válido o ya venció.");
 
-    private Sesion CrearSesion(UsuarioAuth u)
-        => CrearToken(u.Guid, u.Perfil, u.ClienteGuid, DateTime.UtcNow.AddMinutes(jwt.Value.Minutos));
+    private Sesion CrearSesion(UsuarioAuth u, bool recordarme)
+    {
+        var ahora = DateTime.UtcNow;
+        var max = recordarme ? ahora.AddDays(jwt.Value.DiasRecordarme) : ahora.AddHours(jwt.Value.HorasMaximas);
+        return CrearToken(u.Guid, u.Perfil, u.ClienteGuid, Menor(ahora + Ventana(recordarme), max), max, recordarme);
+    }
 
-    private Sesion CrearToken(Guid usuarioGuid, string perfil, Guid? clienteGuid, DateTime expira)
+    public Sesion? RenovarSiCorresponde(ClaimsPrincipal principal)
+    {
+        // Un token sin max (anterior a la sesión deslizante) vence en su exp, sin renovarse.
+        if (MaxDe(principal) is not { } max || !long.TryParse(principal.FindFirstValue("exp"), out var e)) return null;
+        var rec = RecDe(principal);
+        var exp = DateTimeOffset.FromUnixTimeSeconds(e).UtcDateTime;
+        var ventana = Ventana(rec);
+        if (exp >= max || exp - DateTime.UtcNow >= ventana / 2) return null;
+        if (!Guid.TryParse(principal.FindFirstValue("usuarioId"), out var usuario)) return null;
+        Guid? cliente = Guid.TryParse(principal.FindFirstValue("clienteId"), out var c) ? c : null;
+        return CrearToken(usuario, principal.FindFirstValue("perfil") ?? "", cliente, Menor(DateTime.UtcNow + ventana, max), max, rec);
+    }
+
+    private TimeSpan Ventana(bool rec) => rec ? TimeSpan.FromDays(jwt.Value.DiasRecordarme) : TimeSpan.FromMinutes(jwt.Value.MinutosInactividad);
+    private static DateTime Menor(DateTime a, DateTime b) => a < b ? a : b;
+    private static bool RecDe(ClaimsPrincipal p) => p.FindFirstValue("rec") == "1";
+    private static DateTime? MaxDe(ClaimsPrincipal p) =>
+        long.TryParse(p.FindFirstValue("max"), out var m) ? DateTimeOffset.FromUnixTimeSeconds(m).UtcDateTime : null;
+
+    private Sesion CrearToken(Guid usuarioGuid, string perfil, Guid? clienteGuid, DateTime expira, DateTime? max, bool rec)
     {
         var o = jwt.Value;
         var claims = new Dictionary<string, object>
         {
             ["usuarioId"] = usuarioGuid.ToString(),
-            ["perfil"] = perfil
+            ["perfil"] = perfil,
+            ["rec"] = rec ? "1" : "0"
         };
         if (clienteGuid is { } c) claims["clienteId"] = c.ToString();
+        if (max is { } m) claims["max"] = new DateTimeOffset(DateTime.SpecifyKind(m, DateTimeKind.Utc)).ToUnixTimeSeconds();
 
         var token = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
         {
@@ -147,6 +173,6 @@ public class AuthService(
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(o.Clave)), SecurityAlgorithms.HmacSha256)
         });
-        return new Sesion(token, expira);
+        return new Sesion(token, expira, rec);
     }
 }

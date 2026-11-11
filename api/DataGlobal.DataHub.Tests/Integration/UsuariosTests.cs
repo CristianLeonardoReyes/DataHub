@@ -11,7 +11,7 @@ namespace DataGlobal.DataHub.Tests.Integration;
 
 public class UsuariosTests : IClassFixture<MySqlFixture>, IAsyncDisposable
 {
-    private const string Clave = "ClaveSegura123";
+    private const string Clave = "ClaveSegura@123";
     private readonly MySqlFixture _db;
     private readonly ApiFactory _factory;
     private readonly HttpClient _http;

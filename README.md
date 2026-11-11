@@ -122,6 +122,11 @@ Contenido (reemplaza los valores por los que te pasó tu compañero):
 }
 ```
 
+Dónde vive cada secreto: en local, en user-secrets del proyecto Api; en producción, en App
+Settings de Azure (`ConnectionStrings__DataHub`, `Jwt__Clave`, `SesEmailSettings__Aws_access_key`,
+`SesEmailSettings__Aws_secret_key`). Cada ambiente usa su **propia** `Jwt:Clave` (64 caracteres
+aleatorios); cambiarla cierra todas las sesiones abiertas.
+
 Opcional, para enviar correos reales con AWS SES en local (si no, se guardan en `correos-dev/`):
 `"Correo:Modo": "Ses"`, `"SesEmailSettings:Aws_access_key"` y `"SesEmailSettings:Aws_secret_key"`
 (pídelas igual que las anteriores).

@@ -29,6 +29,8 @@ public class UsuarioActual
     public string Correo { get; set; } = "";
     public string Nombre { get; set; } = "";
     public string Perfil { get; set; } = "";
+    /// <summary>Vencimiento vigente de la sesión (UTC), ya renovado si la petición lo renovó.</summary>
+    public DateTime SesionExpira { get; set; }
 }
 
 /// <summary>Cliente sobre el que opera el Super admin. Uso interno (lleva el Id).</summary>
@@ -41,7 +43,7 @@ public class ClienteOperando
 }
 
 /// <summary>Resultado de un login correcto.</summary>
-public record Sesion(string Token, DateTime Expira);
+public record Sesion(string Token, DateTime Expira, bool Recordarme = false);
 
 /// <summary>Error de validación de entrada o regla de negocio; la API lo traduce a 400.</summary>
 public class SolicitudInvalidaException(string mensaje) : Exception(mensaje);

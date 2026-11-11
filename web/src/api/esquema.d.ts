@@ -1079,6 +1079,7 @@ export interface components {
         LoginRequest: {
             correo: string;
             contrasena: string;
+            recordarme?: boolean;
         };
         OlvideContrasenaRequest: {
             correo: string;
@@ -1105,6 +1106,8 @@ export interface components {
             perfil: components["schemas"]["PerfilUsuario"];
             cliente: null | components["schemas"]["ClienteResumenDto"];
             permisos: string[];
+            /** Format: date-time */
+            sesionExpira: string;
         };
         UsuarioDto: {
             /** Format: uuid */

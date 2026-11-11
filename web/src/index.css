@@ -144,11 +144,20 @@
 }
 
 @layer base {
+  /* Tailwind 4 deja los botones con cursor por defecto. */
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), summary, label:has(> input[type="checkbox"]) {
+    cursor: pointer;
+  }
+  button:disabled { cursor: not-allowed; }
+
   :focus-visible {
     outline: 2px solid var(--brand);
     outline-offset: 2px;
   }
 }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {

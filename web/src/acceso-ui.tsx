@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { ArrowRight, CircleAlert, CircleCheck, Eye, EyeOff, LoaderCircle, ShieldCheck, type LucideIcon } from 'lucide-react'
+import { ArrowRight, CircleAlert, CircleCheck, Eye, EyeOff, Info, LoaderCircle, ShieldCheck, type LucideIcon } from 'lucide-react'
 
 export const linkAccesoCls =
   'rounded-[var(--r-xs)] text-[13px] font-medium text-brand-text underline-offset-[3px] hover:underline'
@@ -36,11 +36,12 @@ export function CampoAcceso(p: {
   error?: string | null
   accion?: ReactNode
   invalido?: boolean
+  describe?: string
 }) {
   const [visible, setVisible] = useState(false)
   const esClave = p.type === 'password'
   const Icono = p.icono
-  const descrito = p.error ? `${p.id}-error` : p.ayuda ? `${p.id}-ayuda` : undefined
+  const descrito = p.error ? `${p.id}-error` : p.ayuda ? `${p.id}-ayuda` : p.describe
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
@@ -89,12 +90,16 @@ export function BotonAcceso({ cargando, textoCarga, children }: { cargando: bool
   )
 }
 
-export function Aviso({ tipo, children }: { tipo: 'ok' | 'error'; children: ReactNode }) {
-  const ok = tipo === 'ok'
-  const Icono = ok ? CircleCheck : CircleAlert
+const AVISOS = {
+  ok: { Icono: CircleCheck, rol: 'status', cls: 'border-ok-ink/30 bg-ok-bg text-ok-ink' },
+  info: { Icono: Info, rol: 'status', cls: 'border-review-ink/30 bg-review-bg text-review-ink' },
+  error: { Icono: CircleAlert, rol: 'alert', cls: 'border-danger/30 bg-danger-bg text-danger-ink' },
+} as const
+
+export function Aviso({ tipo, children }: { tipo: keyof typeof AVISOS; children: ReactNode }) {
+  const { Icono, rol, cls } = AVISOS[tipo]
   return (
-    <div role={ok ? 'status' : 'alert'}
-      className={`flex items-start gap-2 rounded-lg border p-3 text-[13px] ${ok ? 'border-ok-ink/30 bg-ok-bg text-ok-ink' : 'border-danger/30 bg-danger-bg text-danger-ink'}`}>
+    <div role={rol} className={`flex items-start gap-2 rounded-lg border p-3 text-[13px] ${cls}`}>
       <Icono aria-hidden className="mt-px size-4 shrink-0" />
       <span>{children}</span>
     </div>

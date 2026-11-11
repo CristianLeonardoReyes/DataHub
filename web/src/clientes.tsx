@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import * as api from './api/clientes'
 import { useSesion } from './Sesion'
 import { Building2, Pencil, Plus, Power } from 'lucide-react'
-import { Alerta, AvisoOk, btnCls, btnSmCls, Campo, Encabezado, Insignia, linkCls, panelCls } from './ui'
+import { Alerta, AvisoOk, Boton, btnCls, btnSmCls, Campo, Encabezado, Insignia, linkCls, panelCls } from './ui'
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
@@ -93,11 +93,11 @@ export function Clientes() {
                         <Link to={`/clientes/${c.guid}`} aria-label={`Editar ${c.nombre}`} className={btnSmCls}>
                           <Pencil aria-hidden className="size-3.5" />Editar
                         </Link>
-                        <button type="button" disabled={ocupado === c.guid}
+                        <Boton type="button" cargando={ocupado === c.guid} textoCarga={c.activo ? 'Desactivando…' : 'Activando…'}
                           className={`${btnSmCls} ${c.activo ? 'text-danger hover:bg-danger-bg' : ''}`}
                           aria-label={`${c.activo ? 'Desactivar' : 'Activar'} ${c.nombre}`} onClick={() => cambiarEstado(c)}>
                           <Power aria-hidden className="size-3.5" />{c.activo ? 'Desactivar' : 'Activar'}
-                        </button>
+                        </Boton>
                       </div>
                     </td>
                   </tr>
@@ -198,7 +198,7 @@ export function ClienteForm() {
           ayuda="Le llegará el enlace para activar su cuenta." />}
         <Alerta texto={errores.general ?? null} />
         <div className="flex gap-2 border-t border-rule pt-5">
-          <button type="submit" disabled={enviando} className={`${btnCls} w-auto`}>{guid ? 'Guardar' : 'Crear cliente'}</button>
+          <Boton type="submit" cargando={enviando} textoCarga={guid ? 'Guardando…' : 'Creando…'} className={`${btnCls} w-auto`}>{guid ? 'Guardar' : 'Crear cliente'}</Boton>
           <Link to="/clientes" className={`${btnSmCls} h-10 px-4`}>Cancelar</Link>
         </div>
       </form>

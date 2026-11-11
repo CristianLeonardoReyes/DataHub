@@ -13,6 +13,9 @@ public class ApiFactory(string? connectionString = null) : WebApplicationFactory
         builder.UseSetting("Jwt:Clave", new string('k', 48));
         builder.UseSetting("Jwt:Emisor", "datahub-test");
         builder.UseSetting("Jwt:Audiencia", "datahub-test");
+        builder.UseSetting("Jwt:MinutosInactividad", "60");
+        builder.UseSetting("Jwt:HorasMaximas", "8");
+        builder.UseSetting("Jwt:DiasRecordarme", "7");
         builder.UseSetting("Correo:Modo", "Archivo");
         builder.UseSetting("Correo:Carpeta", CarpetaCorreos);
         builder.UseSetting("App:UrlBase", "http://localhost:5173");
