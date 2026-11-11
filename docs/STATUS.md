@@ -18,6 +18,11 @@ tocó. La historia la guarda git._
 
 ## Backend (api/ + db/)
 
+- **BD del servidor** (`23.82.136.106:3306`, MySQL 8.0.36, base `DataHub`; 2026-11-11): las 7
+  migraciones aplicadas. Cargada la semilla `db/Semillas/dev_datos_prueba.sql` (3 clientes
+  `prueba-*`, 9 usuarios `@prueba.test`); reversión al final del script. `developer1` tiene
+  privilegios globales: conviene limitarlo a `DataHub.*`.
+
 - 5 capas; `BaseRepository` solo SP; ProblemDetails; `/health`; SPA con fallback (`/api/*` → 404).
 - Convenciones: esquema español PascalCase; `Id` interno, `Guid` público (`System.Guid`);
   `FechaActualizacion = UTC_TIMESTAMP()` en cada UPDATE; SP re-ejecutables y con parámetros de
@@ -58,7 +63,12 @@ tocó. La historia la guarda git._
 - **Acceso rediseñado** (`src/acceso-ui.tsx` + `src/pantallas.tsx`): login, activar cuenta,
   olvidé y restablecer con el diseño; login redirige si hay sesión, vuelve a la ruta pedida
   (`state.from`, solo internas) y avisa si la API no responde. Logo en `public/logo-datahub.svg`.
-- Pendiente de rediseño: Layout, Inicio, Clientes, Usuarios (siguen con clases zinc).
+- **Rediseño completo de `web/`** (`feature/web-rediseno`, 2026-11-11): `ui.tsx` con tokens
+  (botones, campos, avisos, `Encabezado`, `Insignia`, `Avatar`); `Layout` con barra lateral de
+  248px, logo, "Operar en" y usuario abajo; `inicio.tsx` con resumen real de clientes/usuarios
+  según permisos, "Lo que puede hacer tu perfil" y módulos que vienen; Clientes y Usuarios en
+  paneles con insignias de estado y alcance del perfil al invitar. Sin cambios de lógica ni de
+  contrato; 28/28 pruebas. `prototipo/` retirado (queda en git, PR #9).
 - Lint: 2 warnings de estilo en `Sesion.tsx`.
 
 ## Decisiones vigentes
@@ -70,7 +80,7 @@ tocó. La historia la guarda git._
 
 - `CODEOWNERS` (usuario GitHub del 2.º integrante) y proteger `main`/`develop` (usuario).
 - RF-USR-03 (asignar workspaces) se hace en el módulo 4 (decidido 2026-10-15).
-- PRD §12 pendiente: tamaño máximo de archivo (módulo 7; el prototipo usa 25 MB provisional).
+- PRD §12 pendiente: tamaño máximo de archivo (módulo 7; el prototipo retirado usaba 25 MB provisional).
 - Definir la carpeta de OneDrive de la empresa para los valores de entorno de local y pruebas.
 
 ## Variables por subir a OneDrive

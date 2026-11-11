@@ -61,7 +61,7 @@ página Runbook/Procedimiento por proceso. Exportación a Markdown para llevar a
 ## Evidence on Hand
 
 PRD (`docs/PRD.md`), documento de solución y modelo de datos (v1.0, oct 2026). No hay
-clientes, métricas ni testimonios reales: el prototipo usa datos de ejemplo.
+clientes, métricas ni testimonios reales: las pruebas usan datos de ejemplo (`db/Semillas/`).
 
 ## Product Principles
 

@@ -199,7 +199,7 @@ components:
 
 > **Sistema de diseño único del proyecto** (unificado el 2026-11-11): reemplaza a la exportación de Stitch. Las pantallas de Stitch (`docs/diseno/stitch/`, local, no versionada) sirven como referencia de composición; ante cualquier diferencia de valores mandan los tokens de este archivo.
 >
-> Derivado del código del prototipo (`prototipo/src`: `index.css`, `ui.tsx`, `shell.tsx`, `screens/`). Es la **referencia visual que `web/` debe imitar**: se reproducen tokens, medidas y comportamiento, **no se copia código** de `prototipo/`. Los tokens del frontmatter son normativos; los `dark-*` son los valores de `[data-theme="dark"]` para el mismo rol.
+> Derivado del prototipo visual, que ya se llevó a `web/` y se retiró del repositorio (queda en el historial de git, PR #9). Hoy la implementación de referencia es `web/src` (`index.css`, `ui.tsx`, `acceso-ui.tsx`, `Sesion.tsx`). Los tokens del frontmatter son normativos; los `dark-*` son los valores de `[data-theme="dark"]` para el mismo rol.
 
 ## Overview
 
@@ -368,4 +368,4 @@ Sobrios y compactos; el primario es el único con relleno de color.
 - **Don't** construir inicios con saludo, tarjetas de KPI con iconos ni degradados.
 - **Don't** usar etiquetas en mayúsculas con tracking sobre los títulos; los grupos van en 12px de oración.
 - **Don't** superar 8px de radio en contenedores en página (12px solo para diálogos y paleta).
-- **Don't** importar ni copiar código de `prototipo/` en `web/`.
+- **Don't** crear estilos fuera de los tokens de `web/src/index.css`.

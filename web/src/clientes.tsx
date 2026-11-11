@@ -2,7 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import * as api from './api/clientes'
 import { useSesion } from './Sesion'
-import { Alerta, btnCls, btnSmCls, Campo, linkCls } from './ui'
+import { Building2, Pencil, Plus, Power } from 'lucide-react'
+import { Alerta, AvisoOk, btnCls, btnSmCls, Campo, Encabezado, Insignia, linkCls, panelCls } from './ui'
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 
@@ -44,54 +45,68 @@ export function Clientes() {
     setOcupado(null)
   }
 
+  const activos = lista?.filter((c) => c.activo).length ?? 0
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold">Clientes</h1>
-        <Link to="/clientes/nuevo" className={`${btnCls} w-auto text-center`}>Nuevo cliente</Link>
-      </div>
-      {aviso && <p role="status" className="text-sm text-emerald-300">{aviso}</p>}
-      <Alerta texto={error} />
-      {lista === null ? (
-        !error && <p className="text-zinc-400">Cargando…</p>
-      ) : lista.length === 0 ? (
-        <p className="text-zinc-400">Aún no hay clientes.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="text-zinc-400">
-              <tr>
-                <th scope="col" className="p-2">Nombre</th>
-                <th scope="col" className="p-2">Slug</th>
-                <th scope="col" className="p-2">Estado</th>
-                <th scope="col" className="p-2">Creado</th>
-                <th scope="col" className="p-2"><span className="sr-only">Acciones</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {lista.map((c) => (
-                <tr key={c.guid} className="border-t border-zinc-800">
-                  <td className="p-2">{c.nombre}</td>
-                  <td className="p-2 text-zinc-400">{c.slug}</td>
-                  <td className="p-2">
-                    <span className={`rounded px-2 py-0.5 text-xs ${c.activo ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-700 text-zinc-300'}`}>
-                      {c.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td className="p-2">{fecha(c.fechaCreacion)}</td>
-                  <td className="flex gap-2 p-2">
-                    <Link to={`/clientes/${c.guid}`} aria-label={`Editar ${c.nombre}`} className={btnSmCls}>Editar</Link>
-                    <button type="button" disabled={ocupado === c.guid} className={btnSmCls}
-                      aria-label={`${c.activo ? 'Desactivar' : 'Activar'} ${c.nombre}`} onClick={() => cambiarEstado(c)}>
-                      {c.activo ? 'Desactivar' : 'Activar'}
-                    </button>
-                  </td>
+    <section>
+      <Encabezado
+        titulo="Clientes"
+        linea={lista ? `${lista.length} ${lista.length === 1 ? 'cliente' : 'clientes'} · ${activos} ${activos === 1 ? 'activo' : 'activos'}. Desactivar un cliente deja sin acceso a sus usuarios.` : 'Empresas que usan DataHub'}
+        acciones={
+          <Link to="/clientes/nuevo" className={`${btnCls} w-auto`}>
+            <Plus aria-hidden className="size-4" />
+            Nuevo cliente
+          </Link>
+        }
+      />
+      <div className="space-y-4">
+        <AvisoOk texto={aviso ?? null} />
+        <Alerta texto={error} />
+        {lista === null ? (
+          !error && <p className="text-sm text-muted">Cargando…</p>
+        ) : lista.length === 0 ? (
+          <div className={`${panelCls} flex flex-col items-center gap-3 px-6 py-12 text-center`}>
+            <Building2 aria-hidden className="size-6 text-faint" />
+            <p className="text-sm text-muted">Aún no hay clientes.</p>
+            <Link to="/clientes/nuevo" className={btnSmCls}>Crear el primero</Link>
+          </div>
+        ) : (
+          <div className={`${panelCls} overflow-x-auto`}>
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="text-xs text-muted">
+                <tr>
+                  <th scope="col" className="h-10 px-4 font-normal">Nombre</th>
+                  <th scope="col" className="px-4 font-normal">Slug</th>
+                  <th scope="col" className="px-4 font-normal">Estado</th>
+                  <th scope="col" className="px-4 text-right font-normal">Creado</th>
+                  <th scope="col" className="px-4"><span className="sr-only">Acciones</span></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {lista.map((c) => (
+                  <tr key={c.guid} className="border-t border-rule transition-colors hover:bg-raised">
+                    <td className="h-14 px-4 font-medium">{c.nombre}</td>
+                    <td className="px-4 font-mono text-[13px] text-muted">{c.slug}</td>
+                    <td className="px-4"><Insignia tono={c.activo ? 'ok' : 'off'}>{c.activo ? 'Activo' : 'Inactivo'}</Insignia></td>
+                    <td className="px-4 text-right text-[13px] whitespace-nowrap text-muted tabular-nums">{fecha(c.fechaCreacion)}</td>
+                    <td className="px-4">
+                      <div className="flex justify-end gap-2">
+                        <Link to={`/clientes/${c.guid}`} aria-label={`Editar ${c.nombre}`} className={btnSmCls}>
+                          <Pencil aria-hidden className="size-3.5" />Editar
+                        </Link>
+                        <button type="button" disabled={ocupado === c.guid}
+                          className={`${btnSmCls} ${c.activo ? 'text-danger hover:bg-danger-bg' : ''}`}
+                          aria-label={`${c.activo ? 'Desactivar' : 'Activar'} ${c.nombre}`} onClick={() => cambiarEstado(c)}>
+                          <Power aria-hidden className="size-3.5" />{c.activo ? 'Desactivar' : 'Activar'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </section>
   )
 }
@@ -159,27 +174,32 @@ export function ClienteForm() {
     setEnviando(false)
   }
 
-  if (cargando) return <p className="text-zinc-400">Cargando…</p>
+  if (cargando) return <p className="text-sm text-muted">Cargando…</p>
   if (noExiste)
     return (
-      <section className="space-y-2">
-        <p role="alert" className="text-red-300">Cliente no encontrado</p>
+      <section className="space-y-3">
+        <p role="alert" className="text-danger">Cliente no encontrado</p>
         <Link to="/clientes" className={linkCls}>Volver a clientes</Link>
       </section>
     )
 
   return (
-    <section className="max-w-md space-y-4">
-      <h1 className="text-xl font-semibold">{guid ? 'Editar cliente' : 'Nuevo cliente'}</h1>
-      <form onSubmit={enviar} noValidate className="space-y-4">
+    <section className="max-w-[560px]">
+      <Encabezado
+        titulo={guid ? 'Editar cliente' : 'Nuevo cliente'}
+        linea={guid ? 'Cambia el nombre o el identificador. El estado se cambia desde la lista.' : 'Se crea el cliente y se envía la invitación a su primer Admin (vence en 72 horas).'}
+      />
+      <form onSubmit={enviar} noValidate className={`${panelCls} space-y-5 p-6`}>
         <Campo id="nombre" label="Nombre" value={nombre} onChange={cambiarNombre} error={errores.nombre} />
-        <Campo id="slug" label="Slug" value={slug} error={errores.slug}
+        <Campo id="slug" label="Slug" value={slug} error={errores.slug} mono
+          ayuda="Identificador corto: minúsculas, números y guiones."
           onChange={(v) => { setSlugTocado(true); setSlug(v) }} />
-        {!guid && <Campo id="correoAdmin" label="Correo del Admin" type="email" value={correo} onChange={setCorreo} error={errores.correo} />}
+        {!guid && <Campo id="correoAdmin" label="Correo del Admin" type="email" value={correo} onChange={setCorreo} error={errores.correo}
+          ayuda="Le llegará el enlace para activar su cuenta." />}
         <Alerta texto={errores.general ?? null} />
-        <div className="flex gap-2">
-          <button type="submit" disabled={enviando} className={btnCls}>{guid ? 'Guardar' : 'Crear cliente'}</button>
-          <Link to="/clientes" className={`${btnSmCls} flex items-center`}>Cancelar</Link>
+        <div className="flex gap-2 border-t border-rule pt-5">
+          <button type="submit" disabled={enviando} className={`${btnCls} w-auto`}>{guid ? 'Guardar' : 'Crear cliente'}</button>
+          <Link to="/clientes" className={`${btnSmCls} h-10 px-4`}>Cancelar</Link>
         </div>
       </form>
     </section>

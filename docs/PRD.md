@@ -269,12 +269,11 @@ datahub/
 ├── db/
 │   ├── Tablas/  Procedimientos/        # SQL vigente
 │   └── Migraciones/AAAA-MM-DD_<desc>.sql  # con bloque -- REVERSIÓN
-├── web/                      # se abre con VS Code
-└── prototipo/                # referencia visual, no se compila ni se despliega
+└── web/                      # se abre con VS Code
 ```
 
 - El SQL lo revisa y ejecuta el responsable del proyecto. Los agentes solo escriben scripts.
-- El prototipo visual (`prototipo/`, sin Gemini) es la referencia de interfaz y no se usa como base de código.
+- La referencia de interfaz es `docs/diseno/DESIGN.md`; el prototipo visual se llevó a `web/` y se retiró (historial de git, PR #9).
 
 ### 7.3. API
 
