@@ -1,87 +1,328 @@
 @import "tailwindcss";
 
-@theme {
-  --color-surface: #121316;
-  --color-surface-dim: #121316;
-  --color-surface-bright: #38393c;
-  --color-surface-container-lowest: #0d0e11;
-  --color-surface-container-low: #1a1b1e;
-  --color-surface-container: #1f1f23;
-  --color-surface-container-high: #292a2d;
-  --color-surface-container-highest: #343538;
-  --color-surface-variant: #343538;
-  --color-on-surface: #e3e2e6;
-  --color-on-surface-variant: #c8c4d6;
-  --color-outline: #928e9f;
-  --color-outline-variant: #474554;
-  --color-surface-tint: #c7bfff;
-  --color-primary: #c7bfff;
-  --color-primary-fixed-dim: #c7bfff;
-  --color-on-primary: #2a009f;
-  --color-primary-container: #8e7fff;
-  --color-on-primary-container: #24008c;
-  --color-secondary: #c7bfff;
-  --color-secondary-container: #4634a9;
-  --color-on-secondary-container: #b8afff;
-  --color-tertiary: #ffb865;
-  --color-tertiary-container: #c9811a;
-  --color-on-tertiary: #482900;
-  --color-on-tertiary-container: #3f2400;
-  --color-error: #ffb4ab;
-  --color-error-container: #93000a;
-  --color-on-error: #690005;
-  --color-background: #121316;
-  --color-on-background: #e3e2e6;
+/*
+  Sistema DataGlobal — "libro mayor" acromático.
+  El cromo es tinta y gris azulado; el azul de marca va solo en la acción principal,
+  el elemento activo de datos y los enlaces de nombre. El verde DataGlobal solo en "Aprobado".
+*/
+:root {
+  --ground: #f4f5f9;
+  --surface: #ffffff;
+  --raised: #f8f9fc;
+  --active: #e7e9f1;
+  --border: #e2e5ec;
+  --rule: #eef0f4;
+  --control: #cdd2dc;
+  --ink: #12141c;
+  --muted: #555a6a;
+  --faint: #676c7c;
+  --brand: #2b3a8f;
+  --brand-hover: #23307a;
+  --on-brand: #ffffff;
+  --brand-soft: #eceffb;
+  --brand-text: #2b3a8f;
+  --leaf: #8dc63f;
+  --ok-bg: #e9f5d9;
+  --ok-ink: #2c4f08;
+  --review-bg: #fff3dc;
+  --review-ink: #7f4500;
+  --review-signal: #e5a03a;
+  --draft-bg: #eef0f4;
+  --draft-ink: #424757;
+  --archived-bg: #f1f1f2;
+  --archived-ink: #5c5c63;
+  --danger: #b3261e;
+  --danger-bg: #fdecea;
+  --danger-ink: #8c1d18;
+  --code-bg: #f3f4f8;
+  --selection: #d6dcf6;
+  --shadow-float: 0 12px 32px rgb(18 20 28 / 0.14), 0 2px 6px rgb(18 20 28 / 0.06);
+  color-scheme: light;
+}
 
-  --spacing-space-xs: 0.25rem;
-  --spacing-space-sm: 0.5rem;
-  --spacing-space-md: 1rem;
-  --spacing-space-lg: 1.5rem;
-  --spacing-space-xl: 2.5rem;
-  --spacing-gutter: 1.5rem;
-  --spacing-margin: 2rem;
+:root[data-theme="dark"] {
+  --ground: #0f1013;
+  --surface: #16171b;
+  --raised: #1c1e23;
+  --active: #262831;
+  --border: #2a2c34;
+  --rule: #212329;
+  --control: #3b3e48;
+  --ink: #eceef3;
+  --muted: #b3b7c3;
+  --faint: #959aa7;
+  --brand: #7f8fe0;
+  --brand-hover: #95a2e8;
+  --on-brand: #0f1013;
+  --brand-soft: #1f2440;
+  --brand-text: #9eabef;
+  --ok-bg: #1d2b10;
+  --ok-ink: #a8db69;
+  --review-bg: #2e2412;
+  --review-ink: #f0b860;
+  --review-signal: #e8a849;
+  --draft-bg: #23252b;
+  --draft-ink: #c3c7d1;
+  --archived-bg: #222326;
+  --archived-ink: #a5a7ad;
+  --danger: #f08a82;
+  --danger-bg: #331b1a;
+  --danger-ink: #f6a39c;
+  --code-bg: #1c1e23;
+  --selection: #2f3768;
+  --shadow-float: 0 16px 40px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.3);
+  color-scheme: dark;
+}
 
-  --font-display: "Hanken Grotesk", sans-serif;
-  --font-headline-lg: "Hanken Grotesk", sans-serif;
-  --font-headline-md: "Hanken Grotesk", sans-serif;
-  --font-headline-sm: "Hanken Grotesk", sans-serif;
-  --font-body-lg: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body-md: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body-sm: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-label-md: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-label-sm: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-code-block: "JetBrains Mono", monospace;
-  --font-code-inline: "JetBrains Mono", monospace;
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-active: var(--active);
+  --color-line: var(--border);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-on-brand: var(--on-brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-text: var(--brand-text);
+  --color-leaf: var(--leaf);
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-ink: var(--ok-ink);
+  --color-review-bg: var(--review-bg);
+  --color-review-ink: var(--review-ink);
+  --color-draft-bg: var(--draft-bg);
+  --color-draft-ink: var(--draft-ink);
+  --color-archived-bg: var(--archived-bg);
+  --color-archived-ink: var(--archived-ink);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-ink: var(--danger-ink);
+  --color-code: var(--code-bg);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --shadow-float: var(--shadow-float);
 }
 
 @layer base {
-  html, body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--color-surface, #121316);
-    color: var(--color-on-surface, #e3e2e6);
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
   }
-  ::-webkit-scrollbar {
-    display: none;
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 20px;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--selection);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--faint);
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
   }
   * {
-    scrollbar-width: none;
+    scrollbar-width: thin;
+    scrollbar-color: var(--control) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--control);
+    border-radius: 999px;
+    border: 3px solid var(--ground);
   }
 }
 
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 20px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
+.num {
+  font-variant-numeric: tabular-nums;
 }
 
+/* Contenido de página (lector y editor). Medida de lectura ~70ch. */
+.doc {
+  font-size: 16px;
+  line-height: 27px;
+  color: var(--ink);
+  max-width: 720px;
+}
+.doc:focus {
+  outline: none;
+}
+.doc > * + * {
+  margin-top: 14px;
+}
+.doc h2 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 36px;
+}
+.doc h3 {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  margin-top: 24px;
+}
+.doc ul,
+.doc ol {
+  padding-left: 22px;
+}
+.doc ul {
+  list-style: disc;
+}
+.doc ol {
+  list-style: decimal;
+}
+.doc li + li {
+  margin-top: 6px;
+}
+.doc li::marker {
+  color: var(--faint);
+}
+.doc code {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.doc pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 21px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+}
+.doc pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+.doc blockquote {
+  border-left: 2px solid var(--control);
+  padding-left: 14px;
+  color: var(--muted);
+}
+.doc a {
+  color: var(--brand-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.doc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 20px;
+}
+.doc th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.doc td {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.doc .check {
+  list-style: none;
+  padding-left: 0;
+}
+.doc .check li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.doc .check input {
+  margin-top: 6px;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--brand);
+  flex: none;
+}
+.doc .check li.done span {
+  color: var(--faint);
+  text-decoration: line-through;
+}
+
+mark.hit {
+  background: var(--brand-soft);
+  color: var(--ink);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+.anim-rise {
+  animation: rise 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.anim-fade {
+  animation: fade 140ms ease-out;
+}
+.anim-slide {
+  animation: slide-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise,
+  .anim-fade,
+  .anim-slide {
+    animation: none;
+  }
+  * {
+    transition-duration: 0ms !important;
+  }
+}

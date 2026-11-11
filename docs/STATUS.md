@@ -56,6 +56,13 @@ tocó. La historia la guarda git._
   `/usuarios/nuevo` (`usuariosGestionar`; fila propia sin acciones). Selector
   "Operar en:" (solo Super admin) en la cabecera; Usuarios para Super admin exige cliente.
 - Lint: 2 warnings de estilo en `Sesion.tsx`.
+- **Prototipo rediseñado** (`feature/prototipo-rediseno`, sin commit): `prototipo/` en español,
+  alineado al PRD, sistema DataGlobal claro/oscuro; referencia visual de `web/` (`DESIGN.md`,
+  `PRODUCT.md`, `prototipo/README.md`). Archivos: validación de vacío/carpeta, tamaño (25 MB
+  provisional), lote de 10, nombres repetidos, reintentar tras corte de red, SVG sin vista previa.
+  Logo oficial (trazos de `docs/diseno/logo/datahub-icono.svg`) en la app y el favicon. Inicio
+  (2026-10-28): % de documentación al día, línea de revisiones (eje de ±60 días centrado en hoy),
+  "Por revisar", recientes y vigencia por espacio sin cajas.
 
 ## Decisiones vigentes
 
