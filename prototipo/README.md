@@ -32,4 +32,4 @@ ficticios; "hoy" es 2026-10-26). Reemplazar por datos reales al construir en `we
 
 ## Sistema de diseño
 
-Tokens en `src/index.css` (claro y oscuro). Ver `../DESIGN.md`.
+Tokens en `src/index.css` (claro y oscuro). Ver `../docs/diseno/DESIGN.md`.

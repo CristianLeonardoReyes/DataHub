@@ -1,1 +1,167 @@
 @import "tailwindcss";
+
+:root {
+  --ground: #f4f5f9;
+  --surface: #ffffff;
+  --raised: #f8f9fc;
+  --active: #e7e9f1;
+  --line: #e2e5ec;
+  --rule: #eef0f4;
+  --control: #cdd2dc;
+  --ink: #12141c;
+  --muted: #555a6a;
+  --faint: #676c7c;
+  --brand: #2b3a8f;
+  --brand-hover: #23307a;
+  --on-brand: #ffffff;
+  --brand-soft: #eceffb;
+  --brand-text: #2b3a8f;
+  --leaf: #8dc63f;
+  --review-signal: #e5a03a;
+  --ok-bg: #e9f5d9;
+  --ok-ink: #2c4f08;
+  --review-bg: #fff3dc;
+  --review-ink: #7f4500;
+  --draft-bg: #eef0f4;
+  --draft-ink: #424757;
+  --archived-bg: #f1f1f2;
+  --archived-ink: #5c5c63;
+  --danger: #b3261e;
+  --danger-bg: #fdecea;
+  --danger-ink: #8c1d18;
+  --code-bg: #f3f4f8;
+  --selection: #d6dcf6;
+  --r-xs: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 12px;
+  --r-full: 999px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0f1013;
+    --surface: #16171b;
+    --raised: #1c1e23;
+    --active: #262831;
+    --line: #2a2c34;
+    --rule: #212329;
+    --control: #3b3e48;
+    --ink: #eceef3;
+    --muted: #b3b7c3;
+    --faint: #959aa7;
+    --brand: #7f8fe0;
+    --brand-hover: #95a2e8;
+    --on-brand: #0f1013;
+    --brand-soft: #1f2440;
+    --brand-text: #9eabef;
+    --ok-bg: #1d2b10;
+    --ok-ink: #a8db69;
+    --review-bg: #2e2412;
+    --review-ink: #f0b860;
+    --draft-bg: #23252b;
+    --draft-ink: #c3c7d1;
+    --archived-bg: #222326;
+    --archived-ink: #a5a7ad;
+    --danger: #f08a82;
+    --danger-bg: #331b1a;
+    --danger-ink: #f6a39c;
+    --code-bg: #1c1e23;
+    --selection: #2f3768;
+  }
+}
+
+[data-theme="dark"] {
+  --ground: #0f1013;
+  --surface: #16171b;
+  --raised: #1c1e23;
+  --active: #262831;
+  --line: #2a2c34;
+  --rule: #212329;
+  --control: #3b3e48;
+  --ink: #eceef3;
+  --muted: #b3b7c3;
+  --faint: #959aa7;
+  --brand: #7f8fe0;
+  --brand-hover: #95a2e8;
+  --on-brand: #0f1013;
+  --brand-soft: #1f2440;
+  --brand-text: #9eabef;
+  --ok-bg: #1d2b10;
+  --ok-ink: #a8db69;
+  --review-bg: #2e2412;
+  --review-ink: #f0b860;
+  --draft-bg: #23252b;
+  --draft-ink: #c3c7d1;
+  --archived-bg: #222326;
+  --archived-ink: #a5a7ad;
+  --danger: #f08a82;
+  --danger-bg: #331b1a;
+  --danger-ink: #f6a39c;
+  --code-bg: #1c1e23;
+  --selection: #2f3768;
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-active: var(--active);
+  --color-line: var(--line);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-on-brand: var(--on-brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-text: var(--brand-text);
+  --color-leaf: var(--leaf);
+  --color-review-signal: var(--review-signal);
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-ink: var(--ok-ink);
+  --color-review-bg: var(--review-bg);
+  --color-review-ink: var(--review-ink);
+  --color-draft-bg: var(--draft-bg);
+  --color-draft-ink: var(--draft-ink);
+  --color-archived-bg: var(--archived-bg);
+  --color-archived-ink: var(--archived-ink);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-ink: var(--danger-ink);
+  --color-code-bg: var(--code-bg);
+  --color-selection: var(--selection);
+}
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* El resto de la app conserva la tipografia del sistema; Inter se aplica con la clase font-sans. */
+  --default-font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --default-mono-font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Logo por tema: el icono cambia el anillo y el hueco interior según el fondo. */
+.logo-oscuro { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-claro { display: none; }
+  :root:not([data-theme="light"]) .logo-oscuro { display: inline; }
+}
+[data-theme="dark"] .logo-claro { display: none; }
+[data-theme="dark"] .logo-oscuro { display: inline; }

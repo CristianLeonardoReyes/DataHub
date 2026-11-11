@@ -123,6 +123,10 @@ Contenido (reemplaza los valores por los que te pasó tu compañero):
 }
 ```
 
+Opcional, para enviar correos reales con AWS SES en local (si no, se guardan en `correos-dev/`):
+`"Correo:Modo": "Ses"`, `"SesEmailSettings:Aws_access_key"` y `"SesEmailSettings:Aws_secret_key"`
+(pídelas igual que las anteriores).
+
 Para comprobarlo: `dotnet user-secrets list --project api/DataGlobal.DataHub.Api` debe listar
 las dos claves. Si Visual Studio se abre con otra cuenta de Windows (por ejemplo, como
 administrador), crea el archivo desde ese menú para que quede en la cuenta que ejecuta la API.

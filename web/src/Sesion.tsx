@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { Navigate, NavLink, Outlet, useNavigate } from 'react-router'
+import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import * as auth from './api/auth'
 import * as apiClientes from './api/clientes'
 import { Alerta, btnSmCls, inputCls } from './ui'
@@ -51,8 +51,9 @@ export function useSesion() {
 
 export function Protegida({ children }: { children: ReactNode }) {
   const { usuario, cargando } = useSesion()
+  const location = useLocation()
   if (cargando) return <p className="p-8 text-zinc-400">Cargando…</p>
-  return usuario ? children : <Navigate to="/login" replace />
+  return usuario ? children : <Navigate to="/login" replace state={{ from: location }} />
 }
 
 export function RequierePermiso({ permiso, children }: { permiso: Permiso; children: ReactNode }) {

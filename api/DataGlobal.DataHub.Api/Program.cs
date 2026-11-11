@@ -30,6 +30,10 @@ builder.Services.AddOptions<JwtOpciones>().Bind(config.GetSection("Jwt"))
     .Validate(o => Encoding.UTF8.GetByteCount(o.Clave) >= 32, "Jwt:Clave debe tener al menos 32 bytes (user-secrets).")
     .ValidateOnStart(); // sin clave la API no arranca, en vez de responder 500 a todo
 builder.Services.Configure<CorreoOpciones>(config.GetSection("Correo"));
+builder.Services.AddOptions<SesEmailSettings>().Bind(config.GetSection("SesEmailSettings"))
+    .Validate(o => config["Correo:Modo"] != "Ses" || (!string.IsNullOrWhiteSpace(o.Region) && !string.IsNullOrWhiteSpace(o.Aws_from_address)),
+        "Con Correo:Modo=Ses, SesEmailSettings:Region y SesEmailSettings:Aws_from_address son obligatorios.")
+    .ValidateOnStart();
 builder.Services.Configure<AppOpciones>(config.GetSection("App"));
 
 // Acceso
@@ -45,7 +49,7 @@ builder.Services.AddSingleton<IEnviadorCorreo>(sp =>
     var o = sp.GetRequiredService<IOptions<CorreoOpciones>>().Value;
     return o.Modo switch
     {
-        "Ses" => new EnviadorCorreoSes(o.Remitente, o.Region),
+        "Ses" => new EnviadorCorreoSes(sp.GetRequiredService<IOptions<SesEmailSettings>>().Value),
         "Archivo" => new EnviadorCorreoArchivo(o.Carpeta ??
             Path.GetFullPath(Path.Combine(sp.GetRequiredService<IWebHostEnvironment>().ContentRootPath, "..", "..", "correos-dev"))),
         _ => throw new InvalidOperationException("Correo:Modo debe ser Archivo o Ses.")

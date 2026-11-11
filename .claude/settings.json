@@ -1,4 +1,32 @@
 {
   "model": "opus",
-  "effortLevel": "medium"
+  "effortLevel": "medium",
+  "includeCoAuthoredBy": false,
+  "attribution": { "commit": "", "pr": "" },
+  "permissions": {
+    "ask": [
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.pfx)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Write(**/.env)",
+      "Write(**/.env.*)",
+      "Read(**/secrets.json)",
+      "Read(**/appsettings.Production.json)",
+      "Edit(**/appsettings.Production.json)",
+      "Write(**/appsettings.Production.json)"
+    ]
+  }
 }

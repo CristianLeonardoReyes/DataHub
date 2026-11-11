@@ -7,12 +7,17 @@ export type ProblemDetails = S['ProblemDetails']
 export type Resultado<T> = { ok: true; datos: T } | { ok: false; status: number; problema: ProblemDetails }
 
 async function enviar<T>(metodo: 'GET' | 'POST', ruta: string, cuerpo?: unknown): Promise<Resultado<T>> {
-  const r = await fetch(`/api/v1/auth${ruta}`, {
-    method: metodo,
-    credentials: 'same-origin',
-    headers: cuerpo === undefined ? undefined : { 'Content-Type': 'application/json' },
-    body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
-  })
+  let r: Response
+  try {
+    r = await fetch(`/api/v1/auth${ruta}`, {
+      method: metodo,
+      credentials: 'same-origin',
+      headers: cuerpo === undefined ? undefined : { 'Content-Type': 'application/json' },
+      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+    })
+  } catch {
+    return { ok: false, status: 0, problema: { status: 0 } }
+  }
   const texto = await r.text()
   let json: unknown
   try {
