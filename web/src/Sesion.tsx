@@ -1,26 +1,29 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import * as auth from './api/auth'
 import * as apiClientes from './api/clientes'
-import { Building2, Home, LoaderCircle, LogOut, Menu, Users, X } from 'lucide-react'
-import { Alerta, Avatar, btnSmCls, inputCls } from './ui'
+import { alCambiarExpira, alNoAutorizado } from './api/http'
+import { Building2, Home, LoaderCircle, LogIn, LogOut, Menu, Moon, Sun, TriangleAlert, Users, X } from 'lucide-react'
+import { Alerta, Avatar, Boton, btnCls, btnSmCls, inputCls } from './ui'
 
 export type Permiso =
   | 'clientesGestionar' | 'usuariosGestionar' | 'workspacesAsignarUsuarios' | 'workspacesGestionar'
   | 'espaciosColeccionesGestionar' | 'paginasEditar' | 'paginasEliminar' | 'metadataEditar'
   | 'paginasAprobar' | 'archivosGestionar' | 'archivosEliminar' | 'buscar' | 'exportarMarkdown'
 
-type Ctx = { usuario: auth.UsuarioActual | null; cargando: boolean; puede: (p: Permiso) => boolean; recargar: () => Promise<void>; versionClientes: number; clientesCambiaron: () => Promise<void>; salir: () => Promise<void> }
+type Ctx = { usuario: auth.UsuarioActual | null; cargando: boolean; sesionExpirada: boolean; sesionTerminada: () => void; puede: (p: Permiso) => boolean; recargar: () => Promise<void>; versionClientes: number; clientesCambiaron: () => Promise<void>; salir: () => Promise<void> }
 const SesionCtx = createContext<Ctx | null>(null)
 
 export function SesionProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<auth.UsuarioActual | null>(null)
   const [cargando, setCargando] = useState(true)
+  const [sesionExpirada, setSesionExpirada] = useState(false)
   const [versionClientes, setVersion] = useState(0)
 
   const recargar = useCallback(async () => {
     const r = await auth.me()
     setUsuario(r.ok ? r.datos : null)
+    if (r.ok) setSesionExpirada(false)
     setCargando(false)
   }, [])
   // Tras crear/editar/(des)activar un cliente: refresca el selector del Super admin y la sesión
@@ -31,6 +34,12 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   }, [recargar])
   const salir = useCallback(async () => {
     await auth.logout()
+    setSesionExpirada(false)
+    setUsuario(null)
+  }, [])
+  // Tras pulsar "Iniciar sesión" en el modal: suelta al usuario para que el login no lo devuelva.
+  const sesionTerminada = useCallback(() => {
+    setSesionExpirada(false)
     setUsuario(null)
   }, [])
 
@@ -41,7 +50,31 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     void recargar()
   }, [recargar])
 
-  return <SesionCtx.Provider value={{ usuario, cargando, puede, recargar, versionClientes, clientesCambiaron, salir }}>{children}</SesionCtx.Provider>
+  // Un 401 en una llamada autenticada: la cookie ya no vale. Varios 401 seguidos dejan el mismo estado.
+  useEffect(
+    () => alNoAutorizado(() => {
+      setSesionExpirada(true)
+    }),
+    [],
+  )
+
+  // Cada respuesta trae el vencimiento vigente; si la API renovó, se mueve el temporizador.
+  useEffect(
+    () => alCambiarExpira((exp) =>
+      setUsuario((u) => (u && new Date(u.sesionExpira).getTime() !== new Date(exp).getTime() ? { ...u, sesionExpira: exp } : u))),
+    [],
+  )
+
+  // Vencimiento de la sesión; se reprograma cuando la API la renueva.
+  const expira = usuario?.sesionExpira
+  useEffect(() => {
+    if (!expira) return
+    const ms = Math.min(Math.max(new Date(expira).getTime() - Date.now(), 0), 2 ** 31 - 1)
+    const t = setTimeout(() => setSesionExpirada(true), ms)
+    return () => clearTimeout(t)
+  }, [expira])
+
+  return <SesionCtx.Provider value={{ usuario, cargando, sesionExpirada, sesionTerminada, puede, recargar, versionClientes, clientesCambiaron, salir }}>{children}</SesionCtx.Provider>
 }
 
 export function useSesion() {
@@ -60,7 +93,69 @@ export function Protegida({ children }: { children: ReactNode }) {
         Cargando…
       </p>
     )
-  return usuario ? children : <Navigate to="/login" replace state={{ from: location }} />
+  if (usuario) return <><ContenidoSesion>{children}</ContenidoSesion><ModalSesionExpirada /></>
+  return <Navigate to="/login" replace state={{ from: location }} />
+}
+
+function ContenidoSesion({ children }: { children: ReactNode }) {
+  const { sesionExpirada } = useSesion()
+  return <div inert={sesionExpirada}>{children}</div>
+}
+
+function ModalSesionExpirada() {
+  const { sesionExpirada, sesionTerminada } = useSesion()
+  const location = useLocation()
+  const nav = useNavigate()
+  const boton = useRef<HTMLButtonElement>(null)
+
+  const ir = useCallback(() => {
+    nav('/login', { replace: true, state: { from: { pathname: location.pathname, search: location.search } } })
+    sesionTerminada()
+  }, [nav, location.pathname, location.search, sesionTerminada])
+
+  useEffect(() => {
+    if (!sesionExpirada) return
+    boton.current?.focus()
+    // El botón es lo único enfocable: Tab no puede sacar el foco del diálogo.
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') ir()
+      else if (e.key === 'Tab') {
+        e.preventDefault()
+        boton.current?.focus()
+      }
+    }
+    document.addEventListener('keydown', tecla)
+    return () => document.removeEventListener('keydown', tecla)
+  }, [sesionExpirada, ir])
+
+  if (!sesionExpirada) return null
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-4 pt-[12vh] [animation:fade_140ms_ease-out]">
+      <div role="dialog" aria-modal="true" aria-labelledby="sesion-exp-t" aria-describedby="sesion-exp-d"
+        className="w-full max-w-[480px] rounded-xl border border-line bg-surface font-sans text-ink shadow-2xl [animation:rise_180ms_cubic-bezier(.16,1,.3,1)]">
+        <div className="flex items-center justify-center gap-2 border-b border-rule px-5 py-4">
+          <img src="/logo-datahub.svg" alt="" className="logo-claro size-6" />
+          <img src="/logo-datahub-oscuro.svg" alt="" className="logo-oscuro size-6" />
+          <span className="text-[15px] font-semibold tracking-[-0.01em]">DataHub</span>
+        </div>
+        <div className="flex flex-col items-center gap-3 px-5 pt-6 pb-5 text-center">
+          <span aria-hidden className="flex size-11 items-center justify-center rounded-full bg-review-bg text-review-ink">
+            <TriangleAlert className="size-5" />
+          </span>
+          <h2 id="sesion-exp-t" className="text-[17px] font-semibold">Tu sesión expiró</h2>
+          <p id="sesion-exp-d" className="text-sm text-muted">
+            Por seguridad, cerramos tu sesión. Inicia sesión de nuevo para continuar.
+          </p>
+        </div>
+        <div className="px-5 pb-5">
+          <button ref={boton} type="button" className={btnCls} onClick={ir}>
+            <LogIn aria-hidden className="size-4" />
+            Iniciar sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function RequierePermiso({ permiso, children }: { permiso: Permiso; children: ReactNode }) {
@@ -99,7 +194,7 @@ function SelectorCliente() {
       <label htmlFor="operar-en" className="block text-xs text-muted">Operar en:</label>
       <div className="relative">
         <Building2 aria-hidden className="pointer-events-none absolute top-3 left-3 size-4 text-faint" />
-        <select id="operar-en" className={`${inputCls} pl-9`} disabled={enviando}
+        <select id="operar-en" className={`${inputCls} pl-9`} disabled={enviando} aria-busy={enviando}
           value={usuario?.cliente?.guid ?? ''} onChange={(e) => void elegir(e.target.value)}>
           <option value="">Ninguno (vista global)</option>
           {activos.map((c) => <option key={c.guid} value={c.guid}>{c.nombre}</option>)}
@@ -138,10 +233,28 @@ function Logo() {
   )
 }
 
+/** Alterna claro/oscuro y recuerda la preferencia en este navegador (index.html la aplica antes de pintar). */
+function BotonTema() {
+  const [oscuro, setOscuro] = useState(() => document.documentElement.dataset.theme === 'dark') // por defecto claro
+  const cambiar = () => {
+    const tema = oscuro ? 'light' : 'dark'
+    document.documentElement.dataset.theme = tema
+    try { localStorage.setItem('datahub-tema', tema) } catch { /* sin almacenamiento: dura hasta recargar */ }
+    setOscuro(!oscuro)
+  }
+  return (
+    <button type="button" className={`${btnSmCls} px-2`} onClick={cambiar}
+      aria-label={oscuro ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'} title={oscuro ? 'Tema claro' : 'Tema oscuro'}>
+      {oscuro ? <Sun aria-hidden className="size-4" /> : <Moon aria-hidden className="size-4" />}
+    </button>
+  )
+}
+
 export function Layout() {
   const { usuario, puede, salir } = useSesion()
   const nav = useNavigate()
   const [abierto, setAbierto] = useState(false)
+  const [saliendo, setSaliendo] = useState(false)
   if (!usuario) return null
   const verUsuarios = puede('usuariosGestionar') && (usuario.perfil !== 'super_admin' || !!usuario.cliente)
   const contexto = usuario.perfil === 'super_admin' ? 'DataGlobal · sin cliente' : usuario.cliente?.nombre
@@ -150,11 +263,14 @@ export function Layout() {
       <aside className="border-b border-line bg-ground lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[248px] lg:flex-col lg:border-r lg:border-b-0">
         <div className="flex h-14 items-center justify-between px-4">
           <Logo />
-          <button type="button" className={`${btnSmCls} lg:hidden`} aria-expanded={abierto} aria-controls="menu"
-            onClick={() => setAbierto(!abierto)}>
-            {abierto ? <X aria-hidden className="size-4" /> : <Menu aria-hidden className="size-4" />}
-            Menú
-          </button>
+          <div className="flex items-center gap-2">
+            <BotonTema />
+            <button type="button" className={`${btnSmCls} lg:hidden`} aria-expanded={abierto} aria-controls="menu"
+              onClick={() => setAbierto(!abierto)}>
+              {abierto ? <X aria-hidden className="size-4" /> : <Menu aria-hidden className="size-4" />}
+              Menú
+            </button>
+          </div>
         </div>
         <div id="menu" className={`${abierto ? 'flex' : 'hidden'} flex-col gap-5 px-3 pb-4 lg:flex lg:min-h-0 lg:flex-1`}>
           {usuario.perfil === 'super_admin' && <SelectorCliente />}
@@ -171,10 +287,11 @@ export function Layout() {
                 <p className="truncate text-xs text-muted">{PERFILES[usuario.perfil]}{contexto ? ` · ${contexto}` : ''}</p>
               </div>
             </div>
-            <button type="button" className={`${btnSmCls} w-full`} onClick={async () => { await salir(); nav('/login') }}>
+            <Boton type="button" className={`${btnSmCls} w-full`} cargando={saliendo} textoCarga="Cerrando…"
+              onClick={async () => { setSaliendo(true); await salir(); nav('/login') }}>
               <LogOut aria-hidden className="size-4" />
               Cerrar sesión
-            </button>
+            </Boton>
           </div>
         </div>
       </aside>

@@ -1,34 +1,14 @@
 import type { components } from './esquema'
+import { pedir, type Resultado } from './http'
 
 type S = components['schemas']
 export type UsuarioActual = S['UsuarioActualDto']
 export type ProblemDetails = S['ProblemDetails']
 
-export type Resultado<T> = { ok: true; datos: T } | { ok: false; status: number; problema: ProblemDetails }
+export type { Resultado }
 
-async function enviar<T>(metodo: 'GET' | 'POST', ruta: string, cuerpo?: unknown): Promise<Resultado<T>> {
-  let r: Response
-  try {
-    r = await fetch(`/api/v1/auth${ruta}`, {
-      method: metodo,
-      credentials: 'same-origin',
-      headers: cuerpo === undefined ? undefined : { 'Content-Type': 'application/json' },
-      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
-    })
-  } catch {
-    return { ok: false, status: 0, problema: { status: 0 } }
-  }
-  const texto = await r.text()
-  let json: unknown
-  try {
-    json = texto ? JSON.parse(texto) : undefined
-  } catch {
-    json = undefined
-  }
-  return r.ok
-    ? { ok: true, datos: json as T }
-    : { ok: false, status: r.status, problema: (json ?? { status: r.status }) as ProblemDetails }
-}
+const enviar = <T>(metodo: 'GET' | 'POST', ruta: string, cuerpo?: unknown) =>
+  pedir<T>(metodo, `/auth${ruta}`, cuerpo)
 
 export const login = (b: S['LoginRequest']) => enviar<void>('POST', '/login', b)
 export const logout = () => enviar<void>('POST', '/logout')

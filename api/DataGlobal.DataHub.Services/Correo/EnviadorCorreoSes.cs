@@ -20,7 +20,10 @@ public class EnviadorCorreoSes(SesEmailSettings opciones) : IEnviadorCorreo
         foreach (var bcc in o.Aws_bcc_addresses.Where(b => !string.IsNullOrWhiteSpace(b)))
             mensaje.Bcc.Add(MailboxAddress.Parse(bcc));
         mensaje.Subject = asunto;
-        mensaje.Body = new BodyBuilder { HtmlBody = html }.ToMessageBody();
+        var cuerpo = new BodyBuilder { HtmlBody = html };
+        var logo = cuerpo.LinkedResources.Add("logo-datahub.png", PlantillasCorreo.LogoPng, new ContentType("image", "png"));
+        logo.ContentId = PlantillasCorreo.LogoCid;
+        mensaje.Body = cuerpo.ToMessageBody();
         return mensaje;
     }
 

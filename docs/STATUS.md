@@ -4,86 +4,59 @@ tocó. La historia la guarda git._
 
 ## Común
 
-- **Hecho:** paso 1 (base) y paso 2 (Acceso, módulo 1) mergeados en `develop`.
-- **Paso 3:** 3a (PR #4) y 3b (PR #5) mergeados. **3c terminado** en
-  `feature/clientes-usuarios-paso-3c` (api 90/90, web 23/23, QA completo de pasos 1–3 OK).
-  **PUNTO DE PRUEBA:** el usuario ejecuta `2026-10-15_04_cliente_operando.sql` y prueba todo de
-  punta a punta; luego commit/PR del 3c y paso 4 (módulo 4, incluye RF-USR-03).
-- **Decisiones 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta botones, menús y rutas
-  según `permisos`; crear cliente pide solo `correoAdmin`; `PUT` con `activo`; cliente inactivo
-  corta login y sesiones de todos sus usuarios.
-- **Arranque local y pruebas:** ver README "Guía de arranque". API con perfil `http` (si no, no
-  carga user-secrets y no arranca) en `:5080`; Vite `:5173` con proxy. `dotnet test` requiere
-  Docker. Solo local: sin `deploy.yml` (objetivo final PRD §7.6).
+- **Hecho en `develop`:** pasos 1–3 (base, Acceso, Clientes/Usuarios/cliente operando) y rediseño de `web/`.
+- **En curso:** `feat/DAT-161-cierre-del-acceso-y-la-sesion-correo` cerrada (2026-11-11): SES,
+  sesión deslizante, modal de sesión vencida, tema, contraseña segura, correos con marca. api
+  101/101, web 38/38. Siguiente: commit/PR y paso 4 (módulo 4, incluye RF-USR-03).
+- **Reglas 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta según `permisos`.
+- **Local:** README "Guía de arranque". API perfil `http` en `:5080`; Vite `:5173` con proxy.
+  `dotnet test` requiere Docker; si la API bloquea `bin/`, usar `-p:OutDir=…/Tests/bin/alt/`.
 
 ## Backend (api/ + db/)
 
-- **BD del servidor** (`23.82.136.106:3306`, MySQL 8.0.36, base `DataHub`; 2026-11-11): las 7
-  migraciones aplicadas. Cargada la semilla `db/Semillas/dev_datos_prueba.sql` (3 clientes
-  `prueba-*`, 9 usuarios `@prueba.test`); reversión al final del script. `developer1` tiene
-  privilegios globales: conviene limitarlo a `DataHub.*`.
-
-- 5 capas; `BaseRepository` solo SP; ProblemDetails; `/health`; SPA con fallback (`/api/*` → 404).
-- Convenciones: esquema español PascalCase; `Id` interno, `Guid` público (`System.Guid`);
-  `FechaActualizacion = UTC_TIMESTAMP()` en cada UPDATE; SP re-ejecutables y con parámetros de
-  texto `COLLATE utf8mb4_0900_ai_ci` (Testcontainers arranca con `unicode_ci` para detectarlo).
-- **Acceso:** `/api/v1/auth` (login, logout, me, aceptar-invitacion, olvide/restablecer). JWT 60
-  min en cookie `datahub_sesion`; cada petición valida usuario y cliente activos; bloqueo 5/15
-  min; rate limit por IP; correo `Archivo` (`correos-dev/`, por defecto en Development) o `Ses`
-  (`SesEmailSettings`, estándar de la empresa: us-east-2, `no-responder@dataglobal.co`, Bcc vacío;
-  llaves solo en user-secrets/App Settings). SES implementado, **sin probar contra AWS**.
-- **Permisos:** `MatrizPermisos` (Common/Enums/Permisos.cs, 13 acciones) +
-  `Autorizacion.Can(usuario, accion, clienteIdRecurso)`; `/me` → `permisos` y `perfil` (enum).
-- **Usuarios (3b):** `/api/v1/usuarios` GET, POST `{correo, perfil}`, POST
-  `{guid}/reenviar-invitacion`, PUT `{perfil, activo}`; cliente = `UsuarioActual.ClienteId`
-  (Super admin sin cliente → 400 hasta 3c). RF-USR-04 en `usu_editarPerfilEstado` con FOR UPDATE.
-- **Cliente operando (3c):** `POST /auth/cliente-operando {clienteGuid|null}` solo Super admin,
-  solo clientes activos; re-emite la cookie con la misma expiración. `OnTokenValidated`: Super
-  admin con claim `clienteId` → `cli_consultarOperando`; inactivo/inexistente → sin cliente
-  (no 401). Otros perfiles: cliente siempre de BD.
-- **Clientes:** `/api/v1/clientes` GET, GET {guid}, POST (cliente + Admin invitado + token en un
-  SP, luego correo), PUT `{nombre, slug, activo}`. 409 con extensión `campo`.
-- **SP:** estándar `<prefijo>_<verbo><Calificador>` (CLAUDE.md). BD vigente (ejecutado por el
-  usuario hasta `2026-10-15_03`): `db/Tablas/` (Cliente, Usuario, UsuarioToken) y
-  `db/Procedimientos/` (16: `usu_*`, `uto_*`, `cli_*`). Semilla: `db/Semillas/dev_super_admin.sql`.
-- user-secrets: `ConnectionStrings:DataHub`, `Jwt:Clave`. Paquetes: Dapper, MySqlConnector,
-  OpenApi, JwtBearer, AWSSDK.SimpleEmailV2, MimeKit, Pkcs 10.0.13 (parche), xunit.v3,
-  Mvc.Testing, Testcontainers.MySql.
-- Deuda: `UseForwardedHeaders` antes de desplegar; carrera de slug duplicado da 500
-  (improbable, `ponytail:` en el SP); sin aviso si falla el correo al crear cliente (se puede reenviar); invitar a
-  cliente inactivo queda impedido por el 3c.
+- **BD del servidor** (MySQL 8.0.36, base `DataHub`): 7 migraciones aplicadas y semilla
+  `dev_datos_prueba.sql`. `developer1` tiene privilegios globales: limitar a `DataHub.*`.
+- 5 capas; solo SP (`<prefijo>_<verbo><Calificador>`, collation 0900); ProblemDetails; `/health`.
+- **Acceso:** JWT en cookie `datahub_sesion`, usuario y cliente activos validados en cada petición,
+  bloqueo 5/15 min, rate limit. **Sesión deslizante:** claims firmados `max`/`rec`; renueva al pasar
+  media ventana (no en logout ni cliente-operando); 60 min inactividad, máx. 8 h; `recordarme` 7
+  días fijos con cookie persistente; `Jwt:MinutosInactividad`/`HorasMaximas`/`DiasRecordarme`.
+  `/me` y el header `X-Sesion-Expira` dan el vencimiento vigente.
+- **Contraseña** (RF-ACC-07): `ValidadorContrasena` — 10+ con mayúscula, minúscula, número y símbolo.
+- **Correo:** `Archivo` (`correos-dev/`) o `Ses` (`SesEmailSettings`, probado contra AWS). Plantilla
+  única en `PlantillasCorreo` (logo PNG inline `cid:logo-datahub`; data URI en modo Archivo), sin
+  mencionar vencimientos. Falta ver el nuevo diseño en Gmail/Outlook con un envío real.
+- **Permisos:** `MatrizPermisos` + `Autorizacion.Can`. Usuarios, Clientes y cliente operando (3a–3c).
+- **Deuda:** `UseForwardedHeaders` antes de desplegar; carrera de slug duplicado da 500
+  (`ponytail:` en el SP); sin aviso si falla el correo al crear cliente.
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, lucide-react, Vitest + Testing
-  Library (28 pruebas). Tipos: `npm run tipos` → `src/api/esquema.d.ts` (versionado).
-- **Sistema de diseño único:** `docs/diseno/DESIGN.md`. Tokens claro/oscuro en `src/index.css`
-  (`bg-ground`, `text-ink`, `bg-brand`…; oscuro por `prefers-color-scheme` o `[data-theme]`).
-  Fuentes Inter y Geist Mono por Google Fonts. Foco visible global.
-- **Acceso rediseñado** (`src/acceso-ui.tsx` + `src/pantallas.tsx`): login, activar cuenta,
-  olvidé y restablecer con el diseño; login redirige si hay sesión, vuelve a la ruta pedida
-  (`state.from`, solo internas) y avisa si la API no responde. Logo en `public/logo-datahub.svg`.
-- **Rediseño completo de `web/`** (`feature/web-rediseno`, 2026-11-11): `ui.tsx` con tokens
-  (botones, campos, avisos, `Encabezado`, `Insignia`, `Avatar`); `Layout` con barra lateral de
-  248px, logo, "Operar en" y usuario abajo; `inicio.tsx` con resumen real de clientes/usuarios
-  según permisos, "Lo que puede hacer tu perfil" y módulos que vienen; Clientes y Usuarios en
-  paneles con insignias de estado y alcance del perfil al invitar. Sin cambios de lógica ni de
-  contrato; 28/28 pruebas. `prototipo/` retirado (queda en git, PR #9).
-- Lint: 2 warnings de estilo en `Sesion.tsx`.
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (38 pruebas), oxlint (2
+  warnings preexistentes en `Sesion.tsx`). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
+- **Diseño único:** `docs/diseno/DESIGN.md`; tokens claro/oscuro en `index.css`.
+- **Tema:** botón sol/luna en la cabecera; preferencia en `localStorage` `datahub-tema`, aplicada en
+  `index.html` antes de pintar; por defecto claro.
+- **Sesión:** casilla "Recordarme en este equipo"; `http.ts` reprograma el modal con
+  `X-Sesion-Expira`; al vencer o ante un 401, modal "Tu sesión expiró" → login → misma pantalla.
+- **Contraseña:** lista de requisitos en vivo (vertical) que se marca y se oculta al cumplir.
+- **Botones:** cursor de mano global; `Boton` con `cargando`/`textoCarga` en formularios, acciones
+  por fila y Cerrar sesión. "Invitar usuario" solo en el módulo Usuarios.
 
 ## Decisiones vigentes
 
-- PRD §12: JWT 1 h; `Id` + `Guid`; esquema y API en español; SP `usu_consultarX`; collation `utf8mb4_0900_ai_ci`;
-  correo archivo/SES; JwtBearer; react-router, openapi-typescript, Vitest.
+- PRD §12: sesión deslizante 60 min / máx. 8 h, "Recordarme" 7 días; plantilla única de correo;
+  `Id` + `Guid`; esquema y API en español; collation 0900; JwtBearer; react-router, openapi-typescript, Vitest.
 
 ## Pendientes conocidos
 
-- `CODEOWNERS` (usuario GitHub del 2.º integrante) y proteger `main`/`develop` (usuario).
-- RF-USR-03 (asignar workspaces) se hace en el módulo 4 (decidido 2026-10-15).
-- PRD §12 pendiente: tamaño máximo de archivo (módulo 7; el prototipo retirado usaba 25 MB provisional).
-- Definir la carpeta de OneDrive de la empresa para los valores de entorno de local y pruebas.
+- `CODEOWNERS` y proteger `main`/`develop` (usuario). RF-USR-03 en el módulo 4.
+- PRD §12: tamaño máximo de archivo (módulo 7).
+- Producción: `Jwt__Clave` propia al crear la Web App.
+- Limpiar metadatos "generado por IA" (C2PA/Recraft) de `docs/diseno/logo/*.svg` — pendiente de decisión.
+- Definir la carpeta de OneDrive de la empresa para los valores de entorno.
 
 ## Variables por subir a OneDrive
 
-- `SesEmailSettings:Aws_access_key` y `SesEmailSettings:Aws_secret_key` — user-secrets de `api/DataGlobal.DataHub.Api` — credenciales IAM de AWS SES (en Azure: `SesEmailSettings__Aws_access_key` / `__Aws_secret_key`). Carpeta de OneDrive por definir.
-- Ya existentes en user-secrets: `ConnectionStrings:DataHub`, `Jwt:Clave`.
+- `SesEmailSettings:Aws_access_key` / `Aws_secret_key` (user-secrets de la Api; en Azure `SesEmailSettings__…`).
+- Ya existentes: `ConnectionStrings:DataHub`, `Jwt:Clave`.

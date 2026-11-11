@@ -113,6 +113,19 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
                 actual.Correo = u.Correo;
                 actual.Nombre = u.Nombre;
                 actual.Perfil = u.Perfil;
+
+                // Sesión deslizante: renueva la cookie con el uso y publica el vencimiento vigente.
+                // No en logout ni en cliente-operando (esa ruta re-emite su propia cookie; evita dos Set-Cookie).
+                var expira = DateTimeOffset.FromUnixTimeSeconds(long.Parse(ctx.Principal!.FindFirstValue("exp")!)).UtcDateTime;
+                if (!ctx.Request.Path.StartsWithSegments("/api/v1/auth/logout")
+                    && !ctx.Request.Path.StartsWithSegments("/api/v1/auth/cliente-operando")
+                    && sp.GetRequiredService<IAuthService>().RenovarSiCorresponde(ctx.Principal!) is { } nueva)
+                {
+                    ctx.Response.Cookies.Append(AuthController.Cookie, nueva.Token, AuthController.OpcionesCookie(nueva));
+                    expira = nueva.Expira;
+                }
+                actual.SesionExpira = expira;
+                ctx.Response.Headers["X-Sesion-Expira"] = DateTime.SpecifyKind(expira, DateTimeKind.Utc).ToString("o");
             }
         };
     });

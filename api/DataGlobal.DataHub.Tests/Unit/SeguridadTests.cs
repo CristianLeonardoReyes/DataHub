@@ -5,11 +5,16 @@ namespace DataGlobal.DataHub.Tests.Unit;
 public class SeguridadTests
 {
     [Fact]
-    public void Contrasena_de_9_falla_y_de_10_pasa()
+    public void Contrasena_exige_10_caracteres_mayuscula_minuscula_numero_y_simbolo()
     {
-        Assert.NotNull(ValidadorContrasena.Validar(new string('a', 9)));
-        Assert.Null(ValidadorContrasena.Validar(new string('a', 10)));
-        Assert.NotNull(ValidadorContrasena.Validar(new string('a', 129)));
+        Assert.Null(ValidadorContrasena.Validar("Clave@2026"));
+        Assert.NotNull(ValidadorContrasena.Validar("Cla@2026")); // corta
+        Assert.NotNull(ValidadorContrasena.Validar("clave@2026x")); // sin mayúscula
+        Assert.NotNull(ValidadorContrasena.Validar("CLAVE@2026X")); // sin minúscula
+        Assert.NotNull(ValidadorContrasena.Validar("Clave@Segura")); // sin número
+        Assert.NotNull(ValidadorContrasena.Validar("ClaveSegura123")); // sin símbolo
+        Assert.NotNull(ValidadorContrasena.Validar("Clave 2026ab")); // el espacio no cuenta como símbolo
+        Assert.NotNull(ValidadorContrasena.Validar("Aa1@" + new string('a', 125)));
     }
 
     [Fact]

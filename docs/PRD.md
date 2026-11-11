@@ -97,11 +97,11 @@ IA de cualquier tipo, tickets, gestión de tareas, notificaciones, chat, reaccio
 
 - **RF-ACC-01.** No existe registro libre. Todo usuario entra por invitación.
 - **RF-ACC-02.** La invitación envía un correo con un enlace de un solo uso, válido por 72 h. Al abrirlo, el usuario define su nombre y contraseña y queda **Activo**.
-- **RF-ACC-03.** Login con email y contraseña. Emite un JWT con `usuarioId`, `clienteId` (Guid; vacío para el Super admin) y `perfil` dentro de una cookie `HttpOnly`; el frontend nunca lo lee. Los datos del usuario los obtiene de `GET /api/v1/auth/me`. El logout borra la cookie.
+- **RF-ACC-03.** Login con email y contraseña. Emite un JWT con `usuarioId`, `clienteId` (Guid; vacío para el Super admin) y `perfil` dentro de una cookie `HttpOnly`; el frontend nunca lo lee. Los datos del usuario los obtiene de `GET /api/v1/auth/me`. El logout borra la cookie. La sesión se renueva mientras se usa (vence tras 60 min de inactividad, máximo 8 h); la opción "Recordarme" la mantiene hasta 7 días.
 - **RF-ACC-04.** Recuperación de contraseña: enlace de un solo uso, válido por 1 h. La respuesta es la misma exista o no el correo, para no revelar qué cuentas existen.
 - **RF-ACC-05.** Tras 5 intentos fallidos, la cuenta se bloquea 15 minutos.
 - **RF-ACC-06.** Un usuario Invitado o Inactivo no puede iniciar sesión. Cada petición valida que el usuario siga Activo, de modo que desactivar a alguien corta su acceso de inmediato.
-- **RF-ACC-07.** Contraseña de al menos 10 caracteres.
+- **RF-ACC-07.** Contraseña de al menos 10 caracteres, con al menos una mayúscula, una minúscula, un número y un símbolo (p. ej. `@`); el espacio no cuenta como símbolo. Aplica al activar la cuenta y al restablecer; las contraseñas ya creadas siguen sirviendo para entrar (2026-11-11).
 
 **Estados del usuario:** `invitado` → `activo` ⇄ `inactivo`.
 
@@ -417,7 +417,8 @@ Una tarea se cierra (funciona, tiene prueba y está registrada en STATUS) antes 
 | OpenAPI nativo de .NET y `openapi-typescript` | Contrato verificable entre las dos personas. |
 | Una sola Web App de Azure; la API sirve el SPA | Mismo dominio: sin CORS, cookie segura, un solo recurso. |
 | JWT en cookie `HttpOnly` + `Secure` + `SameSite=Strict` | No queda expuesto a XSS. Es posible porque front y API comparten dominio. |
-| Sesión (JWT) de 1 hora | Decidido por el responsable (2026-10-08). |
+| Todo correo usa la plantilla única de `PlantillasCorreo` (logo inline, colores de DESIGN.md, pie DataHub · DataGlobal) | Identidad consistente. Decidido por el responsable (2026-11-11). |
+| Sesión deslizante: vence tras 60 min de inactividad, máximo 8 h desde el login; "Recordarme" la extiende a 7 días (cookie persistente). Reemplaza la sesión fija de 1 h (2026-10-08) | Comodidad sin perder seguridad; el máximo va firmado en el token. Decidido por el responsable (2026-11-11). |
 | Cada tabla con `Id` BIGINT (PK y FKs, interno) y `Guid` CHAR(36) único (lo único que expone la API) | Joins compactos y URLs no adivinables. Decidido por el responsable (2026-10-08). |
 | Esquema de BD en español, PascalCase singular (`Cliente`, `Usuario`, `ClienteId`, `FechaCreacion`) | Estándar de la empresa. Decidido por el responsable (2026-10-13). |
 | Rutas, DTOs, claims y procedimientos en español (`/auth/aceptar-invitacion`, `{ correo, contrasena }`, `usu_consultarPorCorreo`) | Coherencia con el esquema. Decidido por el responsable (2026-10-14). |

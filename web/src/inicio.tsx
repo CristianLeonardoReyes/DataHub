@@ -1,10 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowRight, Building2, Check, Lock, UserPlus, Users } from 'lucide-react'
+import { ArrowRight, Building2, Check, Lock, Users } from 'lucide-react'
 import * as apiClientes from './api/clientes'
 import * as apiUsuarios from './api/usuarios'
 import { useSesion, type Permiso } from './Sesion'
-import { btnCls, Encabezado, panelCls } from './ui'
+import { Encabezado, panelCls } from './ui'
 
 const PERFIL: Record<string, string> = {
   super_admin: 'Super admin',
@@ -95,12 +95,6 @@ export function Inicio() {
       <Encabezado
         titulo={`Hola, ${usuario.nombre}`}
         linea={<>{PERFIL[usuario.perfil]}{contexto ? ` · ${contexto}` : ''}</>}
-        acciones={verUsuarios && (
-          <Link to="/usuarios/nuevo" className={`${btnCls} w-auto`}>
-            <UserPlus aria-hidden className="size-4" />
-            Invitar usuario
-          </Link>
-        )}
       />
       <p className="-mt-3 mb-8 text-sm text-muted">Bienvenido a Data Hub.</p>
 

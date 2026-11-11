@@ -27,7 +27,7 @@ public class AuthController(IAuthService auth, UsuarioActual actual) : Controlle
         if (sesion is null)
             return Problem(statusCode: StatusCodes.Status401Unauthorized, detail: "Correo o contraseña incorrectos.");
 
-        Response.Cookies.Append(Cookie, sesion.Token, OpcionesCookie(new DateTimeOffset(DateTime.SpecifyKind(sesion.Expira, DateTimeKind.Utc))));
+        Response.Cookies.Append(Cookie, sesion.Token, OpcionesCookie(sesion));
         return NoContent();
     }
 
@@ -36,7 +36,7 @@ public class AuthController(IAuthService auth, UsuarioActual actual) : Controlle
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete(Cookie, OpcionesCookie(null));
+        Response.Cookies.Delete(Cookie, OpcionesCookie());
         return NoContent();
     }
 
@@ -44,10 +44,13 @@ public class AuthController(IAuthService auth, UsuarioActual actual) : Controlle
     [HttpGet("me")]
     [ProducesResponseType<UsuarioActualDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<UsuarioActualDto> Me() =>
-        new UsuarioActualDto(actual.Guid, actual.Nombre, actual.Correo, MatrizPermisos.ParsearPerfil(actual.Perfil),
+    public ActionResult<UsuarioActualDto> Me()
+    {
+        return new UsuarioActualDto(actual.Guid, actual.Nombre, actual.Correo, MatrizPermisos.ParsearPerfil(actual.Perfil),
             actual.ClienteGuid is { } g ? new ClienteResumenDto(g, actual.ClienteNombre ?? "") : null,
-            [.. MatrizPermisos.De(MatrizPermisos.ParsearPerfil(actual.Perfil)).Select(MatrizPermisos.Nombre)]);
+            [.. MatrizPermisos.De(MatrizPermisos.ParsearPerfil(actual.Perfil)).Select(MatrizPermisos.Nombre)],
+            actual.SesionExpira);
+    }
 
     /// <summary>Solo Super admin: elige el cliente activo en el que opera (null = ninguno). No alarga la sesión.</summary>
     [HttpPost("cliente-operando")]
@@ -57,10 +60,8 @@ public class AuthController(IAuthService auth, UsuarioActual actual) : Controlle
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ClienteOperando(ClienteOperandoRequest solicitud)
     {
-        if (!long.TryParse(User.FindFirstValue("exp"), out var exp)) return Unauthorized();
-        var expira = DateTimeOffset.FromUnixTimeSeconds(exp).UtcDateTime;
-        var sesion = await auth.CambiarClienteOperandoAsync(solicitud.ClienteGuid, expira);
-        Response.Cookies.Append(Cookie, sesion.Token, OpcionesCookie(new DateTimeOffset(DateTime.SpecifyKind(sesion.Expira, DateTimeKind.Utc))));
+        var sesion = await auth.CambiarClienteOperandoAsync(solicitud.ClienteGuid, actual.SesionExpira, User);
+        Response.Cookies.Append(Cookie, sesion.Token, OpcionesCookie(sesion));
         return NoContent();
     }
 
@@ -97,7 +98,11 @@ public class AuthController(IAuthService auth, UsuarioActual actual) : Controlle
         return NoContent();
     }
 
-    private static CookieOptions OpcionesCookie(DateTimeOffset? expira) => new()
+    /// <summary>Con Recordarme la cookie es persistente (vence con el token); si no, es de sesión.</summary>
+    public static CookieOptions OpcionesCookie(Sesion sesion) =>
+        OpcionesCookie(sesion.Recordarme ? new DateTimeOffset(DateTime.SpecifyKind(sesion.Expira, DateTimeKind.Utc)) : null);
+
+    private static CookieOptions OpcionesCookie(DateTimeOffset? expira = null) => new()
     {
         HttpOnly = true,
         Secure = true,

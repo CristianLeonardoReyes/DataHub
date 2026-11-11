@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { CircleAlert, CircleCheck, Info } from 'lucide-react'
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { CircleAlert, CircleCheck, Info, LoaderCircle } from 'lucide-react'
 
 // Componentes base con los tokens de docs/diseno/DESIGN.md (index.css): brand, ink, line, surface…
 export const inputCls =
@@ -8,6 +8,15 @@ export const btnCls =
   'inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-md bg-brand px-4 text-sm font-medium text-on-brand transition-colors hover:bg-brand-hover active:translate-y-px disabled:opacity-60'
 export const btnSmCls =
   'inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-control bg-surface px-3 text-[13px] font-medium whitespace-nowrap text-ink transition-colors hover:bg-raised active:translate-y-px disabled:opacity-60'
+/** Botón con estado de carga: spinner, texto de progreso y deshabilitado mientras dura la petición. */
+export function Boton({ cargando = false, textoCarga, children, disabled, ...r }:
+  { cargando?: boolean; textoCarga?: string } & ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button {...r} disabled={disabled || cargando} aria-busy={cargando}>
+      {cargando ? <><LoaderCircle aria-hidden className="size-4 animate-spin" />{textoCarga ?? children}</> : children}
+    </button>
+  )
+}
 export const linkCls = 'rounded-[var(--r-xs)] font-medium text-brand-text underline-offset-[3px] hover:underline'
 
 export function Campo(p: {

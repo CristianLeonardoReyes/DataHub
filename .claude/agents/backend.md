@@ -28,6 +28,9 @@ indique el brief. No cambias de rama ni haces commit.
   constante en `SpNombres`. Nada de SQL embebido en C#.
 - Nuevo servicio o repositorio: interfaz + implementación + registro en DI.
 - Errores con el formato uniforme de la API, sin stack ni detalles internos.
+- **Correos:** todo correo se arma con una plantilla de `Services/Correo/PlantillasCorreo.cs`
+  (método nuevo sobre `Cuerpo`: logo `cid:logo-datahub`, colores de DESIGN.md, mismo pie) y se
+  envía por `IEnviadorCorreo`. Nunca HTML suelto en un servicio.
 - Imita el estilo del archivo que tocas.
 
 ## Reglas

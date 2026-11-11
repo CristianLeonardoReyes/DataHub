@@ -98,3 +98,20 @@ test('nuevo cliente: 409 de correo se muestra junto al campo correo', async () =
   expect(msg).toHaveAttribute('id', 'correoAdmin-error')
   expect(screen.getByLabelText('Correo del Admin')).toHaveAttribute('aria-invalid', 'true')
 })
+
+test('nuevo cliente: mientras la petición está pendiente el botón carga y queda deshabilitado', async () => {
+  let resolver!: (r: Response) => void
+  fetchMock.mockImplementation(async (url: string, i?: RequestInit) =>
+    url.endsWith('/auth/me') ? respuesta(200, SUPER)
+      : i?.method === 'POST' ? new Promise<Response>((r) => { resolver = r }) : respuesta(404))
+  montar('/clientes/nuevo')
+  await userEvent.type(await screen.findByLabelText('Nombre'), 'Acme')
+  await userEvent.type(screen.getByLabelText('Correo del Admin'), 'admin@acme.co')
+  await userEvent.click(screen.getByRole('button', { name: 'Crear cliente' }))
+  const cargando = await screen.findByRole('button', { name: 'Creando…' })
+  expect(cargando).toBeDisabled()
+  expect(cargando).toHaveAttribute('aria-busy', 'true')
+  resolver(respuesta(409, { status: 409, detail: 'Slug en uso' }))
+  const normal = await screen.findByRole('button', { name: 'Crear cliente' })
+  expect(normal).toBeEnabled()
+})

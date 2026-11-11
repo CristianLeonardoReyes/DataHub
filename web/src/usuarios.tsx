@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import * as api from './api/usuarios'
 import { useSesion } from './Sesion'
 import { Power, Send, UserPlus, Users } from 'lucide-react'
-import { Alerta, Avatar, AvisoInfo, AvisoOk, btnCls, btnSmCls, Campo, Encabezado, Insignia, inputCls, panelCls } from './ui'
+import { Alerta, Avatar, AvisoInfo, AvisoOk, Boton, btnCls, btnSmCls, Campo, Encabezado, Insignia, inputCls, panelCls } from './ui'
 
 type Perfil = api.Usuario['perfil']
 
@@ -142,17 +142,17 @@ export function Usuarios() {
                       <td className="px-4">
                         <div className="flex justify-end gap-2">
                           {!propio && u.estado === 'invitado' && (
-                            <button type="button" disabled={ocupado === u.guid} className={btnSmCls}
+                            <Boton type="button" cargando={ocupado === u.guid} textoCarga="Reenviando…" className={btnSmCls}
                               aria-label={`Reenviar invitación a ${u.correo}`} onClick={() => void reenviar(u)}>
                               <Send aria-hidden className="size-3.5" />Reenviar invitación
-                            </button>
+                            </Boton>
                           )}
                           {!propio && u.estado !== 'invitado' && (
-                            <button type="button" disabled={ocupado === u.guid}
+                            <Boton type="button" cargando={ocupado === u.guid} textoCarga={activo ? 'Desactivando…' : 'Activando…'}
                               className={`${btnSmCls} ${activo ? 'text-danger hover:bg-danger-bg' : ''}`}
                               aria-label={`${activo ? 'Desactivar' : 'Activar'} ${u.nombre}`} onClick={() => void cambiarEstado(u)}>
                               <Power aria-hidden className="size-3.5" />{activo ? 'Desactivar' : 'Activar'}
-                            </button>
+                            </Boton>
                           )}
                         </div>
                       </td>
@@ -208,7 +208,7 @@ export function InvitarUsuario() {
         </div>
         <Alerta texto={errores.general ?? null} />
         <div className="flex gap-2 border-t border-rule pt-5">
-          <button type="submit" disabled={enviando} className={`${btnCls} w-auto`}>Enviar invitación</button>
+          <Boton type="submit" cargando={enviando} textoCarga="Enviando…" className={`${btnCls} w-auto`}>Enviar invitación</Boton>
           <Link to="/usuarios" className={`${btnSmCls} h-10 px-4`}>Cancelar</Link>
         </div>
       </form>
