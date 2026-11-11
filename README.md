@@ -69,8 +69,7 @@ DataHub/
 ├── docs/              # PRD.md y STATUS.md
 ├── api/               # solución .NET 10, se abre con Visual Studio 2026
 ├── db/                # Tablas/, Procedimientos/, Migraciones/, Semillas/
-├── web/               # app React, se abre con VS Code
-└── prototipo/         # referencia visual (mock), no se compila ni despliega
+└── web/               # app React, se abre con VS Code
 ```
 
 ## Requisitos locales
@@ -169,14 +168,6 @@ Tras cambiar un endpoint o DTO, con la API corriendo: `npm --prefix web run tipo
 - Sistema de diseño vigente: `docs/diseno/DESIGN.md`. Logo e icono: `docs/diseno/logo/`.
 - Las pantallas de referencia de Stitch (HTML y capturas) **no se versionan**: pide el `.zip` a
   tu compañero y descomprímelo en `docs/diseno/stitch/` (ignorada por git).
-
-### Prototipo visual
-
-```bash
-cd prototipo
-npm install
-npm run dev
-```
 
 ## Forma de trabajo
 

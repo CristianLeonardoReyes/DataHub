@@ -13,8 +13,8 @@ indique el brief. No cambias de rama ni haces commit.
 
 - `web/`: React + TypeScript + Vite + Tailwind CSS + Tiptap.
 - `web/src/api/`: cliente HTTP y tipos generados desde OpenAPI (versionados en git).
-- `prototipo/` (fuera de `web/`): referencia visual del diseño. Imita su estilo, layout y
-  componentes, pero no lo importes ni copies su mock data.
+- Diseño: `docs/diseno/DESIGN.md` y los componentes base de `web/src/ui.tsx` y `web/src/acceso-ui.tsx`.
+  Reutilízalos antes de crear estilos nuevos.
 
 ## Convenciones
 

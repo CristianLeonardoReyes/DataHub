@@ -166,14 +166,3 @@ export function OlvideContrasena() {
     </PantallaAcceso>
   )
 }
-
-export function Inicio() {
-  const { usuario } = useSesion()
-  if (!usuario) return null
-  return (
-    <section className="space-y-2">
-      <h1 className="text-xl font-semibold">Hola, {usuario.nombre}</h1>
-      <p className="text-sm text-zinc-400">Bienvenido a Data Hub.</p>
-    </section>
-  )
-}

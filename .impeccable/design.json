@@ -134,7 +134,7 @@
       "**Don't** construir inicios con saludo, tarjetas de KPI con iconos ni degradados.",
       "**Don't** usar etiquetas en mayúsculas con tracking sobre los títulos; los grupos van en 12px de oración.",
       "**Don't** superar 8px de radio en contenedores en página (12px solo para diálogos y paleta).",
-      "**Don't** importar ni copiar código de `prototipo/` en `web/`."
+      "**Don't** crear estilos fuera de los tokens de `web/src/index.css`."
     ]
   }
 }

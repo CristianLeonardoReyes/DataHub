@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import * as auth from './api/auth'
 import * as apiClientes from './api/clientes'
-import { Alerta, btnSmCls, inputCls } from './ui'
+import { Building2, Home, LoaderCircle, LogOut, Menu, Users, X } from 'lucide-react'
+import { Alerta, Avatar, btnSmCls, inputCls } from './ui'
 
 export type Permiso =
   | 'clientesGestionar' | 'usuariosGestionar' | 'workspacesAsignarUsuarios' | 'workspacesGestionar'
@@ -52,7 +53,13 @@ export function useSesion() {
 export function Protegida({ children }: { children: ReactNode }) {
   const { usuario, cargando } = useSesion()
   const location = useLocation()
-  if (cargando) return <p className="p-8 text-zinc-400">Cargando…</p>
+  if (cargando)
+    return (
+      <p className="flex min-h-screen items-center justify-center gap-2 bg-ground font-sans text-sm text-muted">
+        <LoaderCircle aria-hidden className="size-4 animate-spin" />
+        Cargando…
+      </p>
+    )
   return usuario ? children : <Navigate to="/login" replace state={{ from: location }} />
 }
 
@@ -88,15 +95,21 @@ function SelectorCliente() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <label htmlFor="operar-en" className="text-zinc-300">Operar en:</label>
-      <select id="operar-en" className={`${inputCls} w-auto py-1`} disabled={enviando}
-        value={usuario?.cliente?.guid ?? ''} onChange={(e) => void elegir(e.target.value)}>
-        <option value="">Ninguno (vista global)</option>
-        {activos.map((c) => <option key={c.guid} value={c.guid}>{c.nombre}</option>)}
-      </select>
+    <div className="space-y-2">
+      <label htmlFor="operar-en" className="block text-xs text-muted">Operar en:</label>
+      <div className="relative">
+        <Building2 aria-hidden className="pointer-events-none absolute top-3 left-3 size-4 text-faint" />
+        <select id="operar-en" className={`${inputCls} pl-9`} disabled={enviando}
+          value={usuario?.cliente?.guid ?? ''} onChange={(e) => void elegir(e.target.value)}>
+          <option value="">Ninguno (vista global)</option>
+          {activos.map((c) => <option key={c.guid} value={c.guid}>{c.nombre}</option>)}
+        </select>
+      </div>
       {usuario?.cliente && (
-        <span className="rounded bg-violet-500/20 px-2 py-0.5 text-xs text-violet-200">Operando en {usuario.cliente.nombre}</span>
+        <p className="flex items-center gap-1.5 text-xs text-ok-ink">
+          <span aria-hidden className="size-1.5 rounded-full bg-leaf" />
+          Operando en {usuario.cliente.nombre}
+        </p>
       )}
       <Alerta texto={error} />
     </div>
@@ -111,41 +124,63 @@ const PERFILES: Record<auth.UsuarioActual['perfil'], string> = {
 }
 
 const itemCls = ({ isActive }: { isActive: boolean }) =>
-  `block rounded px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-violet-400 focus:outline-none ${
-    isActive ? 'bg-violet-500/20 text-violet-200' : 'text-zinc-300 hover:bg-zinc-800'
+  `flex h-9 items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors ${
+    isActive ? 'bg-active font-medium text-ink' : 'text-muted hover:bg-active/60 hover:text-ink'
   }`
+
+function Logo() {
+  return (
+    <span className="flex items-center gap-2">
+      <img src="/logo-datahub.svg" alt="" className="logo-claro size-7" />
+      <img src="/logo-datahub-oscuro.svg" alt="" className="logo-oscuro size-7" />
+      <span className="text-[15px] font-semibold tracking-[-0.01em]">DataHub</span>
+    </span>
+  )
+}
 
 export function Layout() {
   const { usuario, puede, salir } = useSesion()
   const nav = useNavigate()
   const [abierto, setAbierto] = useState(false)
   if (!usuario) return null
+  const verUsuarios = puede('usuariosGestionar') && (usuario.perfil !== 'super_admin' || !!usuario.cliente)
+  const contexto = usuario.perfil === 'super_admin' ? 'DataGlobal · sin cliente' : usuario.cliente?.nombre
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-100 md:flex-row">
-      <aside className="border-b border-zinc-800 bg-zinc-900/60 md:w-56 md:border-r md:border-b-0">
-        <div className="flex items-center justify-between p-4">
-          <span className="text-lg font-semibold">Data Hub</span>
-          <button type="button" className={`${btnSmCls} md:hidden`} aria-expanded={abierto} aria-controls="menu"
-            onClick={() => setAbierto(!abierto)}>Menú</button>
+    <div className="min-h-screen bg-ground font-sans text-ink lg:flex">
+      <aside className="border-b border-line bg-ground lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-[248px] lg:flex-col lg:border-r lg:border-b-0">
+        <div className="flex h-14 items-center justify-between px-4">
+          <Logo />
+          <button type="button" className={`${btnSmCls} lg:hidden`} aria-expanded={abierto} aria-controls="menu"
+            onClick={() => setAbierto(!abierto)}>
+            {abierto ? <X aria-hidden className="size-4" /> : <Menu aria-hidden className="size-4" />}
+            Menú
+          </button>
         </div>
-        <nav id="menu" aria-label="Principal" className={`${abierto ? 'block' : 'hidden'} space-y-1 px-2 pb-4 md:block`}
-          onClick={() => setAbierto(false)}>
-          <NavLink to="/" end className={itemCls}>Inicio</NavLink>
-          {puede('clientesGestionar') && <NavLink to="/clientes" className={itemCls}>Clientes</NavLink>}
-          {puede('usuariosGestionar') && (usuario.perfil !== 'super_admin' || usuario.cliente) && <NavLink to="/usuarios" className={itemCls}>Usuarios</NavLink>}
-        </nav>
-      </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 px-4 py-3 text-sm">
-          <div>
-            <span className="font-medium">{usuario.nombre}</span>
-            <span className="text-zinc-400"> · {PERFILES[usuario.perfil]}{usuario.perfil !== 'super_admin' && usuario.cliente ? ` · ${usuario.cliente.nombre}` : ''}</span>
-          </div>
+        <div id="menu" className={`${abierto ? 'flex' : 'hidden'} flex-col gap-5 px-3 pb-4 lg:flex lg:min-h-0 lg:flex-1`}>
           {usuario.perfil === 'super_admin' && <SelectorCliente />}
-          <button type="button" className={btnSmCls} onClick={async () => { await salir(); nav('/login') }}>Cerrar sesión</button>
-        </header>
-        <main className="flex-1 p-4 md:p-6"><Outlet /></main>
-      </div>
+          <nav aria-label="Principal" className="flex flex-col gap-0.5" onClick={() => setAbierto(false)}>
+            <NavLink to="/" end className={itemCls}><Home aria-hidden className="size-4" />Inicio</NavLink>
+            {puede('clientesGestionar') && <NavLink to="/clientes" className={itemCls}><Building2 aria-hidden className="size-4" />Clientes</NavLink>}
+            {verUsuarios && <NavLink to="/usuarios" className={itemCls}><Users aria-hidden className="size-4" />Usuarios</NavLink>}
+          </nav>
+          <div className="mt-auto border-t border-line pt-3">
+            <div className="flex items-center gap-2.5 px-1 pb-3">
+              <Avatar nombre={usuario.nombre} semilla={usuario.guid} size={32} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium">{usuario.nombre}</p>
+                <p className="truncate text-xs text-muted">{PERFILES[usuario.perfil]}{contexto ? ` · ${contexto}` : ''}</p>
+              </div>
+            </div>
+            <button type="button" className={`${btnSmCls} w-full`} onClick={async () => { await salir(); nav('/login') }}>
+              <LogOut aria-hidden className="size-4" />
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </aside>
+      <main className="min-w-0 flex-1 lg:pl-[248px]">
+        <div className="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-16 sm:px-6 lg:px-10 lg:pt-9"><Outlet /></div>
+      </main>
     </div>
   )
 }

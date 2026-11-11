@@ -2,7 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { Layout, Protegida, RequierePermiso, SesionProvider } from './Sesion'
 import { ClienteForm, Clientes } from './clientes'
 import { InvitarUsuario, Usuarios } from './usuarios'
-import { AceptarInvitacion, Inicio, Login, OlvideContrasena, RestablecerContrasena } from './pantallas'
+import { Inicio } from './inicio'
+import { AceptarInvitacion, Login, OlvideContrasena, RestablecerContrasena } from './pantallas'
 
 export function Rutas() {
   return (

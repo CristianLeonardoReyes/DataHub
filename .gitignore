@@ -10,7 +10,7 @@ appsettings.*.local.json
 # Build del SPA copiado a la API
 api/DataGlobal.DataHub.Api/wwwroot/
 
-# Node (web/, prototipo/)
+# Node (web/)
 node_modules/
 dist/
 build/

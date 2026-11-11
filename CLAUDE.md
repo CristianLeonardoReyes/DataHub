@@ -30,7 +30,6 @@ cualquier carpeta y aprueba el PR quien no lo escribió. `CLAUDE.md`, `.claude/`
 | `api/` | .NET 10 Web API, capas Api/Services/Repository/Common/Tests, Dapper + SP | Visual Studio 2026 |
 | `db/` | MySQL 8: `Tablas/`, `Procedimientos/`, `Migraciones/`, `Semillas/` | — |
 | `web/` | React, TypeScript, Vite, Tailwind, Tiptap | VS Code |
-| `prototipo/` | Referencia visual (mock). No se compila, no se despliega, no se importa | — |
 
 ## Al iniciar cualquier tarea
 
@@ -139,7 +138,7 @@ antes de entregarlo. Solo se menciona a Claude cuando el usuario lo pide.
 - Ejecutar SQL o tocar esquema sin migración con reversión.
 - Cambiar un DTO o endpoint sin regenerar los tipos del frontend en el mismo PR.
 - Añadir dependencias sin aprobación; las pendientes están en PRD §12.
-- Copiar código de `prototipo/` como base: solo es referencia visual.
+- Diseñar pantallas fuera de `docs/diseno/DESIGN.md`: es el sistema de diseño único de `web/`.
 - Cerrar una tarea con pruebas en rojo o sin actualizar `docs/STATUS.md`.
 
 ## Respuestas
