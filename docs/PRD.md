@@ -426,6 +426,7 @@ Una tarea se cierra (funciona, tiene prueba y está registrada en STATUS) antes 
 | Correo: en desarrollo se guarda como archivo local; SES (AWSSDK.SimpleEmailV2 + MimeKit) se activa por configuración | Probar en local sin credenciales de AWS. Decidido por el responsable (2026-10-14). |
 | Backend: `Microsoft.AspNetCore.Authentication.JwtBearer`, leyendo el JWT desde la cookie | Validación estándar del token. Decidido por el responsable (2026-10-14). |
 | Frontend: react-router, openapi-typescript (dev), Vitest + Testing Library (dev) | Navegación, tipos del contrato y pruebas de pantallas. Decidido por el responsable (2026-10-14). |
+| Sistema de diseño único en `docs/diseno/DESIGN.md` (paleta DataGlobal, Inter + Geist Mono, claro y oscuro); iconos `lucide-react`; fuentes por Google Fonts | Coherencia visual con el prototipo y la marca. Decidido por el responsable (2026-11-11). |
 
 ### Pendientes (se resuelven en la tarea que las necesita)
 

@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react'
-
 export const inputCls =
   'w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2 text-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 aria-[invalid=true]:border-red-400'
 export const btnCls =
@@ -7,18 +5,6 @@ export const btnCls =
 export const btnSmCls =
   'rounded border border-zinc-700 px-3 py-1 text-sm text-zinc-100 hover:bg-zinc-800 focus-visible:ring-2 focus-visible:ring-violet-400 focus:outline-none disabled:opacity-50'
 export const linkCls = 'text-violet-300 underline hover:text-violet-200 focus-visible:ring-2 focus-visible:ring-violet-400 focus:outline-none'
-
-export function Tarjeta({ titulo, children }: { titulo: string; children: ReactNode }) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-4 text-zinc-100">
-      <div className="w-full max-w-sm space-y-4 rounded-lg border border-zinc-800 bg-zinc-900/60 p-6">
-        <h1 className="text-xl font-semibold">Data Hub</h1>
-        <h2 className="text-zinc-400">{titulo}</h2>
-        {children}
-      </div>
-    </main>
-  )
-}
 
 export function Campo(p: {
   id: string

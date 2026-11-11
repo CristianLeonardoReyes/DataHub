@@ -24,7 +24,9 @@ tocó. La historia la guarda git._
   texto `COLLATE utf8mb4_0900_ai_ci` (Testcontainers arranca con `unicode_ci` para detectarlo).
 - **Acceso:** `/api/v1/auth` (login, logout, me, aceptar-invitacion, olvide/restablecer). JWT 60
   min en cookie `datahub_sesion`; cada petición valida usuario y cliente activos; bloqueo 5/15
-  min; rate limit por IP; correo `Archivo` (`correos-dev/`) o `Ses`.
+  min; rate limit por IP; correo `Archivo` (`correos-dev/`, por defecto en Development) o `Ses`
+  (`SesEmailSettings`, estándar de la empresa: us-east-2, `no-responder@dataglobal.co`, Bcc vacío;
+  llaves solo en user-secrets/App Settings). SES implementado, **sin probar contra AWS**.
 - **Permisos:** `MatrizPermisos` (Common/Enums/Permisos.cs, 13 acciones) +
   `Autorizacion.Can(usuario, accion, clienteIdRecurso)`; `/me` → `permisos` y `perfil` (enum).
 - **Usuarios (3b):** `/api/v1/usuarios` GET, POST `{correo, perfil}`, POST
@@ -48,21 +50,16 @@ tocó. La historia la guarda git._
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, Vitest + Testing Library (23
-  pruebas). Tipos: `npm run tipos` → `src/api/esquema.d.ts` (versionado; `overrides` TS 5).
-- Pantallas: login, aceptar invitación, olvidé/restablecer; `Layout` con menú según
-  `puede(permiso)`; Inicio; `/clientes`, `/clientes/nuevo`, `/clientes/:guid` con
-  `RequierePermiso` (sin permiso → `/`). Componentes comunes en `src/ui.tsx`. `/usuarios` y
-  `/usuarios/nuevo` (`usuariosGestionar`; fila propia sin acciones). Selector
-  "Operar en:" (solo Super admin) en la cabecera; Usuarios para Super admin exige cliente.
+- React 19, Vite 8, TS 6, Tailwind 4, oxlint, react-router 7, lucide-react, Vitest + Testing
+  Library (28 pruebas). Tipos: `npm run tipos` → `src/api/esquema.d.ts` (versionado).
+- **Sistema de diseño único:** `docs/diseno/DESIGN.md`. Tokens claro/oscuro en `src/index.css`
+  (`bg-ground`, `text-ink`, `bg-brand`…; oscuro por `prefers-color-scheme` o `[data-theme]`).
+  Fuentes Inter y Geist Mono por Google Fonts. Foco visible global.
+- **Acceso rediseñado** (`src/acceso-ui.tsx` + `src/pantallas.tsx`): login, activar cuenta,
+  olvidé y restablecer con el diseño; login redirige si hay sesión, vuelve a la ruta pedida
+  (`state.from`, solo internas) y avisa si la API no responde. Logo en `public/logo-datahub.svg`.
+- Pendiente de rediseño: Layout, Inicio, Clientes, Usuarios (siguen con clases zinc).
 - Lint: 2 warnings de estilo en `Sesion.tsx`.
-- **Prototipo rediseñado** (`feature/prototipo-rediseno`, sin commit): `prototipo/` en español,
-  alineado al PRD, sistema DataGlobal claro/oscuro; referencia visual de `web/` (`DESIGN.md`,
-  `PRODUCT.md`, `prototipo/README.md`). Archivos: validación de vacío/carpeta, tamaño (25 MB
-  provisional), lote de 10, nombres repetidos, reintentar tras corte de red, SVG sin vista previa.
-  Logo oficial (trazos de `docs/diseno/logo/datahub-icono.svg`) en la app y el favicon. Inicio
-  (2026-10-28): % de documentación al día, línea de revisiones (eje de ±60 días centrado en hoy),
-  "Por revisar", recientes y vigencia por espacio sin cajas.
 
 ## Decisiones vigentes
 
@@ -73,4 +70,10 @@ tocó. La historia la guarda git._
 
 - `CODEOWNERS` (usuario GitHub del 2.º integrante) y proteger `main`/`develop` (usuario).
 - RF-USR-03 (asignar workspaces) se hace en el módulo 4 (decidido 2026-10-15).
-- PRD §12 pendiente: tamaño máximo de archivo (módulo 7).
+- PRD §12 pendiente: tamaño máximo de archivo (módulo 7; el prototipo usa 25 MB provisional).
+- Definir la carpeta de OneDrive de la empresa para los valores de entorno de local y pruebas.
+
+## Variables por subir a OneDrive
+
+- `SesEmailSettings:Aws_access_key` y `SesEmailSettings:Aws_secret_key` — user-secrets de `api/DataGlobal.DataHub.Api` — credenciales IAM de AWS SES (en Azure: `SesEmailSettings__Aws_access_key` / `__Aws_secret_key`). Carpeta de OneDrive por definir.
+- Ya existentes en user-secrets: `ConnectionStrings:DataHub`, `Jwt:Clave`.
