@@ -18,6 +18,14 @@ public abstract class BaseRepository(DapperContext context)
         return await cn.QueryFirstOrDefaultAsync<T>(sp, parametros, commandType: CommandType.StoredProcedure);
     }
 
+    /// <summary>Ejecuta el SP y deja que <paramref name="leer"/> consuma sus result sets en orden.</summary>
+    protected async Task<T> QueryMultipleAsync<T>(string sp, object? parametros, Func<SqlMapper.GridReader, Task<T>> leer)
+    {
+        using var cn = context.CreateConnection();
+        using var grid = await cn.QueryMultipleAsync(sp, parametros, commandType: CommandType.StoredProcedure);
+        return await leer(grid);
+    }
+
     /// <summary>Ejecuta el SP y devuelve las filas afectadas.</summary>
     protected async Task<int> ExecuteAsync(string sp, object? parametros = null)
     {

@@ -76,7 +76,7 @@ test('mostrar/ocultar contraseña cambia el type y el aria-label', async () => {
 })
 
 test('con sesión activa /login redirige a /', async () => {
-  fetchMock.mockResolvedValue(respuesta(200, yo))
+  fetchMock.mockImplementation(async () => respuesta(200, yo))
   montar('/login')
   expect(await screen.findByText('Hola, Ana')).toBeInTheDocument()
   expect(screen.queryByLabelText('Contraseña')).not.toBeInTheDocument()

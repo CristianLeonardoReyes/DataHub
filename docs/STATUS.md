@@ -4,17 +4,16 @@ tocó. La historia la guarda git._
 
 ## Común
 
-- **Hecho en `develop`:** pasos 1–3 (base, Acceso, Clientes/Usuarios/cliente operando) y rediseño de `web/`.
-- **En curso:** `feat/DAT-161-cierre-del-acceso-y-la-sesion-correo` cerrada (2026-11-11): SES,
-  sesión deslizante, modal de sesión vencida, tema, contraseña segura, correos con marca. api
-  101/101, web 38/38. Siguiente: commit/PR y paso 4 (módulo 4, incluye RF-USR-03).
+- **Hecho en `develop`:** pasos 1–3, rediseño de `web/` y DAT-161 (sesión deslizante, SES, contraseña segura, correos con marca).
+- **En curso:** `feat/DAT-181-jerarquia-y-navegacion-…` (paso 4, módulo 4 + RF-USR-03) — lista
+  para commit/PR (2026-11-18). api 120/120, web 48/48. Siguiente: paso 5 (editor Tiptap).
 - **Reglas 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta según `permisos`.
 - **Local:** README "Guía de arranque". API perfil `http` en `:5080`; Vite `:5173` con proxy.
   `dotnet test` requiere Docker; si la API bloquea `bin/`, usar `-p:OutDir=…/Tests/bin/alt/`.
 
 ## Backend (api/ + db/)
 
-- **BD del servidor** (MySQL 8.0.36, base `DataHub`): 7 migraciones aplicadas y semilla
+- **BD del servidor** (MySQL 8.0.36, base `DataHub`): 9 migraciones aplicadas (incl. 2026-11-18_01/_02) y semilla
   `dev_datos_prueba.sql`. `developer1` tiene privilegios globales: limitar a `DataHub.*`.
 - 5 capas; solo SP (`<prefijo>_<verbo><Calificador>`, collation 0900); ProblemDetails; `/health`.
 - **Acceso:** JWT en cookie `datahub_sesion`, usuario y cliente activos validados en cada petición,
@@ -27,30 +26,33 @@ tocó. La historia la guarda git._
   única en `PlantillasCorreo` (logo PNG inline `cid:logo-datahub`; data URI en modo Archivo), sin
   mencionar vencimientos. Falta ver el nuevo diseño en Gmail/Outlook con un envío real.
 - **Permisos:** `MatrizPermisos` + `Autorizacion.Can`. Usuarios, Clientes y cliente operando (3a–3c).
-- **Deuda:** `UseForwardedHeaders` antes de desplegar; carrera de slug duplicado da 500
+- **Jerarquía:** `/arbol`, `/workspaces` (+`/miembros`), `/espacios`, `/colecciones`, `/paginas`
+  (+`/recientes`). Alcance en los SP (`p_ClienteId`, `p_UsuarioId`, `p_VeTodo`; fuera → 404);
+  borrado lógico en cascada; `posicion` 0-based; PUT de página reemplaza `paginaPadreGuid`
+  (reenviarlo). Mover páginas solo en su colección. Al pasar a Admin se borran sus membresías.
+- **Deuda:** `UseForwardedHeaders` antes de desplegar; altas simultáneas pueden repetir `Posicion` (se corrige al reordenar); carrera de slug duplicado da 500
   (`ponytail:` en el SP); sin aviso si falla el correo al crear cliente.
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (38 pruebas), oxlint (2
-  warnings preexistentes en `Sesion.tsx`). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
-- **Diseño único:** `docs/diseno/DESIGN.md`; tokens claro/oscuro en `index.css`.
-- **Tema:** botón sol/luna en la cabecera; preferencia en `localStorage` `datahub-tema`, aplicada en
-  `index.html` antes de pintar; por defecto claro.
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (48 pruebas), oxlint (5
+  warnings aceptados). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
+- **Tema:** sol/luna en la cabecera; `localStorage` `datahub-tema`, aplicado en `index.html`; por defecto claro.
 - **Sesión:** casilla "Recordarme en este equipo"; `http.ts` reprograma el modal con
   `X-Sesion-Expira`; al vencer o ante un 401, modal "Tu sesión expiró" → login → misma pantalla.
 - **Contraseña:** lista de requisitos en vivo (vertical) que se marca y se oculta al cumplir.
-- **Botones:** cursor de mano global; `Boton` con `cargando`/`textoCarga` en formularios, acciones
-  por fila y Cerrar sesión. "Invitar usuario" solo en el módulo Usuarios.
+- **Jerarquía:** `ArbolProvider`/`MenuArbol` (árbol en el menú, acciones por nodo, Subir/Bajar),
+  `/workspaces` con miembros, `/paginas/:guid` (ruta, título, subpáginas; sin editor), recientes en
+  Inicio. Deuda: foco del menú ⋯ con teclado (paso 10).
+- **Botones:** cursor de mano global; `Boton` con `cargando`/`textoCarga` en toda acción.
 
 ## Decisiones vigentes
 
-- PRD §12: sesión deslizante 60 min / máx. 8 h, "Recordarme" 7 días; plantilla única de correo;
-  `Id` + `Guid`; esquema y API en español; collation 0900; JwtBearer; react-router, openapi-typescript, Vitest.
+- PRD §12 (sesión deslizante, plantilla única de correo, `Id`+`Guid`, todo en español, collation 0900).
 
 ## Pendientes conocidos
 
-- `CODEOWNERS` y proteger `main`/`develop` (usuario). RF-USR-03 en el módulo 4.
+- `CODEOWNERS` y proteger `main`/`develop` (usuario).
 - PRD §12: tamaño máximo de archivo (módulo 7).
 - Producción: `Jwt__Clave` propia al crear la Web App.
 - Limpiar metadatos "generado por IA" (C2PA/Recraft) de `docs/diseno/logo/*.svg` — pendiente de decisión.

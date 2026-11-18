@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
-import { ArrowRight, Building2, Check, Lock, Users } from 'lucide-react'
+import { ArrowRight, Building2, Check, Clock, Lock, Users } from 'lucide-react'
 import * as apiClientes from './api/clientes'
 import * as apiUsuarios from './api/usuarios'
+import * as apiJerarquia from './api/jerarquia'
 import { useSesion, type Permiso } from './Sesion'
 import { Encabezado, panelCls } from './ui'
 
@@ -14,28 +15,38 @@ const PERFIL: Record<string, string> = {
 }
 
 // Permisos de /me en palabras, agrupados por el módulo del PRD que los habilita.
-const PERMISOS: { permiso: Permiso; texto: string; disponible: boolean }[] = [
+const PERMISOS: { permiso: Permiso; texto: string; disponible: boolean; to?: string }[] = [
   { permiso: 'clientesGestionar', texto: 'Crear, editar y desactivar clientes', disponible: true },
   { permiso: 'usuariosGestionar', texto: 'Invitar usuarios, cambiar su perfil y desactivarlos', disponible: true },
-  { permiso: 'workspacesGestionar', texto: 'Crear y editar workspaces', disponible: false },
-  { permiso: 'workspacesAsignarUsuarios', texto: 'Asignar personas a workspaces', disponible: false },
-  { permiso: 'espaciosColeccionesGestionar', texto: 'Crear espacios y colecciones', disponible: false },
+  { permiso: 'workspacesGestionar', texto: 'Crear y editar workspaces', disponible: true, to: '/workspaces' },
+  { permiso: 'workspacesAsignarUsuarios', texto: 'Asignar personas a workspaces', disponible: true, to: '/workspaces' },
+  { permiso: 'espaciosColeccionesGestionar', texto: 'Crear espacios y colecciones', disponible: true },
   { permiso: 'paginasEditar', texto: 'Crear y editar páginas', disponible: false },
   { permiso: 'paginasAprobar', texto: 'Aprobar páginas', disponible: false },
-  { permiso: 'paginasEliminar', texto: 'Eliminar páginas', disponible: false },
+  { permiso: 'paginasEliminar', texto: 'Eliminar páginas', disponible: true },
   { permiso: 'archivosGestionar', texto: 'Subir y ver archivos', disponible: false },
   { permiso: 'buscar', texto: 'Buscar en la documentación', disponible: false },
   { permiso: 'exportarMarkdown', texto: 'Exportar páginas a Markdown', disponible: false },
 ]
 
 const PROXIMOS = [
-  'Workspaces, espacios y colecciones',
   'Editor de páginas con guardado automático',
   'Estado, responsable, revisión y etiquetas',
   'Archivos adjuntos con vista previa',
   'Búsqueda',
   'Exportación a Markdown',
 ]
+
+const relativo = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
+/** Fecha relativa hasta una semana; después, fecha corta. */
+function hace(iso: string) {
+  const min = Math.round((Date.now() - new Date(iso).getTime()) / 60_000)
+  if (min < 1) return 'hace un momento'
+  if (min < 60) return relativo.format(-min, 'minute')
+  if (min < 1440) return relativo.format(-Math.round(min / 60), 'hour')
+  if (min < 10_080) return relativo.format(-Math.round(min / 1440), 'day')
+  return new Date(iso).toLocaleDateString('es-CO')
+}
 
 function Cifra({ valor, etiqueta, tono }: { valor: number | null; etiqueta: string; tono?: 'ok' | 'pendiente' | 'off' }) {
   const punto = tono === 'ok' ? 'bg-leaf' : tono === 'pendiente' ? 'bg-review-signal' : tono === 'off' ? 'bg-control' : ''
@@ -73,6 +84,7 @@ export function Inicio() {
   const { usuario, puede } = useSesion()
   const [clientes, setClientes] = useState<apiClientes.Cliente[] | null>(null)
   const [usuarios, setUsuarios] = useState<apiUsuarios.Usuario[] | null>(null)
+  const [recientes, setRecientes] = useState<apiJerarquia.PaginaReciente[] | null>(null)
 
   const verClientes = puede('clientesGestionar')
   const verUsuarios = puede('usuariosGestionar') && (usuario?.perfil !== 'super_admin' || !!usuario?.cliente)
@@ -83,6 +95,12 @@ export function Inicio() {
   useEffect(() => {
     if (verUsuarios) void apiUsuarios.listar().then((r) => r.ok && setUsuarios(r.datos))
   }, [verUsuarios, usuario?.cliente?.guid])
+
+  useEffect(() => {
+    // El Super admin sin cliente operando no tiene contenido (la API respondería 400).
+    if (usuario?.perfil === 'super_admin' && !usuario.cliente) return setRecientes(null)
+    void apiJerarquia.paginas.recientes().then((r) => r.ok && Array.isArray(r.datos) && setRecientes(r.datos))
+  }, [usuario])
 
   if (!usuario) return null
   const contexto = usuario.perfil === 'super_admin'
@@ -123,6 +141,29 @@ export function Inicio() {
         </div>
       )}
 
+      {recientes && (
+        <section aria-labelledby="h-recientes" className="mb-10">
+          <h2 id="h-recientes" className="mb-3 flex items-center gap-2 text-[15px] font-semibold">
+            <Clock aria-hidden className="size-4 text-faint" />Actualizadas recientemente
+          </h2>
+          {recientes.length === 0 ? (
+            <p className="text-sm text-muted">Aún no hay páginas.</p>
+          ) : (
+            <ul className={`${panelCls} divide-y divide-rule`}>
+              {recientes.map((r) => (
+                <li key={r.guid}>
+                  <Link to={`/paginas/${r.guid}`} className="flex flex-wrap items-center gap-x-4 gap-y-0.5 px-4 py-3 text-sm hover:bg-raised">
+                    <span className="min-w-0 flex-1 truncate font-medium">{r.titulo}</span>
+                    <span className="truncate text-[13px] text-muted">{r.workspace} / {r.coleccion}</span>
+                    <span className="text-xs whitespace-nowrap text-faint">{hace(r.fechaActualizacion)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       <div className="grid grid-cols-1 gap-x-10 gap-y-8 lg:grid-cols-2">
         <section aria-labelledby="h-acceso">
           <h2 id="h-acceso" className="mb-3 text-[15px] font-semibold">Lo que puede hacer tu perfil</h2>
@@ -132,7 +173,7 @@ export function Inicio() {
                 {p.disponible
                   ? <Check aria-hidden className="size-4 shrink-0 text-ok-ink" />
                   : <Lock aria-hidden className="size-4 shrink-0 text-faint" />}
-                <span className="min-w-0 flex-1">{p.texto}</span>
+                <span className="min-w-0 flex-1">{p.to ? <Link to={p.to} className="hover:underline">{p.texto}</Link> : p.texto}</span>
                 {!p.disponible && <span className="text-xs whitespace-nowrap text-faint">Próximamente</span>}
               </li>
             ))}
@@ -143,7 +184,7 @@ export function Inicio() {
           <ol className={`${panelCls} divide-y divide-rule`}>
             {PROXIMOS.map((t, i) => (
               <li key={t} className="flex items-center gap-3 px-4 py-3 text-sm">
-                <span className="w-5 text-right text-xs text-faint tabular-nums">{i + 4}</span>
+                <span className="w-5 text-right text-xs text-faint tabular-nums">{i + 5}</span>
                 <span className="min-w-0 flex-1 text-muted">{t}</span>
               </li>
             ))}

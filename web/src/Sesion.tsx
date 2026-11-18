@@ -3,7 +3,8 @@ import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-route
 import * as auth from './api/auth'
 import * as apiClientes from './api/clientes'
 import { alCambiarExpira, alNoAutorizado } from './api/http'
-import { Building2, Home, LoaderCircle, LogIn, LogOut, Menu, Moon, Sun, TriangleAlert, Users, X } from 'lucide-react'
+import { ArbolProvider, MenuArbol } from './arbol'
+import { Building2, Home, Layers, LoaderCircle, LogIn, LogOut, Menu, Moon, Sun, TriangleAlert, Users, X } from 'lucide-react'
 import { Alerta, Avatar, Boton, btnCls, btnSmCls, inputCls } from './ui'
 
 export type Permiso =
@@ -160,8 +161,8 @@ function ModalSesionExpirada() {
 
 export function RequierePermiso({ permiso, children }: { permiso: Permiso; children: ReactNode }) {
   const { puede, usuario } = useSesion()
-  // Usuarios: el Super admin solo opera dentro de un cliente.
-  const ok = puede(permiso) && !(permiso === 'usuariosGestionar' && usuario?.perfil === 'super_admin' && !usuario.cliente)
+  // Usuarios y workspaces: el Super admin solo opera dentro de un cliente.
+  const ok = puede(permiso) && !((permiso === 'usuariosGestionar' || permiso === 'workspacesGestionar') && usuario?.perfil === 'super_admin' && !usuario.cliente)
   return ok ? children : <Navigate to="/" replace />
 }
 
@@ -251,12 +252,17 @@ function BotonTema() {
 }
 
 export function Layout() {
+  return <ArbolProvider><LayoutInterno /></ArbolProvider>
+}
+
+function LayoutInterno() {
   const { usuario, puede, salir } = useSesion()
   const nav = useNavigate()
   const [abierto, setAbierto] = useState(false)
   const [saliendo, setSaliendo] = useState(false)
   if (!usuario) return null
   const verUsuarios = puede('usuariosGestionar') && (usuario.perfil !== 'super_admin' || !!usuario.cliente)
+  const verWorkspaces = puede('workspacesGestionar') && (usuario.perfil !== 'super_admin' || !!usuario.cliente)
   const contexto = usuario.perfil === 'super_admin' ? 'DataGlobal · sin cliente' : usuario.cliente?.nombre
   return (
     <div className="min-h-screen bg-ground font-sans text-ink lg:flex">
@@ -278,7 +284,9 @@ export function Layout() {
             <NavLink to="/" end className={itemCls}><Home aria-hidden className="size-4" />Inicio</NavLink>
             {puede('clientesGestionar') && <NavLink to="/clientes" className={itemCls}><Building2 aria-hidden className="size-4" />Clientes</NavLink>}
             {verUsuarios && <NavLink to="/usuarios" className={itemCls}><Users aria-hidden className="size-4" />Usuarios</NavLink>}
+            {verWorkspaces && <NavLink to="/workspaces" className={itemCls}><Layers aria-hidden className="size-4" />Workspaces</NavLink>}
           </nav>
+          <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto"><MenuArbol alNavegar={() => setAbierto(false)} /></div>
           <div className="mt-auto border-t border-line pt-3">
             <div className="flex items-center gap-2.5 px-1 pb-3">
               <Avatar nombre={usuario.nombre} semilla={usuario.guid} size={32} />
