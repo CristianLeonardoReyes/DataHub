@@ -1,7 +1,8 @@
--- Estado vigente. Origen: Migraciones/2026-10-15_03_usuarios.sql
+-- Estado vigente. Origen: Migraciones/2026-11-18_02_jerarquia_procedimientos.sql
 
 DELIMITER $$
 
+-- Igual que la versión anterior; al pasar el perfil a 'admin' (que ve todo) borra sus membresías.
 DROP PROCEDURE IF EXISTS `usu_editarPerfilEstado`$$
 CREATE PROCEDURE `usu_editarPerfilEstado`(
   IN p_ClienteId BIGINT UNSIGNED,
@@ -44,6 +45,9 @@ BEGIN
     ELSE
       UPDATE Usuario SET Perfil = p_Perfil, Estado = v_NuevoEstado, FechaActualizacion = UTC_TIMESTAMP()
       WHERE Id = v_Id;
+      IF p_Perfil = 'admin' THEN
+        DELETE FROM WorkspaceMiembro WHERE UsuarioId = v_Id;
+      END IF;
       COMMIT;
       SELECT 1 AS Resultado, Guid, Nombre, Correo, Perfil, Estado, FechaCreacion FROM Usuario WHERE Id = v_Id;
     END IF;

@@ -28,7 +28,7 @@ export function alCambiarExpira(fn: (expira: string) => void) {
   }
 }
 
-export async function pedir<T>(metodo: 'GET' | 'POST' | 'PUT', ruta: string, cuerpo?: unknown): Promise<Resultado<T>> {
+export async function pedir<T>(metodo: 'GET' | 'POST' | 'PUT' | 'DELETE', ruta: string, cuerpo?: unknown): Promise<Resultado<T>> {
   let r: Response
   try {
     r = await fetch(`/api/v1${ruta}`, {

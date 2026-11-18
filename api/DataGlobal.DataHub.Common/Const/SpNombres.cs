@@ -23,4 +23,21 @@ public static class SpNombres
     public const string ClienteCrearConAdmin = "cli_insertarConAdmin";
     public const string ClienteConsultarOperando = "cli_consultarOperando";
     public const string ClienteActualizar = "cli_editar";
+    public const string WorkspaceConsultarArbol = "wks_consultarArbol";
+    public const string WorkspaceInsertar = "wks_insertar";
+    public const string WorkspaceEditar = "wks_editar";
+    public const string WorkspaceEliminar = "wks_eliminar";
+    public const string MiembroConsultar = "wkm_consultar";
+    public const string MiembroEditar = "wkm_editar";
+    public const string EspacioInsertar = "esp_insertar";
+    public const string EspacioEditar = "esp_editar";
+    public const string EspacioEliminar = "esp_eliminar";
+    public const string ColeccionInsertar = "col_insertar";
+    public const string ColeccionEditar = "col_editar";
+    public const string ColeccionEliminar = "col_eliminar";
+    public const string PaginaInsertar = "pag_insertar";
+    public const string PaginaEditar = "pag_editar";
+    public const string PaginaEliminar = "pag_eliminar";
+    public const string PaginaConsultarPorGuid = "pag_consultarPorGuid";
+    public const string PaginaConsultarRecientes = "pag_consultarRecientes";
 }

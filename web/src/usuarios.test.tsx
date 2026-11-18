@@ -32,7 +32,7 @@ afterEach(() => vi.unstubAllGlobals())
 
 const simular = (u: unknown, otras: (url: string, init?: RequestInit) => Response = () => respuesta(404)) =>
   fetchMock.mockImplementation(async (url: string, init?: RequestInit) =>
-    url.endsWith('/auth/me') ? respuesta(200, u) : otras(url, init))
+    url.endsWith('/auth/me') ? respuesta(200, u) : url.endsWith('/arbol') ? respuesta(200, []) : otras(url, init))
 
 const montar = (ruta: string) =>
   render(

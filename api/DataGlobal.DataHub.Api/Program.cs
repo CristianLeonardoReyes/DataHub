@@ -43,6 +43,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
+builder.Services.AddScoped<IEspacioRepository, EspacioRepository>();
+builder.Services.AddScoped<IColeccionRepository, ColeccionRepository>();
+builder.Services.AddScoped<IPaginaRepository, PaginaRepository>();
+builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
+builder.Services.AddScoped<IEspacioService, EspacioService>();
+builder.Services.AddScoped<IColeccionService, ColeccionService>();
+builder.Services.AddScoped<IPaginaService, PaginaService>();
 builder.Services.AddScoped<UsuarioActual>();
 builder.Services.AddSingleton<IEnviadorCorreo>(sp =>
 {
