@@ -9,4 +9,6 @@ public interface IPaginaService
     Task<Guid> CrearAsync(CrearPaginaRequest solicitud);
     Task ActualizarAsync(Guid guid, ActualizarPaginaRequest solicitud);
     Task EliminarAsync(Guid guid);
+    Task<ContenidoPaginaDto> ObtenerContenidoAsync(Guid guid);
+    Task<VersionContenidoDto> GuardarContenidoAsync(Guid guid, GuardarContenidoRequest solicitud);
 }

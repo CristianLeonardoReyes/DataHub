@@ -1551,6 +1551,173 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/paginas/{guid}/contenido": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    guid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ContenidoPaginaDto"];
+                        "application/json": components["schemas"]["ContenidoPaginaDto"];
+                        "text/json": components["schemas"]["ContenidoPaginaDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    guid: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GuardarContenidoRequest"];
+                    "text/json": components["schemas"]["GuardarContenidoRequest"];
+                    "application/*+json": components["schemas"]["GuardarContenidoRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["VersionContenidoDto"];
+                        "application/json": components["schemas"]["VersionContenidoDto"];
+                        "text/json": components["schemas"]["VersionContenidoDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/usuarios": {
         parameters: {
             query?: never;
@@ -2409,6 +2576,11 @@ export interface components {
             descripcion: null | string;
             paginas: components["schemas"]["PaginaArbolDto"][];
         };
+        ContenidoPaginaDto: {
+            contenido: null | components["schemas"]["JsonElement"];
+            /** Format: int32 */
+            version: number | string;
+        };
         CreadoDto: {
             /** Format: uuid */
             guid: string;
@@ -2450,10 +2622,16 @@ export interface components {
         };
         /** @enum {unknown} */
         EstadoUsuario: "invitado" | "activo" | "inactivo";
+        GuardarContenidoRequest: {
+            contenido?: components["schemas"]["JsonElement"];
+            /** Format: int32 */
+            version?: number | string;
+        };
         InvitarUsuarioRequest: {
             correo: string;
             perfil?: components["schemas"]["PerfilUsuario"];
         };
+        JsonElement: unknown;
         LoginRequest: {
             correo: string;
             contrasena: string;
@@ -2544,6 +2722,10 @@ export interface components {
             estado: components["schemas"]["EstadoUsuario"];
             /** Format: date-time */
             fechaCreacion: string;
+        };
+        VersionContenidoDto: {
+            /** Format: int32 */
+            version: number | string;
         };
         WorkspaceArbolDto: {
             /** Format: uuid */

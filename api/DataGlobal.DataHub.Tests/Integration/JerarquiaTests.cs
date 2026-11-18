@@ -454,4 +454,144 @@ public class JerarquiaTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         Assert.Equal("Con espacios", (await ArbolAsync(admin)).EnumerateArray().Single(x => x.GetProperty("guid").GetGuid() == ws).GetProperty("nombre").GetString());
         Assert.Equal(HttpStatusCode.Unauthorized, await CodigoAsync(HttpMethod.Get, "/api/v1/arbol", null));
     }
+
+    // ---------- módulo 5: contenido de páginas
+
+    private static object Doc(string texto) => new
+    {
+        type = "doc",
+        content = new object[] { new { type = "paragraph", content = new object[] { new { type = "text", text = texto } } } }
+    };
+
+    private Task<HttpResponseMessage> GuardarAsync(string cookie, Guid pag, object contenido, int version) =>
+        EnviarAsync(HttpMethod.Put, $"/api/v1/paginas/{pag}/contenido", cookie, new { contenido, version });
+
+    private async Task<JsonElement> ContenidoAsync(string cookie, Guid pag)
+    {
+        var r = await EnviarAsync(HttpMethod.Get, $"/api/v1/paginas/{pag}/contenido", cookie);
+        Assert.Equal(HttpStatusCode.OK, r.StatusCode);
+        return await r.Content.ReadFromJsonAsync<JsonElement>(Ct);
+    }
+
+    private async Task<string> TextoPlanoAsync(Guid pag)
+    {
+        await using var cn = new MySqlConnection(_db.ConnectionString);
+        return await cn.ExecuteScalarAsync<string>(
+            "SELECT c.TextoPlano FROM PaginaContenido c JOIN Pagina p ON p.Id = c.PaginaId WHERE p.Guid = @pag", new { pag }) ?? "";
+    }
+
+    [Fact]
+    public async Task Contenido_vacio_guardar_y_leer()
+    {
+        var admin = await AdminAsync();
+        var (_, _, _, pag) = await CadenaAsync(admin);
+
+        var vacio = await ContenidoAsync(admin, pag);
+        Assert.Equal(JsonValueKind.Null, vacio.GetProperty("contenido").ValueKind);
+        Assert.Equal(0, vacio.GetProperty("version").GetInt32());
+
+        var r = await GuardarAsync(admin, pag, Doc("Hola"), 0);
+        Assert.Equal(HttpStatusCode.OK, r.StatusCode);
+        Assert.Equal(1, (await r.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("version").GetInt32());
+
+        var c = await ContenidoAsync(admin, pag);
+        Assert.Equal(1, c.GetProperty("version").GetInt32());
+        Assert.Equal("Hola", c.GetProperty("contenido").GetProperty("content")[0].GetProperty("content")[0].GetProperty("text").GetString());
+        Assert.Equal("Hola", await TextoPlanoAsync(pag));
+
+        r = await GuardarAsync(admin, pag, Doc("Chau"), 1);
+        Assert.Equal(2, (await r.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("version").GetInt32());
+        Assert.Equal("Chau", await TextoPlanoAsync(pag));
+    }
+
+    [Fact]
+    public async Task Contenido_con_version_vieja_da_409_y_no_cambia_nada()
+    {
+        var admin = await AdminAsync();
+        var (_, _, _, pag) = await CadenaAsync(admin);
+        Assert.Equal(HttpStatusCode.OK, (await GuardarAsync(admin, pag, Doc("Uno"), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await GuardarAsync(admin, pag, Doc("Dos"), 1)).StatusCode);
+
+        var r = await GuardarAsync(admin, pag, Doc("Viejo"), 1);
+        Assert.Equal(HttpStatusCode.Conflict, r.StatusCode);
+        Assert.Equal("Otra persona guardó cambios en esta página. Recarga para ver la última versión.",
+            (await r.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("detail").GetString());
+        Assert.Equal(HttpStatusCode.Conflict, (await GuardarAsync(admin, pag, Doc("Viejo"), 0)).StatusCode);
+
+        var c = await ContenidoAsync(admin, pag);
+        Assert.Equal(2, c.GetProperty("version").GetInt32());
+        Assert.Equal("Dos", await TextoPlanoAsync(pag));
+    }
+
+    [Fact]
+    public async Task Contenido_guardados_concurrentes_con_la_misma_version_solo_pasa_uno()
+    {
+        var admin = await AdminAsync();
+        var (_, _, _, pag) = await CadenaAsync(admin);
+        var rs = await Task.WhenAll(Enumerable.Range(0, 4).Select(i => GuardarAsync(admin, pag, Doc("T" + i), 0)));
+        Assert.Equal(1, rs.Count(r => r.StatusCode == HttpStatusCode.OK));
+        Assert.Equal(3, rs.Count(r => r.StatusCode == HttpStatusCode.Conflict));
+        Assert.Equal(1, (await ContenidoAsync(admin, pag)).GetProperty("version").GetInt32());
+    }
+
+    [Fact]
+    public async Task Contenido_aislamiento_alcance_y_permisos()
+    {
+        var a = await AdminAsync();
+        var b = await AdminAsync();
+        var (colab, cColab) = await UsuarioAsync(a, "colaborador");
+        var (ws, _, col, pag) = await CadenaAsync(a);
+        var eliminada = await PaginaAsync(a, col, "Borrar");
+        Assert.Equal(HttpStatusCode.NoContent, await CodigoAsync(HttpMethod.Delete, "/api/v1/paginas/" + eliminada, a));
+
+        Assert.Equal(HttpStatusCode.NotFound, (await EnviarAsync(HttpMethod.Get, $"/api/v1/paginas/{pag}/contenido", b)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await GuardarAsync(b, pag, Doc("X"), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await EnviarAsync(HttpMethod.Get, $"/api/v1/paginas/{pag}/contenido", cColab)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await GuardarAsync(cColab, pag, Doc("X"), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await EnviarAsync(HttpMethod.Get, $"/api/v1/paginas/{eliminada}/contenido", a)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await GuardarAsync(a, eliminada, Doc("X"), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await EnviarAsync(HttpMethod.Get, $"/api/v1/paginas/{pag}/contenido", null)).StatusCode);
+
+        await AsignarAsync(a, ws, colab);
+        Assert.Equal(HttpStatusCode.OK, (await GuardarAsync(cColab, pag, Doc("Colab"), 0)).StatusCode);
+        Assert.Equal("Colab", await TextoPlanoAsync(pag));
+    }
+
+    [Fact]
+    public async Task Contenido_invalido_da_400()
+    {
+        var admin = await AdminAsync();
+        var (_, _, _, pag) = await CadenaAsync(admin);
+        object Enlace(string href) => new { type = "doc", content = new object[] { new { type = "paragraph", content = new object[] {
+            new { type = "text", text = "x", marks = new object[] { new { type = "link", attrs = new { href } } } } } } } };
+        object Imagen(object attrs) => new { type = "doc", content = new object[] { new { type = "image", attrs } } };
+
+        Assert.Equal(HttpStatusCode.BadRequest, (await GuardarAsync(admin, pag, Enlace("javascript:alert(1)"), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await GuardarAsync(admin, pag, Imagen(new { src = "https://x/y.png" }), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await GuardarAsync(admin, pag, Imagen(new { attachmentId = Guid.NewGuid(), src = "data:x" }), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await GuardarAsync(admin, pag, Imagen(new { attachmentId = "no-es-guid" }), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await GuardarAsync(admin, pag, new { type = "paragraph" }, 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await GuardarAsync(admin, pag, Doc(new string('a', 2 * 1024 * 1024 + 10)), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await GuardarAsync(admin, pag, Enlace("https://datahub.test/x"), 0)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await GuardarAsync(admin, pag, Imagen(new { attachmentId = Guid.NewGuid() }), 1)).StatusCode);
+        Assert.Equal(2, (await ContenidoAsync(admin, pag)).GetProperty("version").GetInt32());
+    }
+
+    [Fact]
+    public async Task Guardar_contenido_actualiza_las_recientes()
+    {
+        var admin = await AdminAsync();
+        var ws = await WorkspaceAsync(admin);
+        var col = await ColeccionAsync(admin, await EspacioAsync(admin, ws));
+        var primera = await PaginaAsync(admin, col, "Primera");
+        await Task.Delay(1100, Ct);
+        var segunda = await PaginaAsync(admin, col, "Segunda");
+        var antes = await (await EnviarAsync(HttpMethod.Get, "/api/v1/paginas/recientes", admin)).Content.ReadFromJsonAsync<JsonElement>(Ct);
+        Assert.Equal([segunda, primera], Guids(antes));
+
+        await Task.Delay(1100, Ct);
+        Assert.Equal(HttpStatusCode.OK, (await GuardarAsync(admin, primera, Doc("Editada"), 0)).StatusCode);
+        var despues = await (await EnviarAsync(HttpMethod.Get, "/api/v1/paginas/recientes", admin)).Content.ReadFromJsonAsync<JsonElement>(Ct);
+        Assert.Equal([primera, segunda], Guids(despues));
+    }
 }
