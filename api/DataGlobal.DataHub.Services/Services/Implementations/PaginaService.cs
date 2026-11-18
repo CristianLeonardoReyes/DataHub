@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DataGlobal.DataHub.Common.DTOs;
 using DataGlobal.DataHub.Common.Enums;
 using DataGlobal.DataHub.Common.Models;
@@ -54,6 +55,25 @@ public class PaginaService(IPaginaRepository paginas, UsuarioActual actual) : IP
         var r = await paginas.EliminarAsync(a, guid, SoloPropias());
         Jerarquia.ExigirExiste(r, "La página no existe.");
         if (r == 3) throw new AccesoDenegadoException("Solo puedes eliminar tus propias páginas sin subpáginas.");
+    }
+
+    public async Task<ContenidoPaginaDto> ObtenerContenidoAsync(Guid guid)
+    {
+        var f = await paginas.ObtenerContenidoAsync(Jerarquia.Alcance(actual), guid);
+        Jerarquia.ExigirExiste(f.Resultado, "La página no existe.");
+        return new(f.ContenidoJson is null ? null : JsonDocument.Parse(f.ContenidoJson).RootElement, f.VersionContenido);
+    }
+
+    public async Task<VersionContenidoDto> GuardarContenidoAsync(Guid guid, GuardarContenidoRequest s)
+    {
+        var a = Jerarquia.Alcance(actual, Accion.PaginasEditar);
+        if (s.Version < 0) throw new SolicitudInvalidaException("La versión no es válida.");
+        TiptapContenido.Validar(s.Contenido);
+        // El texto plano sale siempre del propio documento, nunca de lo que envíe el cliente (RF-EDI-05).
+        var r = await paginas.GuardarContenidoAsync(a, guid, s.Contenido.GetRawText(), TiptapContenido.Extraer(s.Contenido), s.Version);
+        Jerarquia.ExigirExiste(r.Resultado, "La página no existe.");
+        if (r.Resultado == 2) throw new ConflictoException("Otra persona guardó cambios en esta página. Recarga para ver la última versión.");
+        return new(r.VersionContenido);
     }
 
     private bool SoloPropias() => MatrizPermisos.ParsearPerfil(actual.Perfil) == PerfilUsuario.Colaborador;

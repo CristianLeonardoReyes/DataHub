@@ -131,13 +131,13 @@ test('renombrar una página reenvía su paginaPadreGuid', async () => {
 })
 
 test('la página muestra su ruta y oculta Eliminar si puedeEliminar es false', async () => {
-  montar('/paginas/p2', ADMIN, { 'GET /paginas/p2': DETALLE })
+  montar('/paginas/p2', ADMIN, { 'GET /paginas/p2': DETALLE, 'GET /paginas/p2/contenido': { contenido: null, version: 0 } })
   const ruta = within(await screen.findByRole('navigation', { name: 'Ruta' }))
   expect(ruta.getByText('Soporte')).toBeInTheDocument()
   expect(ruta.getByText('Manuales')).toBeInTheDocument()
   expect(ruta.getByRole('link', { name: 'Inicio rapido' })).toHaveAttribute('href', '/paginas/p1')
   expect(screen.getByRole('heading', { name: 'Alta de clientes' })).toBeInTheDocument()
-  expect(screen.getByText('El editor de contenido llega en el módulo 5')).toBeInTheDocument()
+  expect(await screen.findByRole('textbox', { name: 'Contenido de la página' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Eliminar página' })).toBeNull()
 })
 

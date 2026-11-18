@@ -1,4 +1,5 @@
 using DataGlobal.DataHub.Common.DTOs;
+using DataGlobal.DataHub.Common.Util;
 using DataGlobal.DataHub.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,4 +49,17 @@ public class PaginasController(IPaginaService paginas) : ControllerBase
         await paginas.EliminarAsync(guid);
         return NoContent();
     }
+
+    /// <summary>Contenido Tiptap de la página y su versión; contenido null y versión 0 si aún no tiene.</summary>
+    [HttpGet("{guid:guid}/contenido")]
+    [ProducesResponseType<ContenidoPaginaDto>(StatusCodes.Status200OK)]
+    public async Task<ContenidoPaginaDto> ObtenerContenido(Guid guid) => await paginas.ObtenerContenidoAsync(guid);
+
+    /// <summary>Guarda el contenido (máx. 2 MB). 409 si la versión enviada no es la guardada; 400 si el documento es inválido.</summary>
+    [HttpPut("{guid:guid}/contenido")]
+    [RequestSizeLimit(TiptapContenido.MaxBytes + 4096)]
+    [ProducesResponseType<VersionContenidoDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public async Task<VersionContenidoDto> GuardarContenido(Guid guid, GuardarContenidoRequest solicitud) =>
+        await paginas.GuardarContenidoAsync(guid, solicitud);
 }

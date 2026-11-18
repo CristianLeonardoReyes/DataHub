@@ -33,4 +33,13 @@ public class PaginaRepository(DapperContext context) : BaseRepository(context), 
     public Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync(Alcance a) =>
         QueryListAsync<PaginaRecienteDto>(SpNombres.PaginaConsultarRecientes,
             new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo });
+
+    public async Task<ContenidoFila> ObtenerContenidoAsync(Alcance a, Guid guid) =>
+        (await QueryFirstOrNullAsync<ContenidoFila>(SpNombres.ContenidoConsultar,
+            new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo, p_PaginaGuid = guid }))!;
+
+    public async Task<ResultadoContenido> GuardarContenidoAsync(Alcance a, Guid guid, string contenidoJson, string textoPlano, int version) =>
+        (await QueryFirstOrNullAsync<ResultadoContenido>(SpNombres.ContenidoEditar,
+            new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo, p_PaginaGuid = guid,
+                  p_ContenidoJson = contenidoJson, p_TextoPlano = textoPlano, p_Version = version }))!;
 }

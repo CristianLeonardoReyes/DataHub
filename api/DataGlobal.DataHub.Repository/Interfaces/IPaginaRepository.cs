@@ -13,4 +13,8 @@ public interface IPaginaRepository
     Task<int> EliminarAsync(Alcance a, Guid guid, bool soloPropiaSinHijas);
     Task<PaginaDetalleFilas?> ObtenerAsync(Alcance a, Guid guid);
     Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync(Alcance a);
+    /// <summary>Resultado 0 fuera de alcance, 1 ok (ContenidoJson null y versión 0 si aún no hay contenido).</summary>
+    Task<ContenidoFila> ObtenerContenidoAsync(Alcance a, Guid guid);
+    /// <summary>0 fuera de alcance, 1 ok (versión nueva), 2 conflicto de versión (versión guardada).</summary>
+    Task<ResultadoContenido> GuardarContenidoAsync(Alcance a, Guid guid, string contenidoJson, string textoPlano, int version);
 }

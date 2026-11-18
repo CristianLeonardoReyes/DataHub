@@ -40,4 +40,6 @@ public static class SpNombres
     public const string PaginaEliminar = "pag_eliminar";
     public const string PaginaConsultarPorGuid = "pag_consultarPorGuid";
     public const string PaginaConsultarRecientes = "pag_consultarRecientes";
+    public const string ContenidoConsultar = "pco_consultar";
+    public const string ContenidoEditar = "pco_editar";
 }

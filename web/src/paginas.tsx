@@ -3,9 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { FilePlus, FileText, Trash2 } from 'lucide-react'
 import * as api from './api/jerarquia'
 import { useArbol } from './arbol'
+import { EditorContenido } from './editor'
 import { errorDe, FormNombre } from './jerarquia-ui'
 import { useSesion } from './Sesion'
-import { Alerta, AvisoInfo, Boton, btnSmCls, Encabezado, panelCls } from './ui'
+import { Alerta, Boton, btnSmCls, Encabezado, panelCls } from './ui'
 
 export function PaginaVista() {
   const { guid = '' } = useParams()
@@ -91,7 +92,7 @@ export function PaginaVista() {
               }} />
           </div>
         )}
-        <AvisoInfo texto="El editor de contenido llega en el módulo 5" />
+        <EditorContenido key={guid} guid={guid} editable={puede('paginasEditar')} />
         <section aria-labelledby="h-sub">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 id="h-sub" className="text-[15px] font-semibold">Subpáginas</h2>
