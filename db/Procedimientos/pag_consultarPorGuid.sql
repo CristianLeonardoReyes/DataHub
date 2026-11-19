@@ -1,9 +1,7 @@
--- Estado vigente. Origen: Migraciones/2026-11-18_02_jerarquia_procedimientos.sql
+-- Estado vigente. Origen: Migraciones/2026-11-19_01_metadata_etiquetas.sql
 
 DELIMITER $$
 
--- Result sets: 1) la página con su ubicación (vacío si no existe o fuera de alcance);
--- 2) páginas padre en orden (de la raíz al padre directo); 3) subpáginas directas.
 DROP PROCEDURE IF EXISTS `pag_consultarPorGuid`$$
 CREATE PROCEDURE `pag_consultarPorGuid`(
   IN p_ClienteId BIGINT UNSIGNED,
@@ -18,12 +16,14 @@ BEGIN
 
   SELECT p.Guid, p.Titulo, c.Guid AS ColeccionGuid, c.Nombre AS ColeccionNombre, pp.Guid AS PaginaPadreGuid,
          p.FechaActualizacion, cr.Guid AS CreadoPorGuid,
-         w.Guid AS WorkspaceGuid, w.Nombre AS WorkspaceNombre, e.Guid AS EspacioGuid, e.Nombre AS EspacioNombre
+         w.Guid AS WorkspaceGuid, w.Nombre AS WorkspaceNombre, e.Guid AS EspacioGuid, e.Nombre AS EspacioNombre,
+         p.Estado, p.TipoDocumento, re.Guid AS ResponsableGuid, re.Nombre AS ResponsableNombre, p.FechaRevision
   FROM Pagina p
   JOIN Coleccion c ON c.Id = p.ColeccionId
   JOIN Espacio e ON e.Id = c.EspacioId
   JOIN Workspace w ON w.Id = p.WorkspaceId
   JOIN Usuario cr ON cr.Id = p.CreadoPor
+  LEFT JOIN Usuario re ON re.Id = p.ResponsableId
   LEFT JOIN Pagina pp ON pp.Id = p.PaginaPadreId
   WHERE p.Id = v_Id;
 
@@ -36,6 +36,9 @@ BEGIN
   SELECT h.Guid, h.Titulo FROM Pagina h
   WHERE h.PaginaPadreId = v_Id AND h.ClienteId = p_ClienteId AND h.FechaEliminacion IS NULL
   ORDER BY h.Posicion, h.Id;
+
+  SELECT et.Nombre FROM PaginaEtiqueta pe JOIN Etiqueta et ON et.Id = pe.EtiquetaId
+  WHERE pe.PaginaId = v_Id ORDER BY et.Nombre;
 END$$
 
 DELIMITER ;

@@ -27,8 +27,37 @@ public class PaginaService(IPaginaRepository paginas, UsuarioActual actual) : IP
         var puedeEliminar = Autorizacion.Can(actual, Accion.PaginasEliminar)
             && (SoloPropias() is false || (p.CreadoPorGuid == actual.Guid && f.Hijas.Count == 0));
         return new(p.Guid, p.Titulo, p.ColeccionGuid, p.PaginaPadreGuid, DateTime.SpecifyKind(p.FechaActualizacion, DateTimeKind.Utc),
-            puedeEliminar, ruta, [.. f.Hijas.Select(h => new SubpaginaDto(h.Guid, h.Titulo))]);
+            puedeEliminar, ruta, [.. f.Hijas.Select(h => new SubpaginaDto(h.Guid, h.Titulo))],
+            p.Estado, p.TipoDocumento, p.ResponsableGuid is { } rg ? new ResponsableDto(rg, p.ResponsableNombre ?? "") : null,
+            p.FechaRevision is { } fr ? DateOnly.FromDateTime(fr) : null, f.Etiquetas, Autorizacion.Can(actual, Accion.PaginasAprobar));
     }
+
+    private static readonly string[] Estados = ["borrador", "en_revision", "aprobado", "archivado"];
+    private static readonly string[] Tipos = ["general", "adr", "api", "runbook", "arquitectura", "onboarding", "guia", "procedimiento", "manual", "acta"];
+
+    public async Task EditarMetadataAsync(Guid guid, EditarMetadataRequest s)
+    {
+        var a = Jerarquia.Alcance(actual, Accion.MetadataEditar);
+        if (!Estados.Contains(s.Estado)) throw new SolicitudInvalidaException("El estado no es válido.");
+        if (!Tipos.Contains(s.TipoDocumento)) throw new SolicitudInvalidaException("El tipo de documento no es válido.");
+        var etiquetas = Etiquetas.Normalizar(s.Etiquetas);
+        if (etiquetas.Count > 20) throw new SolicitudInvalidaException("Una página admite como máximo 20 etiquetas.");
+        if (etiquetas.Any(e => e.Length > 50)) throw new SolicitudInvalidaException("Cada etiqueta debe tener entre 1 y 50 caracteres.");
+        var r = await paginas.EditarMetadataAsync(a, guid, s.Estado, s.TipoDocumento, s.ResponsableGuid, s.FechaRevision,
+            JsonSerializer.Serialize(etiquetas), Autorizacion.Can(actual, Accion.PaginasAprobar));
+        Jerarquia.ExigirExiste(r, "La página no existe.");
+        if (r == 2) throw new SolicitudInvalidaException("El responsable debe ser un usuario activo del cliente");
+        if (r == 3) throw new AccesoDenegadoException("Solo un Coordinador o superior puede aprobar una página");
+    }
+
+    public Task<IReadOnlyList<string>> EtiquetasAsync(string? texto)
+    {
+        var a = Jerarquia.Alcance(actual);
+        var t = Etiquetas.Normalizar(texto);
+        return paginas.ConsultarEtiquetasAsync(a, t.Length > 50 ? t[..50] : t);
+    }
+
+    public Task<IReadOnlyList<ResponsableDto>> ResponsablesAsync() => paginas.ConsultarResponsablesAsync(Jerarquia.Alcance(actual));
 
     public async Task<Guid> CrearAsync(CrearPaginaRequest s)
     {
