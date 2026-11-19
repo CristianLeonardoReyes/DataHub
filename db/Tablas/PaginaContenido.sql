@@ -1,4 +1,4 @@
--- Estado vigente. Origen: Migraciones/2026-11-18_03_pagina_contenido.sql
+-- Estado vigente (índice FULLTEXT: Migraciones/2026-11-19_03_busqueda.sql). Origen: Migraciones/2026-11-18_03_pagina_contenido.sql
 
 CREATE TABLE `PaginaContenido` (
   `PaginaId`           BIGINT UNSIGNED NOT NULL,
@@ -8,5 +8,6 @@ CREATE TABLE `PaginaContenido` (
   `FechaActualizacion` DATETIME        NOT NULL DEFAULT (UTC_TIMESTAMP()),
   PRIMARY KEY (`PaginaId`),
   CONSTRAINT `FK_PaginaContenido_Pagina` FOREIGN KEY (`PaginaId`)
-    REFERENCES `Pagina` (`Id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+    REFERENCES `Pagina` (`Id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  FULLTEXT KEY `FT_PaginaContenido_TextoPlano` (`TextoPlano`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

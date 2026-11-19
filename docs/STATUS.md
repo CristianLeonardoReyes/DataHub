@@ -4,22 +4,20 @@ tocó. La historia la guarda git._
 
 ## Común
 
-- **Hecho en `develop`:** pasos 1–6 (base, Acceso, Clientes/Usuarios, Jerarquía, Editor, Metadata), PR #15.
-- **En curso:** `feat/DAT-185-archivos-de-paginas-…` (paso 7) — lista para commit/PR (2026-11-19).
-  api 173/173, web 74/74. Siguiente: paso 8 (búsqueda FULLTEXT).
+- **Hecho en `develop`:** pasos 1–7 (… Metadata, Archivos), PR #16.
+- **En curso:** `feat/DAT-186-busqueda-de-paginas-…` (paso 8) — lista para commit/PR (2026-11-19).
+  api 202/202, web 79/79. Siguiente: paso 9 (exportar a Markdown).
 - **Reglas 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta según `permisos`.
 - **Local:** README "Guía de arranque". API perfil `http` en `:5080`; Vite `:5173` con proxy.
   `dotnet test` requiere Docker; si la API bloquea `bin/`, usar `-p:OutDir=…/Tests/bin/alt/`.
 
 ## Backend (api/ + db/)
 
-- **BD del servidor** (MySQL 8.0.36, base `DataHub`): 12 migraciones aplicadas (hasta 2026-11-19_02) y semilla
+- **BD del servidor** (MySQL 8.0.36, base `DataHub`): 13 migraciones aplicadas (hasta 2026-11-19_03) y semilla
   `dev_datos_prueba.sql`. `developer1` tiene privilegios globales: limitar a `DataHub.*`.
 - 5 capas; solo SP (`<prefijo>_<verbo><Calificador>`, collation 0900); ProblemDetails; `/health`.
-- **Acceso:** JWT en cookie `datahub_sesion`; usuario/cliente activos en cada petición; bloqueo 5/15 min;
-  rate limit. Sesión deslizante (`max`/`rec`, 60 min / 8 h, recordarme 7 días); header `X-Sesion-Expira`.
-- **Contraseña** 10+ con mayúscula, minúscula, número y símbolo. **Correo:** `Archivo` o `Ses`, plantilla
-  única. **Permisos:** `MatrizPermisos` + `Autorizacion.Can`.
+- **Acceso:** JWT en cookie `datahub_sesion`, sesión deslizante 60 min / 8 h (recordarme 7 días),
+  bloqueo 5/15 min, contraseña fuerte, correo `Archivo`/`Ses`. Permisos: `MatrizPermisos` + `Can`.
 - **Jerarquía:** alcance en los SP (`p_ClienteId`/`p_UsuarioId`/`p_VeTodo`; fuera → 404); borrado lógico
   en cascada; PUT de página reemplaza `paginaPadreGuid`; pasar a Admin borra sus membresías.
 - **Contenido:** `pco_editar` con `FOR UPDATE` → 409 si la versión no coincide; `TiptapContenido` valida
@@ -31,26 +29,30 @@ tocó. La historia la guarda git._
   `{clienteGuid}/{workspaceGuid}/{paginaGuid}/{adjuntoGuid}`; SAS de lectura 10 min (SVG y no
   previsualizables como attachment); `LimiteSubida` corta en `Archivos:TamanoMaximoMb`+1 MB; rate
   limit "subida" 30/min; borrado lógico (el blob se conserva). Pruebas con Azurite 3.37.0.
+- **Búsqueda:** `GET /buscar` → `pag_consultarBusqueda` (FULLTEXT BOOLEAN MODE, filtro de permisos en
+  el SP, título x2). `ConsultaBusqueda.Preparar`: solo letras/dígitos, sin stopwords de InnoDB, ≤8
+  términos `+t*`, mínimo 2 letras. Rate limit "busqueda" 60/min; páginas 1..500.
 - **Deuda:** `UseForwardedHeaders` antes de desplegar; `Posicion` repetida en altas simultáneas; carrera
   de slug de cliente da 500; sin aviso si falla el correo al crear cliente.
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (74 pruebas), oxlint (5
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (79 pruebas), oxlint (5
   warnings aceptados). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
 - **Tema** claro por defecto (`datahub-tema`). **Sesión:** modal "Tu sesión expiró" (`X-Sesion-Expira` o 401).
-- **Jerarquía:** árbol en el menú (`ArbolProvider`), `/workspaces`, `/paginas/:guid`, recientes. Deuda:
-  foco del menú ⋯ con teclado (paso 10).
+- **Jerarquía:** árbol en el menú, `/workspaces`, `/paginas/:guid`, recientes. Deuda: teclado en menú ⋯.
 - **Editor** (Tiptap 3.32.2): autoguardado 1,5 s, un PUT a la vez, reintento 5 s, guarda al salir;
   409 bloquea y ofrece Recargar. Imagen = nodo propio `image` con `attachmentId`.
-- **Metadata** (`metadata.tsx`): insignia de estado y panel "Detalles" con guardado explícito; etiquetas
-  como chips con `<datalist>`; "Aprobado" deshabilitado sin `puedeAprobar`.
+- **Metadata:** insignia y panel "Detalles" (guardado explícito, etiquetas con `<datalist>`).
 - **Archivos** (`archivos.tsx`): subida (botón y arrastrar), vista previa (imagen, PDF, video, audio;
   SVG nunca) y descarga.
-- **Botones:** cursor de mano global; `Boton` con `cargando`/`textoCarga` en toda acción.
+- **Búsqueda:** campo en la cabecera (Ctrl+K fuera del editor, "/"), `/buscar` con resaltado `<mark>`
+  sin innerHTML y paginación.
 
 ## Pendientes conocidos
 
+- Búsqueda: cada término debe estar en el título o en el contenido (no repartido entre ambos). Mejora
+  posterior: columna única de búsqueda con un FULLTEXT (cambia PRD §6; requiere decisión).
 - **Prueba real de archivos (bloqueada):** crear la cuenta de almacenamiento propia de DataHub (la
   cadena actual apunta a `datahub`, que no es de la empresa → 403), guardar su cadena en user-secrets
   y reiniciar la API; luego probar subir/ver/descargar/imagen en editor/eliminar. El usuario avisa.

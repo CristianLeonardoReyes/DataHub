@@ -48,6 +48,12 @@ public class PaginaRepository(DapperContext context) : BaseRepository(context), 
         QueryListAsync<PaginaRecienteDto>(SpNombres.PaginaConsultarRecientes,
             new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo });
 
+    public Task<BusquedaFilas> BuscarAsync(Alcance a, string consulta, string primero, int desplazamiento, int limite) =>
+        QueryMultipleAsync(SpNombres.PaginaConsultarBusqueda,
+            new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo, p_Consulta = consulta, p_Primero = primero,
+                  p_Desplazamiento = desplazamiento, p_Limite = limite },
+            async g => new BusquedaFilas(await g.ReadFirstAsync<int>(), (await g.ReadAsync<BusquedaFila>()).AsList()));
+
     public async Task<ContenidoFila> ObtenerContenidoAsync(Alcance a, Guid guid) =>
         (await QueryFirstOrNullAsync<ContenidoFila>(SpNombres.ContenidoConsultar,
             new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo, p_PaginaGuid = guid }))!;
