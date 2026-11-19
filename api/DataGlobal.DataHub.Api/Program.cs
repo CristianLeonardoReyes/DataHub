@@ -163,6 +163,8 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy("token", c => Ventana(c, 10)); // aceptar invitación y restablecer comparten el cupo
     o.AddPolicy("subida", c => RateLimitPartition.GetFixedWindowLimiter(c.User.FindFirstValue("usuarioId") ?? c.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 })); // por usuario
+    o.AddPolicy("busqueda", c => RateLimitPartition.GetFixedWindowLimiter(c.User.FindFirstValue("usuarioId") ?? c.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 60, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 })); // por usuario
 });
 
 var app = builder.Build();

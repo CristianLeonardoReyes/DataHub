@@ -1,4 +1,4 @@
--- Estado vigente. Origen: Migraciones/2026-11-18_01_jerarquia_tablas.sql
+-- Estado vigente (índice FULLTEXT: Migraciones/2026-11-19_03_busqueda.sql). Origen: Migraciones/2026-11-18_01_jerarquia_tablas.sql
 
 CREATE TABLE `Pagina` (
   `Id`                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -38,5 +38,6 @@ CREATE TABLE `Pagina` (
   CONSTRAINT `FK_Pagina_CreadoPor` FOREIGN KEY (`CreadoPor`)
     REFERENCES `Usuario` (`Id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `FK_Pagina_ActualizadoPor` FOREIGN KEY (`ActualizadoPor`)
-    REFERENCES `Usuario` (`Id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+    REFERENCES `Usuario` (`Id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  FULLTEXT KEY `FT_Pagina_Titulo` (`Titulo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

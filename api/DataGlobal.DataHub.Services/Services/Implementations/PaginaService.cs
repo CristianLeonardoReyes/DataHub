@@ -12,6 +12,20 @@ public class PaginaService(IPaginaRepository paginas, UsuarioActual actual) : IP
 {
     public Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync() => paginas.RecientesAsync(Jerarquia.Alcance(actual));
 
+    public const int PorPagina = 20;
+    public const int MaxPagina = 500;
+
+    public async Task<BusquedaDto> BuscarAsync(string? q, int pagina)
+    {
+        var a = Jerarquia.Alcance(actual, Accion.Buscar);
+        if (pagina < 1 || pagina > MaxPagina) throw new SolicitudInvalidaException($"La página debe estar entre 1 y {MaxPagina}.");
+        var (consulta, primero) = ConsultaBusqueda.Preparar(q) ?? throw new SolicitudInvalidaException("Escribe al menos 2 letras para buscar");
+        var r = await paginas.BuscarAsync(a, consulta, primero, (pagina - 1) * PorPagina, PorPagina);
+        return new(r.Total, pagina, PorPagina, [.. r.Filas.Select(f => new ResultadoBusquedaDto(f.Guid, f.Titulo,
+            string.Join(" / ", new[] { f.Workspace, f.Espacio, f.Coleccion, f.PaginaPadreTitulo }.Where(x => x is not null)),
+            f.Fragmento, DateTime.SpecifyKind(f.FechaActualizacion, DateTimeKind.Utc)))]);
+    }
+
     public async Task<PaginaDetalleDto> ObtenerAsync(Guid guid)
     {
         var f = await paginas.ObtenerAsync(Jerarquia.Alcance(actual), guid) ?? throw new NoEncontradoException("La página no existe.");

@@ -5,6 +5,7 @@ namespace DataGlobal.DataHub.Services.Services.Interfaces;
 public interface IPaginaService
 {
     Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync();
+    Task<BusquedaDto> BuscarAsync(string? q, int pagina);
     Task<PaginaDetalleDto> ObtenerAsync(Guid guid);
     Task EditarMetadataAsync(Guid guid, EditarMetadataRequest solicitud);
     Task<IReadOnlyList<string>> EtiquetasAsync(string? texto);

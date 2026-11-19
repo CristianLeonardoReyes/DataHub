@@ -4,6 +4,7 @@ import { ClienteForm, Clientes } from './clientes'
 import { InvitarUsuario, Usuarios } from './usuarios'
 import { Inicio } from './inicio'
 import { PaginaVista } from './paginas'
+import { Busqueda } from './busqueda'
 import { Workspaces } from './workspaces'
 import { AceptarInvitacion, Login, OlvideContrasena, RestablecerContrasena } from './pantallas'
 
@@ -22,6 +23,7 @@ export function Rutas() {
         <Route path="/usuarios" element={<RequierePermiso permiso="usuariosGestionar"><Usuarios /></RequierePermiso>} />
         <Route path="/usuarios/nuevo" element={<RequierePermiso permiso="usuariosGestionar"><InvitarUsuario /></RequierePermiso>} />
         <Route path="/workspaces" element={<RequierePermiso permiso="workspacesGestionar"><Workspaces /></RequierePermiso>} />
+        <Route path="/buscar" element={<RequierePermiso permiso="buscar"><Busqueda /></RequierePermiso>} />
         <Route path="/paginas/:guid" element={<PaginaVista />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

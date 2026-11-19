@@ -4,7 +4,7 @@ import * as auth from './api/auth'
 import * as apiClientes from './api/clientes'
 import { alCambiarExpira, alNoAutorizado } from './api/http'
 import { ArbolProvider, MenuArbol } from './arbol'
-import { Building2, Home, Layers, LoaderCircle, LogIn, LogOut, Menu, Moon, Sun, TriangleAlert, Users, X } from 'lucide-react'
+import { Building2, Home, Layers, LoaderCircle, LogIn, LogOut, Menu, Moon, Search, Sun, TriangleAlert, Users, X } from 'lucide-react'
 import { Alerta, Avatar, Boton, btnCls, btnSmCls, inputCls } from './ui'
 
 export type Permiso =
@@ -255,6 +255,55 @@ export function Layout() {
   return <ArbolProvider><LayoutInterno /></ArbolProvider>
 }
 
+/** Campo de búsqueda de la cabecera: Enter va a /buscar; Ctrl+K o "/" lo enfocan; en móvil se abre con la lupa. */
+function Buscador() {
+  const nav = useNavigate()
+  const { pathname, search } = useLocation()
+  const [texto, setTexto] = useState(() => (pathname === '/buscar' ? (new URLSearchParams(search).get('q') ?? '') : ''))
+  const [abierto, setAbierto] = useState(false)
+  const campo = useRef<HTMLInputElement>(null)
+  const abrir = () => {
+    setAbierto(true)
+    setTimeout(() => campo.current?.focus(), 0)
+  }
+
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement
+      const escribiendo = el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)
+      // Dentro del editor Ctrl+K queda libre (atajo habitual de enlace).
+      const ctrlK = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && !el.isContentEditable
+      const barra = e.key === '/' && !escribiendo && !e.ctrlKey && !e.metaKey
+      if (!ctrlK && !barra) return
+      e.preventDefault()
+      abrir()
+    }
+    document.addEventListener('keydown', tecla)
+    return () => document.removeEventListener('keydown', tecla)
+  }, [])
+
+  return (
+    <div className="mb-5 flex justify-end sm:justify-start">
+      <button type="button" className={`${btnSmCls} px-2 sm:hidden ${abierto ? 'hidden' : ''}`} aria-label="Buscar" onClick={abrir}>
+        <Search aria-hidden className="size-4" />
+      </button>
+      <form role="search" className={`${abierto ? 'block' : 'hidden'} w-full sm:block sm:max-w-md`}
+        onSubmit={(e) => {
+          e.preventDefault()
+          const q = texto.trim()
+          if (q) nav(`/buscar?q=${encodeURIComponent(q)}`)
+        }}>
+        <label htmlFor="buscar-q" className="sr-only">Buscar páginas</label>
+        <div className="relative">
+          <Search aria-hidden className="pointer-events-none absolute top-3 left-3 size-4 text-faint" />
+          <input id="buscar-q" ref={campo} type="search" className={`${inputCls} pl-9`} placeholder="Buscar páginas (Ctrl+K)"
+            value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={200} onBlur={() => setAbierto(false)} />
+        </div>
+      </form>
+    </div>
+  )
+}
+
 function LayoutInterno() {
   const { usuario, puede, salir } = useSesion()
   const nav = useNavigate()
@@ -304,7 +353,10 @@ function LayoutInterno() {
         </div>
       </aside>
       <main className="min-w-0 flex-1 lg:pl-[248px]">
-        <div className="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-16 sm:px-6 lg:px-10 lg:pt-9"><Outlet /></div>
+        <div className="mx-auto w-full max-w-[1200px] px-4 pt-6 pb-16 sm:px-6 lg:px-10 lg:pt-9">
+          {puede('buscar') && (usuario.perfil !== 'super_admin' || !!usuario.cliente) && <Buscador />}
+          <Outlet />
+        </div>
       </main>
     </div>
   )

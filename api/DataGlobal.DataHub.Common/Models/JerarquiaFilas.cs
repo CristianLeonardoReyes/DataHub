@@ -15,6 +15,20 @@ public class EspacioFila { public Guid WorkspaceGuid { get; set; } public Guid G
 public class ColeccionFila { public Guid EspacioGuid { get; set; } public Guid Guid { get; set; } public string Nombre { get; set; } = ""; public string? Descripcion { get; set; } }
 public class PaginaFila { public Guid ColeccionGuid { get; set; } public Guid? PaginaPadreGuid { get; set; } public Guid Guid { get; set; } public string Titulo { get; set; } = ""; }
 
+public class BusquedaFila
+{
+    public Guid Guid { get; set; }
+    public string Titulo { get; set; } = "";
+    public DateTime FechaActualizacion { get; set; }
+    public string Workspace { get; set; } = "";
+    public string Espacio { get; set; } = "";
+    public string Coleccion { get; set; } = "";
+    public string? PaginaPadreTitulo { get; set; }
+    public string Fragmento { get; set; } = "";
+}
+
+public record BusquedaFilas(int Total, IReadOnlyList<BusquedaFila> Filas);
+
 public record ArbolFilas(IReadOnlyList<WorkspaceFila> Workspaces, IReadOnlyList<EspacioFila> Espacios,
     IReadOnlyList<ColeccionFila> Colecciones, IReadOnlyList<PaginaFila> Paginas);
 

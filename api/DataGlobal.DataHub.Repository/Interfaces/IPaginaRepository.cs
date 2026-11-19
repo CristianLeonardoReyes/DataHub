@@ -18,6 +18,8 @@ public interface IPaginaRepository
     Task<IReadOnlyList<string>> ConsultarEtiquetasAsync(Alcance a, string texto);
     Task<IReadOnlyList<ResponsableDto>> ConsultarResponsablesAsync(Alcance a);
     Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync(Alcance a);
+    /// <summary>Total de coincidencias y la página pedida; el alcance se filtra dentro del SP.</summary>
+    Task<BusquedaFilas> BuscarAsync(Alcance a, string consulta, string primero, int desplazamiento, int limite);
     /// <summary>Resultado 0 fuera de alcance, 1 ok (ContenidoJson null y versión 0 si aún no hay contenido).</summary>
     Task<ContenidoFila> ObtenerContenidoAsync(Alcance a, Guid guid);
     /// <summary>0 fuera de alcance, 1 ok (versión nueva), 2 conflicto de versión (versión guardada).</summary>
