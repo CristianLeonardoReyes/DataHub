@@ -1,5 +1,5 @@
 import type { components } from './esquema'
-import { pedir } from './http'
+import { pedir, pedirArchivo } from './http'
 
 type S = components['schemas']
 export type WorkspaceArbol = S['WorkspaceArbolDto']
@@ -53,6 +53,7 @@ export const paginas = {
   eliminar: eliminar('paginas'),
   obtener: (guid: string) => pedir<PaginaDetalle>('GET', `/paginas/${guid}`),
   recientes: () => pedir<PaginaReciente[]>('GET', '/paginas/recientes'),
+  markdown: (guid: string) => pedirArchivo(`/paginas/${guid}/markdown`),
 }
 export const metadata = (guid: string, b: MetadataPagina) => pedir<void>('PUT', `/paginas/${guid}/metadata`, b)
 export const etiquetas = (q: string) => pedir<string[]>('GET', `/etiquetas?q=${encodeURIComponent(q)}`)

@@ -20,6 +20,7 @@ export function PaginaVista() {
   const [fallo, setFallo] = useState<{ status: number; detalle?: string | null } | null>(null)
   const [nueva, setNueva] = useState(false)
   const [eliminando, setEliminando] = useState(false)
+  const [exportando, setExportando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [recargaArchivos, setRecargaArchivos] = useState(0)
 
@@ -53,6 +54,24 @@ export function PaginaVista() {
     setEliminando(false)
   }
 
+  async function exportar(paginaGuid: string) {
+    setExportando(true)
+    setError(null)
+    const r = await api.paginas.markdown(paginaGuid)
+    if (r.ok) {
+      const url = URL.createObjectURL(r.datos.blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = r.datos.nombre ?? 'pagina.md'
+      a.click()
+      // Revocar en el mismo tick puede cancelar la descarga en Firefox/Safari.
+      setTimeout(() => URL.revokeObjectURL(url), 0)
+    } else if (r.status !== 401) {
+      setError(r.status === 403 ? 'No tienes permiso para exportar' : r.status === 404 ? 'Página no encontrada o sin acceso' : 'No se pudo exportar')
+    }
+    setExportando(false)
+  }
+
   if (fallo)
     return (
       <section>
@@ -80,11 +99,10 @@ export function PaginaVista() {
           {`Actualizada ${new Date(pagina.fechaActualizacion).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}`}
         </span>}
         acciones={<div className="flex flex-wrap gap-2">
-          {/* Descarga directa: el navegador envía la cookie y la API responde como adjunto {slug}.md. */}
           {puede('exportarMarkdown') && (
-            <a href={`/api/v1/paginas/${pagina.guid}/markdown`} download className={btnSmCls}>
+            <Boton type="button" cargando={exportando} textoCarga="Exportando…" className={btnSmCls} onClick={() => void exportar(pagina.guid)}>
               <FileDown aria-hidden className="size-3.5" />Exportar a Markdown
-            </a>
+            </Boton>
           )}
           {pagina.puedeEliminar && (
             <Boton type="button" cargando={eliminando} textoCarga="Eliminando…" className={`${btnSmCls} text-danger hover:bg-danger-bg`} onClick={() => void eliminar(pagina)}>

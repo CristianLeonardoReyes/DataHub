@@ -4,9 +4,10 @@ tocó. La historia la guarda git._
 
 ## Común
 
-- **Hecho en `develop`:** pasos 1–8 (… Archivos, Búsqueda), PR #17.
-- **En curso:** `feat/DAT-187-exportacion-de-paginas-a-markdown-…` (paso 9) — lista para commit/PR
-  (2026-11-19). api 235/235, web 80/80. Siguiente: paso 10 (cierre: PRD §9 y RNF).
+- **Hecho en `develop`:** pasos 1–9 (… Búsqueda, Markdown), PR #18.
+- **En curso:** `feat/DAT-188-cierre-del-mvp-…` (paso 10) — lista para commit/PR (2026-11-19).
+  api 244/244, web 85/85. Criterios PRD §9: los 8 con prueba de integración. Despliegue (PRD §7.6)
+  fuera del paso 10: se hace tras probar todo en local.
 - **Reglas 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta según `permisos`.
 - **Local:** README "Guía de arranque". API perfil `http` en `:5080`; Vite `:5173` con proxy.
   `dotnet test` requiere Docker; si la API bloquea `bin/`, usar `-p:OutDir=…/Tests/bin/alt/`.
@@ -35,23 +36,28 @@ tocó. La historia la guarda git._
 - **Markdown:** `GET /paginas/{guid}/markdown` → `MarkdownTiptap` determinístico (GFM, `<!-- -->` entre
   listas seguidas, imagen `attachment:{guid}`, links http/https/mailto) + Front Matter RF-MD-03 con
   strings citados; `owner` y `review_date` se omiten si no hay. Sin migración.
-- **Deuda:** `UseForwardedHeaders` antes de desplegar; `Posicion` repetida en altas simultáneas; carrera
+- **Seguridad (RNF-04):** cabeceras en `Program.cs` para toda respuesta: nosniff, `Referrer-Policy:
+  no-referrer`, CSP (`script-src 'self'`, `style-src` con `'unsafe-inline'` por el editor, Google Fonts,
+  origen del blob en img/media/frame-src, calculado al arrancar); HSTS fuera de Development;
+  `UseForwardedHeaders` confiando en cualquier proxy (válido solo detrás del frontend de Azure).
+  Video/audio inline solo mp4/webm/ogg y mpeg/mp4/ogg/wav/webm; el resto, attachment.
+- **Deuda:** `Posicion` repetida en altas simultáneas; carrera
   de slug de cliente da 500; sin aviso si falla el correo al crear cliente.
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (80 pruebas), oxlint (5
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (85 pruebas), oxlint (11
   warnings aceptados). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
-- **Tema** claro por defecto (`datahub-tema`). **Sesión:** modal "Tu sesión expiró" (`X-Sesion-Expira` o 401).
-- **Jerarquía:** árbol en el menú, `/workspaces`, `/paginas/:guid`, recientes. Deuda: teclado en menú ⋯.
+- **Tema** claro por defecto (`datahub-tema`, aplicado por `public/tema.js`: la CSP no admite scripts inline). **Sesión:** modal "Tu sesión expiró" (`X-Sesion-Expira` o 401).
+- **Jerarquía:** árbol en el menú, `/workspaces`, `/paginas/:guid`, recientes. Menú ⋯ con teclado (roles menu/menuitem).
 - **Editor** (Tiptap 3.32.2): autoguardado 1,5 s, un PUT a la vez, reintento 5 s, guarda al salir;
   409 bloquea y ofrece Recargar. Imagen = nodo propio `image` con `attachmentId`.
 - **Metadata:** insignia y panel "Detalles" (guardado explícito, etiquetas con `<datalist>`).
 - **Archivos** (`archivos.tsx`): subida (botón y arrastrar), vista previa (imagen, PDF, video, audio;
-  SVG nunca) y descarga.
+  SVG nunca) en `<dialog>` modal y descarga; la URL SAS se renueva 1 min antes de vencer.
 - **Búsqueda:** campo en la cabecera (Ctrl+K fuera del editor, "/"), `/buscar` con resaltado `<mark>`
   sin innerHTML y paginación.
-- **Markdown:** enlace "Exportar a Markdown" (`<a download>`); con sesión vencida descarga el JSON de error.
+- **Markdown:** botón "Exportar a Markdown" (`pedirArchivo` en `http.ts`); 401 abre el modal de sesión.
 
 ## Pendientes conocidos
 
@@ -60,8 +66,11 @@ tocó. La historia la guarda git._
 - **Prueba real de archivos (bloqueada):** crear la cuenta de almacenamiento propia de DataHub (la
   cadena actual apunta a `datahub`, que no es de la empresa → 403), guardar su cadena en user-secrets
   y reiniciar la API; luego probar subir/ver/descargar/imagen en editor/eliminar. El usuario avisa.
-- Paso 10: error de exportar Markdown con sesión vencida (hoy descarga el JSON); foco atrapado en el modal de vista previa; lista blanca de subtipos video/audio; reintento
-  del PDF tras 10 min. CSP al desplegar: permitir el dominio del blob en img/frame/media-src.
+- **Prueba manual pendiente (usuario, con su API y MySQL):** recorrer la DoD (PRD §10) con la API
+  sirviendo el build de `web/` y la consola abierta: editor sin violaciones de CSP, vista previa
+  `<dialog>` (foco, Esc), exportar Markdown (también en Firefox), menú ⋯ con teclado. Desde el entorno
+  del agente MySQL no responde (timeout); solo se verificó la CSP en el login.
+- Al desplegar: confirmar que el límite de login cuenta por la IP real (depende de `UseForwardedHeaders`).
 - `CODEOWNERS` y proteger `main`/`develop` (usuario).
 - Producción: `Jwt__Clave` propia al crear la Web App.
 - Limpiar metadatos "generado por IA" (C2PA/Recraft) de `docs/diseno/logo/*.svg` — pendiente de decisión.

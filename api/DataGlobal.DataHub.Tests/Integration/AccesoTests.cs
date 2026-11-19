@@ -190,6 +190,30 @@ public class AccesoTests : IClassFixture<MySqlFixture>, IAsyncDisposable
     }
 
     [Fact]
+    public async Task Token_de_recuperacion_usado_o_vencido_da_400()
+    {
+        var correo = await CrearActivoAsync();
+        await _http.PostAsJsonAsync("/api/v1/auth/olvide-contrasena", new { correo }, Ct);
+        var archivo = Assert.Single(Directory.GetFiles(_factory.CarpetaCorreos, "*.html"));
+        var token = Regex.Match(await File.ReadAllTextAsync(archivo, Ct), "token=([0-9a-f]{64})").Groups[1].Value;
+
+        const string nueva = "OtraClave@456789";
+        Assert.Equal(HttpStatusCode.NoContent, (await _http.PostAsJsonAsync("/api/v1/auth/restablecer-contrasena", new { token, contrasena = nueva }, Ct)).StatusCode);
+        const string otra = "TerceraClave@789012";
+        Assert.Equal(HttpStatusCode.BadRequest, (await _http.PostAsJsonAsync("/api/v1/auth/restablecer-contrasena", new { token, contrasena = otra }, Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await LoginAsync(correo, nueva)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await LoginAsync(correo, otra)).StatusCode);
+
+        var vencido = TokenUtil.Generar();
+        await using var cn = new MySqlConnection(_db.ConnectionString);
+        await cn.ExecuteAsync(
+            "INSERT INTO UsuarioToken (UsuarioId, Tipo, TokenHash, FechaExpiracion) SELECT Id, 'reset', @hash, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR) FROM Usuario WHERE Correo = @correo",
+            new { hash = TokenUtil.Hash(vencido), correo });
+        Assert.Equal(HttpStatusCode.BadRequest, (await _http.PostAsJsonAsync("/api/v1/auth/restablecer-contrasena", new { token = vencido, contrasena = otra }, Ct)).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await LoginAsync(correo, otra)).StatusCode);
+    }
+
+    [Fact]
     public async Task Login_de_usuario_invitado_da_401()
     {
         var correo = Correo();

@@ -4,7 +4,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Dapper;
+using DataGlobal.DataHub.Services.Almacen;
+using Microsoft.Extensions.DependencyInjection;
 using DataGlobal.DataHub.Services.Seguridad;
 using MySqlConnector;
 
@@ -234,6 +237,10 @@ public class ArchivosTests : IClassFixture<MySqlFixture>, IClassFixture<AzuriteF
     [InlineData("doc.pdf", "application/pdf", false, "inline", "application/pdf")]
     [InlineData("dibujo.svg", "image/svg+xml", false, "attachment", "application/octet-stream")]
     [InlineData("datos.zip", "application/zip", false, "attachment", "application/octet-stream")]
+    [InlineData("clip.mp4", "video/mp4", false, "inline", "video/mp4")]
+    [InlineData("audio.mp3", "audio/mpeg", false, "inline", "audio/mpeg")]
+    [InlineData("clip.avi", "video/x-msvideo", false, "attachment", "application/octet-stream")]
+    [InlineData("voz.flac", "audio/flac", false, "attachment", "application/octet-stream")]
     [InlineData("foto.png", "image/png", true, "attachment", "application/octet-stream")]
     public async Task Url_sas_entrega_el_contenido_con_su_disposicion(string nombre, string tipo, bool descargar, string disposicion, string tipoRespuesta)
     {
@@ -250,6 +257,32 @@ public class ArchivosTests : IClassFixture<MySqlFixture>, IClassFixture<AzuriteF
         Assert.Equal(tipoRespuesta, r.Content.Headers.ContentType!.MediaType);
         Assert.StartsWith(disposicion, r.Content.Headers.ContentDisposition!.ToString());
         if (disposicion == "attachment") Assert.Equal(nombre, r.Content.Headers.ContentDisposition!.FileNameStar);
+    }
+
+    private async Task<string> RutaBlobAsync(Guid adj)
+    {
+        await using var cn = new MySqlConnection(_db.ConnectionString);
+        return await cn.ExecuteScalarAsync<string>("SELECT RutaBlob FROM Adjunto WHERE Guid = @g", new { g = adj.ToString() }) ?? "";
+    }
+
+    [Fact]
+    public async Task Sas_vencida_o_ausente_es_rechazada_y_el_contenedor_es_privado()
+    {
+        var admin = await AdminAsync();
+        var (_, pag) = await PaginaAsync(admin);
+        var adj = await SubirAsync(admin, pag);
+        var ruta = await RutaBlobAsync(adj);
+        Assert.Equal(4, ruta.Split('/').Length);
+
+        var almacen = _factory.Services.GetRequiredService<IAlmacenArchivos>();
+        var vencida = almacen.UrlLectura(ruta, DateTimeOffset.UtcNow.AddSeconds(-30), "text/plain", "inline");
+        Assert.Equal(HttpStatusCode.Forbidden, (await DescargarAsync(vencida)).StatusCode);
+
+        var sinSas = vencida[..vencida.IndexOf('?')];
+        Assert.False((await DescargarAsync(sinSas)).IsSuccessStatusCode);
+
+        var c = new BlobContainerClient(_azurite.ConnectionString, ApiFactory.ContenedorArchivos);
+        Assert.Equal(PublicAccessType.None, (await c.GetPropertiesAsync(cancellationToken: Ct)).Value.PublicAccess ?? PublicAccessType.None);
     }
 
     [Fact]
