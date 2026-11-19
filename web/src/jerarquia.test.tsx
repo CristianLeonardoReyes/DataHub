@@ -140,6 +140,16 @@ test('la página muestra su ruta y oculta Eliminar si puedeEliminar es false', a
   expect(screen.getByRole('heading', { name: 'Alta de clientes' })).toBeInTheDocument()
   expect(await screen.findByRole('textbox', { name: 'Contenido de la página' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Eliminar página' })).toBeNull()
+  // ADMIN no tiene exportarMarkdown en este fixture: no aparece el enlace.
+  expect(screen.queryByRole('link', { name: 'Exportar a Markdown' })).toBeNull()
+})
+
+test('con exportarMarkdown aparece el enlace de descarga del Markdown de la página', async () => {
+  montar('/paginas/p2', { ...ADMIN, permisos: [...ADMIN.permisos, 'exportarMarkdown'] },
+    { 'GET /paginas/p2': DETALLE, 'GET /paginas/p2/contenido': { contenido: null, version: 0 } })
+  const enlace = await screen.findByRole('link', { name: 'Exportar a Markdown' })
+  expect(enlace).toHaveAttribute('href', '/api/v1/paginas/p2/markdown')
+  expect(enlace).toHaveAttribute('download')
 })
 
 test('una página inexistente muestra el mensaje de no encontrada', async () => {

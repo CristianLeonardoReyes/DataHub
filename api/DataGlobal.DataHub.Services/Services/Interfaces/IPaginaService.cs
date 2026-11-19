@@ -14,5 +14,7 @@ public interface IPaginaService
     Task ActualizarAsync(Guid guid, ActualizarPaginaRequest solicitud);
     Task EliminarAsync(Guid guid);
     Task<ContenidoPaginaDto> ObtenerContenidoAsync(Guid guid);
+    /// <summary>Markdown con Front Matter y nombre de archivo {slug}.md.</summary>
+    Task<ArchivoMarkdownDto> ExportarMarkdownAsync(Guid guid);
     Task<VersionContenidoDto> GuardarContenidoAsync(Guid guid, GuardarContenidoRequest solicitud);
 }

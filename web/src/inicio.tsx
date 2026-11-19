@@ -26,7 +26,7 @@ const PERMISOS: { permiso: Permiso; texto: string; disponible: boolean; to?: str
   { permiso: 'paginasEliminar', texto: 'Eliminar páginas', disponible: true },
   { permiso: 'archivosGestionar', texto: 'Subir y ver archivos', disponible: false },
   { permiso: 'buscar', texto: 'Buscar en la documentación', disponible: false },
-  { permiso: 'exportarMarkdown', texto: 'Exportar páginas a Markdown', disponible: false },
+  { permiso: 'exportarMarkdown', texto: 'Exportar páginas a Markdown', disponible: true },
 ]
 
 const PROXIMOS = [
