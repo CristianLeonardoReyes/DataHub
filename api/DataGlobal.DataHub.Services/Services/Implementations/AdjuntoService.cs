@@ -17,7 +17,12 @@ public class AdjuntoService(IAdjuntoRepository adjuntos, IPaginaRepository pagin
     private static readonly TimeSpan Vigencia = TimeSpan.FromMinutes(10); // RF-ARC-03
     private const string Octeto = "application/octet-stream";
     // RF-ARC-04. SVG queda fuera a propósito: un SVG inline puede ejecutar scripts.
-    private static readonly HashSet<string> Previsualizables = ["image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf"];
+    // Video y audio solo en contenedores que el navegador reproduce de forma nativa.
+    private static readonly HashSet<string> Previsualizables =
+    [
+        "image/png", "image/jpeg", "image/webp", "image/gif", "application/pdf",
+        "video/mp4", "video/webm", "video/ogg", "audio/mpeg", "audio/mp4", "audio/ogg", "audio/wav", "audio/webm"
+    ];
 
     public async Task<IReadOnlyList<AdjuntoDto>> ListarAsync(Guid paginaGuid)
     {
@@ -60,7 +65,7 @@ public class AdjuntoService(IAdjuntoRepository adjuntos, IPaginaRepository pagin
     {
         var f = await adjuntos.ConsultarPorGuidAsync(Jerarquia.Alcance(actual), guid) ?? throw new NoEncontradoException("El archivo no existe.");
         var tipo = f.TipoMime.ToLowerInvariant();
-        var inline = !descargar && (Previsualizables.Contains(tipo) || tipo.StartsWith("video/") || tipo.StartsWith("audio/"));
+        var inline = !descargar && Previsualizables.Contains(tipo);
         var expira = DateTimeOffset.UtcNow + Vigencia;
         var url = almacen.UrlLectura(f.RutaBlob, expira, inline ? tipo : Octeto,
             inline ? "inline" : $"attachment; filename*=UTF-8''{Uri.EscapeDataString(f.NombreOriginal)}");

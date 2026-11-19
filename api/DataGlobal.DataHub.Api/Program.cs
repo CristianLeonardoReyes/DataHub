@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
+using Azure.Storage.Blobs;
 using DataGlobal.DataHub.Api.Controllers;
 using DataGlobal.DataHub.Api.Middleware;
 using DataGlobal.DataHub.Common.Models;
@@ -13,6 +14,7 @@ using DataGlobal.DataHub.Services.Correo;
 using DataGlobal.DataHub.Services.Services.Implementations;
 using DataGlobal.DataHub.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -168,6 +170,34 @@ builder.Services.AddRateLimiter(o =>
 });
 
 var app = builder.Build();
+
+// ponytail: se confía en cualquier proxy porque Azure App Service entrega por su frontend; si la API se expone directo, fijar KnownProxies.
+var reenviadas = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto };
+reenviadas.KnownIPNetworks.Clear();
+reenviadas.KnownProxies.Clear();
+app.UseForwardedHeaders(reenviadas);
+
+// RNF-04. El origen del Blob (para las URL SAS de imágenes, PDF, video y audio) se calcula una vez al arrancar.
+var cadenaBlob = app.Configuration.GetConnectionString("AzureBlobStorage");
+var origenBlob = string.IsNullOrWhiteSpace(cadenaBlob) ? "" : " " + new BlobServiceClient(cadenaBlob).Uri.GetLeftPart(UriPartial.Authority);
+// 'unsafe-inline' en style-src: el editor pone estilos inline.
+var csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; "
+    + $"img-src 'self' data: blob:{origenBlob}; media-src 'self' blob:{origenBlob}; frame-src 'self'{origenBlob}; connect-src 'self'; "
+    + "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'";
+app.Use((ctx, next) =>
+{
+    ctx.Response.OnStarting(() =>
+    {
+        var h = ctx.Response.Headers;
+        h["X-Content-Type-Options"] = "nosniff";
+        h["Referrer-Policy"] = "no-referrer"; // las URL SAS no deben salir en el Referer
+        h["Content-Security-Policy"] = csp;
+        return Task.CompletedTask;
+    });
+    return next();
+});
+
+if (!app.Environment.IsDevelopment()) app.UseHsts();
 
 app.UseExceptionHandler();
 

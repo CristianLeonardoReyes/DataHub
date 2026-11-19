@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { Archivos } from './archivos'
+import { tipoVista } from './api/adjuntos'
 import { EditorContenido } from './editor'
 
 const respuesta = (status: number, cuerpo?: unknown) =>
@@ -93,8 +94,27 @@ test('la vista previa de una imagen pide url con descargar=false y muestra <img>
   const dialogo = await screen.findByRole('dialog')
   expect(await within(dialogo).findByRole('img')).toHaveAttribute('src', 'https://blob.test/foto.png?sas=1')
   expect(llamadas('GET /adjuntos/a1/url?descargar=false')).toHaveLength(1)
-  fireEvent.keyDown(dialogo, { key: 'Escape' })
+  fireEvent(dialogo, new Event('cancel', { cancelable: true }))
   expect(screen.queryByRole('dialog')).toBeNull()
+})
+
+test('al cerrar la vista previa el foco vuelve al botón que la abrió', async () => {
+  rutas['GET /adjuntos/a1/url?descargar=false'] = { url: 'https://blob.test/foto.png?sas=1', expira: 'x' }
+  render(<Archivos guid="p1" editable />)
+  const abrir = await screen.findByRole('button', { name: 'foto.png' })
+  abrir.focus()
+  fireEvent.click(abrir)
+  const dialogo = await screen.findByRole('dialog')
+  expect(screen.getByRole('button', { name: 'Cerrar vista previa' })).toHaveFocus()
+  fireEvent.click(dialogo)
+  expect(screen.queryByRole('dialog')).toBeNull()
+  expect(abrir).toHaveFocus()
+})
+
+test('tipoVista: solo subtipos de video y audio de la lista blanca tienen vista previa', () => {
+  for (const m of ['video/mp4', 'video/webm', 'video/ogg']) expect(tipoVista(m)).toBe('video')
+  for (const m of ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/webm', 'AUDIO/MPEG']) expect(tipoVista(m)).toBe('audio')
+  for (const m of ['video/x-matroska', 'video/quicktime', 'audio/x-flac', 'image/svg+xml', 'text/html']) expect(tipoVista(m)).toBeNull()
 })
 
 test('un SVG no se previsualiza: ficha con Descargar y sin <img>', async () => {

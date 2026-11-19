@@ -37,3 +37,16 @@ export async function subirArchivo(paginaGuid: string, archivo: File): Promise<{
       : 'No se pudo subir el archivo',
   }
 }
+
+const IMAGENES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif']
+const VIDEOS = ['video/mp4', 'video/webm', 'video/ogg']
+const AUDIOS = ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/webm']
+// SVG no está en la lista a propósito: puede llevar scripts. Video y audio también van por lista blanca.
+export function tipoVista(mime: string): 'imagen' | 'pdf' | 'video' | 'audio' | null {
+  const m = mime.toLowerCase()
+  if (IMAGENES.includes(m)) return 'imagen'
+  if (m === 'application/pdf') return 'pdf'
+  if (VIDEOS.includes(m)) return 'video'
+  if (AUDIOS.includes(m)) return 'audio'
+  return null
+}

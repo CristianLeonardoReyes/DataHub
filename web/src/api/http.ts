@@ -55,3 +55,26 @@ export async function pedir<T>(metodo: 'GET' | 'POST' | 'PUT' | 'DELETE', ruta: 
     ? { ok: true, datos: json as T }
     : { ok: false, status: r.status, problema: (json ?? { status: r.status }) as ProblemDetails }
 }
+
+/** GET de un archivo: devuelve el Blob y el nombre de Content-Disposition (null si no viene). */
+export async function pedirArchivo(ruta: string): Promise<Resultado<{ blob: Blob; nombre: string | null }>> {
+  let r: Response
+  try {
+    r = await fetch(`/api/v1${ruta}`, { credentials: 'same-origin' })
+  } catch {
+    return { ok: false, status: 0, problema: { status: 0 } }
+  }
+  const expira = r.headers.get('X-Sesion-Expira')
+  if (expira) oyenteExpira?.(expira)
+  if (r.status === 401 && !SIN_AVISO.includes(ruta)) oyente?.()
+  if (!r.ok) return { ok: false, status: r.status, problema: { status: r.status } }
+  const cd = r.headers.get('Content-Disposition') ?? ''
+  const nombre = /filename\*=UTF-8''([^;]+)/i.exec(cd)?.[1] ?? /filename="?([^";]+)"?/i.exec(cd)?.[1] ?? null
+  let decodificado = nombre
+  try {
+    decodificado = nombre && decodeURIComponent(nombre)
+  } catch {
+    decodificado = nombre
+  }
+  return { ok: true, datos: { blob: await r.blob(), nombre: decodificado } }
+}

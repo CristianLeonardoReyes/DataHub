@@ -90,18 +90,18 @@ test('un colaborador no ve acciones de workspace ni espacio; en colección y pá
   expect(screen.queryByRole('button', { name: 'Acciones de Soporte' })).toBeNull()
   expect(screen.queryByRole('button', { name: 'Acciones de Manuales' })).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Acciones de Guias' }))
-  expect(screen.getByRole('button', { name: 'Agregar página' })).toBeInTheDocument()
-  expect(screen.queryByRole('button', { name: 'Renombrar' })).toBeNull()
+  expect(screen.getByRole('menuitem', { name: 'Agregar página' })).toBeInTheDocument()
+  expect(screen.queryByRole('menuitem', { name: 'Renombrar' })).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Acciones de Inicio rapido' }))
-  expect(screen.getByRole('button', { name: 'Agregar subpágina' })).toBeInTheDocument()
-  expect(screen.queryByRole('button', { name: 'Agregar espacio' })).toBeNull()
-  expect(screen.queryByRole('button', { name: 'Eliminar' })).toBeNull()
+  expect(screen.getByRole('menuitem', { name: 'Agregar subpágina' })).toBeInTheDocument()
+  expect(screen.queryByRole('menuitem', { name: 'Agregar espacio' })).toBeNull()
+  expect(screen.queryByRole('menuitem', { name: 'Eliminar' })).toBeNull()
 })
 
 test('crear un espacio envía POST y recarga el árbol', async () => {
   montar('/', ADMIN, { 'POST /espacios': () => respuesta(201, { guid: 'e2' }) })
   await userEvent.click(await screen.findByRole('button', { name: 'Acciones de Soporte' }))
-  await userEvent.click(screen.getByRole('button', { name: 'Agregar espacio' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Agregar espacio' }))
   await userEvent.type(screen.getByLabelText('Nombre del nuevo espacio'), 'Procesos')
   await userEvent.click(screen.getByRole('button', { name: 'Crear' }))
   await waitFor(() => expect(llamadas('GET /arbol')).toHaveLength(2))
@@ -112,7 +112,7 @@ test('Subir reenvía el nombre y la posición anterior entre hermanos', async ()
   const dos = [{ ...ARBOL[0], guid: 'w0', nombre: 'Primero', espacios: [] }, ARBOL[0]]
   montar('/', ADMIN, { 'GET /arbol': dos, 'PUT /workspaces/w1': () => respuesta(204) })
   await userEvent.click(await screen.findByRole('button', { name: 'Acciones de Soporte' }))
-  await userEvent.click(screen.getByRole('button', { name: 'Subir' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Subir' }))
   await waitFor(() => expect(llamadas('PUT /workspaces/w1')).toHaveLength(1))
   expect(JSON.parse(llamadas('PUT /workspaces/w1')[0][1].body)).toEqual({ nombre: 'Soporte', descripcion: 'Equipo', posicion: 0 })
 })
@@ -140,16 +140,61 @@ test('la página muestra su ruta y oculta Eliminar si puedeEliminar es false', a
   expect(screen.getByRole('heading', { name: 'Alta de clientes' })).toBeInTheDocument()
   expect(await screen.findByRole('textbox', { name: 'Contenido de la página' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Eliminar página' })).toBeNull()
-  // ADMIN no tiene exportarMarkdown en este fixture: no aparece el enlace.
-  expect(screen.queryByRole('link', { name: 'Exportar a Markdown' })).toBeNull()
+  // ADMIN no tiene exportarMarkdown en este fixture: no aparece el botón.
+  expect(screen.queryByRole('button', { name: 'Exportar a Markdown' })).toBeNull()
 })
 
-test('con exportarMarkdown aparece el enlace de descarga del Markdown de la página', async () => {
-  montar('/paginas/p2', { ...ADMIN, permisos: [...ADMIN.permisos, 'exportarMarkdown'] },
-    { 'GET /paginas/p2': DETALLE, 'GET /paginas/p2/contenido': { contenido: null, version: 0 } })
-  const enlace = await screen.findByRole('link', { name: 'Exportar a Markdown' })
-  expect(enlace).toHaveAttribute('href', '/api/v1/paginas/p2/markdown')
-  expect(enlace).toHaveAttribute('download')
+const CON_EXPORTAR = { ...ADMIN, permisos: [...ADMIN.permisos, 'exportarMarkdown'] }
+const rutasPagina = { 'GET /paginas/p2': DETALLE, 'GET /paginas/p2/contenido': { contenido: null, version: 0 } }
+
+test('Exportar a Markdown pide el archivo y lo descarga con el nombre de Content-Disposition', async () => {
+  const crear = vi.fn(() => 'blob:x')
+  const revocar = vi.fn()
+  vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: crear, revokeObjectURL: revocar }))
+  let nombre = ''
+  const clic = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) { nombre = this.download })
+  montar('/paginas/p2', CON_EXPORTAR, {
+    ...rutasPagina,
+    'GET /paginas/p2/markdown': () => new Response('# x', { status: 200, headers: { 'Content-Disposition': 'attachment; filename="alta-de-clientes.md"' } }),
+  })
+  await userEvent.click(await screen.findByRole('button', { name: 'Exportar a Markdown' }))
+  await waitFor(() => expect(revocar).toHaveBeenCalledWith('blob:x'))
+  expect(nombre).toBe('alta-de-clientes.md')
+  clic.mockRestore()
+})
+
+test('Exportar a Markdown con 401 abre el modal de sesión expirada', async () => {
+  montar('/paginas/p2', CON_EXPORTAR, { ...rutasPagina, 'GET /paginas/p2/markdown': () => respuesta(401, {}) })
+  await userEvent.click(await screen.findByRole('button', { name: 'Exportar a Markdown' }))
+  expect(await screen.findByRole('dialog', { name: 'Tu sesión expiró' })).toBeInTheDocument()
+})
+
+test('Exportar a Markdown con 404 muestra la alerta', async () => {
+  montar('/paginas/p2', CON_EXPORTAR, { ...rutasPagina, 'GET /paginas/p2/markdown': () => respuesta(404, {}) })
+  await userEvent.click(await screen.findByRole('button', { name: 'Exportar a Markdown' }))
+  // La lista de archivos (sin ruta simulada) también responde 404, de ahí varias alertas.
+  expect((await screen.findAllByText('Página no encontrada o sin acceso')).length).toBeGreaterThan(0)
+  expect(llamadas('GET /paginas/p2/markdown')).toHaveLength(1)
+})
+
+test('menú de acciones: abrir con teclado enfoca el primer ítem, las flechas recorren y Esc devuelve el foco', async () => {
+  montar('/')
+  const boton = await screen.findByRole('button', { name: 'Acciones de Guias' })
+  boton.focus()
+  await userEvent.keyboard('{Enter}')
+  const items = within(screen.getByRole('menu', { name: 'Acciones de Guias' })).getAllByRole('menuitem')
+  expect(items[0]).toHaveFocus()
+  await userEvent.keyboard('{ArrowDown}')
+  expect(items[1]).toHaveFocus()
+  await userEvent.keyboard('{ArrowUp}{ArrowUp}')
+  expect(items[items.length - 1]).toHaveFocus()
+  await userEvent.keyboard('{Home}')
+  expect(items[0]).toHaveFocus()
+  await userEvent.keyboard('{End}')
+  expect(items[items.length - 1]).toHaveFocus()
+  await userEvent.keyboard('{Escape}')
+  expect(screen.queryByRole('menu')).toBeNull()
+  expect(boton).toHaveFocus()
 })
 
 test('una página inexistente muestra el mensaje de no encontrada', async () => {

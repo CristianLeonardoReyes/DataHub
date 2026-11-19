@@ -82,6 +82,35 @@ function Fila(p: FilaProps) {
   const [ocupado, setOcupado] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const raiz = useRef<HTMLDivElement>(null)
+  const botonMenu = useRef<HTMLButtonElement>(null)
+  const lista = useRef<HTMLUListElement>(null)
+  const porTeclado = useRef(false)
+
+  const items = () => [...(lista.current?.querySelectorAll<HTMLElement>('[role="menuitem"]:not(:disabled)') ?? [])]
+  useEffect(() => {
+    if (menu && porTeclado.current) items()[0]?.focus()
+    porTeclado.current = false
+  }, [menu])
+  function teclaMenu(e: React.KeyboardEvent) {
+    const lis = items()
+    const i = lis.indexOf(document.activeElement as HTMLElement)
+    const ir = (n: number) => {
+      e.preventDefault()
+      lis[(n + lis.length) % lis.length]?.focus()
+    }
+    if (e.key === 'ArrowDown') ir(i + 1)
+    else if (e.key === 'ArrowUp') ir(i < 0 ? -1 : i - 1)
+    else if (e.key === 'Home') ir(0)
+    else if (e.key === 'End') ir(-1)
+    else if (e.key === 'Escape') {
+      e.preventDefault()
+      setMenu(false)
+      botonMenu.current?.focus()
+    } else if (e.key === 'Tab') {
+      setMenu(false)
+      botonMenu.current?.focus()
+    }
+  }
 
   useEffect(() => {
     if (!menu) return
@@ -186,17 +215,20 @@ function Fila(p: FilaProps) {
           </button>
         )}
         {acciones.length > 0 && (
-          <button type="button" aria-label={`Acciones de ${p.nombre}`} aria-expanded={menu} aria-haspopup="true"
+          <button type="button" aria-label={`Acciones de ${p.nombre}`} aria-expanded={menu} aria-haspopup="menu" ref={botonMenu}
             className="mr-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-muted hover:bg-active hover:text-ink aria-expanded:opacity-100 lg:opacity-0 lg:group-focus-within:opacity-100 lg:group-hover:opacity-100"
-            onClick={() => setMenu(!menu)}>
+            onClick={(e) => {
+              porTeclado.current = e.detail === 0
+              setMenu(!menu)
+            }}>
             <Ellipsis aria-hidden className="size-4" />
           </button>
         )}
         {menu && (
-          <ul className="absolute top-full right-0 z-20 mt-1 w-44 rounded-lg border border-line bg-surface p-1 shadow-lg">
+          <ul ref={lista} role="menu" aria-label={`Acciones de ${p.nombre}`} onKeyDown={teclaMenu} className="absolute top-full right-0 z-20 mt-1 w-44 rounded-lg border border-line bg-surface p-1 shadow-lg">
             {acciones.map((a) => (
-              <li key={a.clave}>
-                <Boton type="button" cargando={ocupado === a.clave} textoCarga={`${a.texto}…`} onClick={a.ejecutar}
+              <li key={a.clave} role="none">
+                <Boton type="button" role="menuitem" tabIndex={-1} cargando={ocupado === a.clave} textoCarga={`${a.texto}…`} onClick={a.ejecutar}
                   className={`flex h-8 w-full items-center gap-2 rounded-md px-2 text-left text-[13px] hover:bg-raised ${a.peligro ? 'text-danger' : 'text-ink'}`}>
                   <a.icono aria-hidden className="size-3.5" />{a.texto}
                 </Boton>

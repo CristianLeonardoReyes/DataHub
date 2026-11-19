@@ -1,18 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Download, FileIcon, Trash2, Upload, X } from 'lucide-react'
 import * as api from './api/adjuntos'
+import { tipoVista } from './api/adjuntos'
 import { Alerta, Boton, btnSmCls, panelCls } from './ui'
-
-const IMAGENES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif']
-// SVG no está en la lista a propósito: puede llevar scripts.
-function tipoVista(mime: string): 'imagen' | 'pdf' | 'video' | 'audio' | null {
-  const m = mime.toLowerCase()
-  if (IMAGENES.includes(m)) return 'imagen'
-  if (m === 'application/pdf') return 'pdf'
-  if (m.startsWith('video/')) return 'video'
-  if (m.startsWith('audio/')) return 'audio'
-  return null
-}
 
 export function tamano(b: number) {
   if (b < 1024) return `${b} B`
@@ -23,17 +13,26 @@ const fecha = (f: string) => new Date(f).toLocaleString('es-CO', { dateStyle: 'm
 
 /** URL firmada del adjunto (caduca a los 10 min); `reintentar` la vuelve a pedir una sola vez. */
 export function useUrlAdjunto(guid: string) {
-  const [estado, setEstado] = useState<{ url?: string; status?: number }>({})
+  const [estado, setEstado] = useState<{ url?: string; expira?: string; status?: number }>({})
   const [intento, setIntento] = useState(0)
   useEffect(() => {
     let vigente = true
     void api.adjuntos.url(guid, false).then((r) => {
-      if (vigente) setEstado(r.ok ? { url: r.datos.url } : { status: r.status })
+      if (vigente) setEstado(r.ok ? { url: r.datos.url, expira: r.datos.expira } : { status: r.status })
     })
     return () => {
       vigente = false
     }
   }, [guid, intento])
+  // Se renueva 1 min antes de vencer (con piso de 10 s para no entrar en bucle).
+  const { expira } = estado
+  useEffect(() => {
+    const vence = expira ? new Date(expira).getTime() : NaN
+    if (Number.isNaN(vence)) return
+    const ms = Math.min(Math.max(vence - Date.now() - 60_000, 10_000), 2 ** 31 - 1)
+    const t = setTimeout(() => setIntento((i) => i + 1), ms)
+    return () => clearTimeout(t)
+  }, [expira])
   // Un enlace dura 10 min: si la carga falla, se pide otro; como mucho uno por minuto para no
   // entrar en bucle con un archivo que de verdad no carga.
   const ultimo = useRef(0)
@@ -69,13 +68,19 @@ function Vista({ a, tipo }: { a: api.Adjunto; tipo: NonNullable<ReturnType<typeo
 
 function Previa({ a, alCerrar }: { a: api.Adjunto; alCerrar: () => void }) {
   const cerrar = useRef<HTMLButtonElement>(null)
+  const dialogo = useRef<HTMLDialogElement>(null)
   const [descargando, setDescargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const tipo = tipoVista(a.tipoMime)
   useEffect(() => {
     const previo = document.activeElement as HTMLElement | null
+    const d = dialogo.current
+    if (d && !d.open) d.showModal()
     cerrar.current?.focus()
-    return () => previo?.focus()
+    return () => {
+      d?.close()
+      previo?.focus()
+    }
   }, [])
 
   async function descargar() {
@@ -88,10 +93,11 @@ function Previa({ a, alCerrar }: { a: api.Adjunto; alCerrar: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4" onClick={alCerrar}>
-      <div role="dialog" aria-modal="true" aria-labelledby="previa-titulo" onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => { if (e.key === 'Escape') alCerrar() }}
-        className={`${panelCls} max-h-full w-full max-w-3xl space-y-4 overflow-auto p-4 shadow-lg`}>
+    <dialog ref={dialogo} aria-labelledby="previa-titulo"
+      onClick={(e) => { if (e.target === e.currentTarget) alCerrar() }}
+      onCancel={(e) => { e.preventDefault(); alCerrar() }}
+      className="m-auto max-h-[calc(100%-2rem)] w-full max-w-3xl bg-transparent p-0 backdrop:bg-ink/40">
+      <div className={`${panelCls} max-h-[inherit] w-full space-y-4 overflow-auto p-4 shadow-lg`}>
         <div className="flex items-start justify-between gap-3">
           <h2 id="previa-titulo" className="min-w-0 text-[15px] font-semibold break-all">{a.nombre}</h2>
           <button ref={cerrar} type="button" aria-label="Cerrar vista previa" className={`${btnSmCls} w-8 px-0`} onClick={alCerrar}>
@@ -104,7 +110,7 @@ function Previa({ a, alCerrar }: { a: api.Adjunto; alCerrar: () => void }) {
           <Download aria-hidden className="size-3.5" />Descargar
         </Boton>
       </div>
-    </div>
+    </dialog>
   )
 }
 

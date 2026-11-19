@@ -170,6 +170,74 @@ public class MarkdownTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         Assert.Equal(md, await (await MarkdownAsync(admin, pag)).Content.ReadAsStringAsync(Ct));
     }
 
+    private static string P(string texto, string? marca = null, string? href = null)
+    {
+        var attrs = href is null ? "" : ",\"attrs\":{\"href\":\"" + href + "\"}";
+        var marcas = marca is null ? "" : ",\"marks\":[{\"type\":\"" + marca + "\"" + attrs + "}]";
+        return "{\"type\":\"text\",\"text\":\"" + texto + "\"" + marcas + "}";
+    }
+
+    private static string Par(params string[] hijos) => $$"""{"type":"paragraph","content":[{{string.Join(",", hijos)}}]}""";
+    private static string Item(string tipo, string texto, bool? marcado = null) =>
+        "{\"type\":\"" + tipo + "\"" + (marcado is { } m ? ",\"attrs\":{\"checked\":" + (m ? "true" : "false") + "}" : "")
+        + ",\"content\":[" + Par(P(texto)) + "]}";
+    private static string Celda(string tipo, string texto) => $$"""{"type":"{{tipo}}","content":[{{Par(P(texto))}}]}""";
+
+    [Fact]
+    public async Task Exporta_todos_los_nodos_y_marcas_de_forma_determinista()
+    {
+        var admin = await AdminAsync();
+        var (_, _, _, pag) = await CadenaAsync(admin);
+        var img = Guid.NewGuid();
+        string[] bloques =
+        [
+            $$"""{"type":"heading","attrs":{"level":1},"content":[{{P("Titulo uno")}}]}""",
+            $$"""{"type":"heading","attrs":{"level":2},"content":[{{P("Titulo dos")}}]}""",
+            $$"""{"type":"heading","attrs":{"level":3},"content":[{{P("Titulo tres")}}]}""",
+            Par(P("negrita", "bold"), P(" "), P("cursiva", "italic"), P(" "), P("tachado", "strike"), P(" "), P("codigo", "code"), P(" "),
+                P("enlace", "link", "https://example.com/a")),
+            Par(P("linea1"), """{"type":"hardBreak"}""", P("linea2")),
+            $$"""{"type":"bulletList","content":[{{Item("listItem", "uno")}},{{Item("listItem", "dos")}}]}""",
+            $$"""{"type":"orderedList","attrs":{"start":3},"content":[{{Item("listItem", "tres")}},{{Item("listItem", "cuatro")}}]}""",
+            $$"""{"type":"taskList","content":[{{Item("taskItem", "hecha", true)}},{{Item("taskItem", "pendiente", false)}}]}""",
+            $$"""{"type":"blockquote","content":[{{Par(P("una cita"))}}]}""",
+            """{"type":"codeBlock","attrs":{"language":"csharp"},"content":[{"type":"text","text":"var x = 1;"}]}""",
+            """{"type":"horizontalRule"}""",
+            "{\"type\":\"image\",\"attrs\":{\"attachmentId\":\"" + img + "\",\"alt\":\"logo\"}}",
+            $$"""{"type":"table","content":[{"type":"tableRow","content":[{{Celda("tableHeader", "A")}},{{Celda("tableHeader", "B")}}]},{"type":"tableRow","content":[{{Celda("tableCell", "1")}},{{Celda("tableCell", "2")}}]}]}"""
+        ];
+        await GuardarAsync(admin, pag, "{\"type\":\"doc\",\"content\":[" + string.Join(",", bloques) + "]}");
+
+        var r1 = await MarkdownAsync(admin, pag);
+        Assert.Equal(HttpStatusCode.OK, r1.StatusCode);
+        var a = await r1.Content.ReadAsByteArrayAsync(Ct);
+        var b = await (await MarkdownAsync(admin, pag)).Content.ReadAsByteArrayAsync(Ct);
+        Assert.Equal(a, b);
+
+        var md = System.Text.Encoding.UTF8.GetString(a);
+        Assert.StartsWith("---\n", md);
+        var fin = md.IndexOf("\n---\n", StringComparison.Ordinal);
+        Assert.True(fin > 0);
+        var fm = md[..fin];
+        foreach (var clave in new[] { "title", "status", "type", "workspace", "space", "collection", "tags", "updated_at" })
+            Assert.Contains($"\n{clave}: ", fm);
+
+        var cuerpo = md[(fin + 5)..];
+        Assert.Contains("# Titulo uno\n", cuerpo);
+        Assert.Contains("\n## Titulo dos\n", cuerpo);
+        Assert.Contains("\n### Titulo tres\n", cuerpo);
+        Assert.Contains("**negrita** *cursiva* ~~tachado~~ `codigo` [enlace](https://example.com/a)", cuerpo);
+        Assert.Contains("linea1\\\nlinea2", cuerpo);
+        Assert.Contains("- uno\n- dos", cuerpo);
+        Assert.Contains("3. tres\n4. cuatro", cuerpo);
+        Assert.Contains("- [x] hecha\n- [ ] pendiente", cuerpo);
+        Assert.Contains("> una cita", cuerpo);
+        Assert.Contains("```csharp\nvar x = 1;\n```", cuerpo);
+        Assert.Contains("\n\n---\n\n", cuerpo);
+        Assert.Contains($"![logo](attachment:{img})", cuerpo);
+        Assert.Contains("| A | B |\n| --- | --- |\n| 1 | 2 |", cuerpo);
+    }
+
     [Fact]
     public async Task Pagina_sin_contenido_ni_metadata_solo_trae_front_matter()
     {
