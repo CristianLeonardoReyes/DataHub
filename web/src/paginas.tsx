@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { FilePlus, FileText, Trash2 } from 'lucide-react'
+import { FileDown, FilePlus, FileText, Trash2 } from 'lucide-react'
 import * as api from './api/jerarquia'
 import { useArbol } from './arbol'
 import { Archivos } from './archivos'
@@ -79,11 +79,19 @@ export function PaginaVista() {
           <InsigniaEstado estado={pagina.estado} />
           {`Actualizada ${new Date(pagina.fechaActualizacion).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}`}
         </span>}
-        acciones={pagina.puedeEliminar && (
-          <Boton type="button" cargando={eliminando} textoCarga="Eliminando…" className={`${btnSmCls} text-danger hover:bg-danger-bg`} onClick={() => void eliminar(pagina)}>
-            <Trash2 aria-hidden className="size-3.5" />Eliminar página
-          </Boton>
-        )} />
+        acciones={<div className="flex flex-wrap gap-2">
+          {/* Descarga directa: el navegador envía la cookie y la API responde como adjunto {slug}.md. */}
+          {puede('exportarMarkdown') && (
+            <a href={`/api/v1/paginas/${pagina.guid}/markdown`} download className={btnSmCls}>
+              <FileDown aria-hidden className="size-3.5" />Exportar a Markdown
+            </a>
+          )}
+          {pagina.puedeEliminar && (
+            <Boton type="button" cargando={eliminando} textoCarga="Eliminando…" className={`${btnSmCls} text-danger hover:bg-danger-bg`} onClick={() => void eliminar(pagina)}>
+              <Trash2 aria-hidden className="size-3.5" />Eliminar página
+            </Boton>
+          )}
+        </div>} />
       <div className="space-y-6">
         <Alerta texto={error} />
         {puede('paginasEditar') && (

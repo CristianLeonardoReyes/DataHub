@@ -8,7 +8,7 @@ using DataGlobal.DataHub.Services.Services.Interfaces;
 
 namespace DataGlobal.DataHub.Services.Services.Implementations;
 
-public class PaginaService(IPaginaRepository paginas, UsuarioActual actual) : IPaginaService
+public class PaginaService(IPaginaRepository paginas, IUsuarioRepository usuarios, UsuarioActual actual) : IPaginaService
 {
     public Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync() => paginas.RecientesAsync(Jerarquia.Alcance(actual));
 
@@ -117,6 +117,22 @@ public class PaginaService(IPaginaRepository paginas, UsuarioActual actual) : IP
         Jerarquia.ExigirExiste(r.Resultado, "La página no existe.");
         if (r.Resultado == 2) throw new ConflictoException("Otra persona guardó cambios en esta página. Recarga para ver la última versión.");
         return new(r.VersionContenido);
+    }
+
+    public async Task<ArchivoMarkdownDto> ExportarMarkdownAsync(Guid guid)
+    {
+        var a = Jerarquia.Alcance(actual, Accion.ExportarMarkdown);
+        var f = await paginas.ObtenerAsync(a, guid) ?? throw new NoEncontradoException("La página no existe.");
+        var c = await paginas.ObtenerContenidoAsync(a, guid);
+        Jerarquia.ExigirExiste(c.Resultado, "La página no existe.");
+        var p = f.Pagina;
+        // El correo del responsable solo se publica si pertenece al mismo cliente.
+        string? owner = null;
+        if (p.ResponsableGuid is { } rg && await usuarios.ObtenerPorGuidAsync(rg) is { } u && u.ClienteId == a.ClienteId) owner = u.Correo;
+        var datos = new FrontMatterPagina(p.Titulo, p.Estado, p.TipoDocumento, p.WorkspaceNombre, p.EspacioNombre, p.ColeccionNombre, owner,
+            f.Etiquetas, p.FechaRevision is { } fr ? DateOnly.FromDateTime(fr) : null, DateTime.SpecifyKind(p.FechaActualizacion, DateTimeKind.Utc));
+        using var docJson = c.ContenidoJson is null ? null : JsonDocument.Parse(c.ContenidoJson);
+        return new(Slug.De(p.Titulo) + ".md", MarkdownTiptap.Documento(datos, docJson?.RootElement));
     }
 
     private bool SoloPropias() => MatrizPermisos.ParsearPerfil(actual.Perfil) == PerfilUsuario.Colaborador;

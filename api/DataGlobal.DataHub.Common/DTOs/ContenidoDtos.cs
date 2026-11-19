@@ -14,3 +14,6 @@ public class GuardarContenidoRequest
 }
 
 public record VersionContenidoDto(int Version);
+
+/// <summary>Resultado interno de la exportación: no se serializa como JSON.</summary>
+public record ArchivoMarkdownDto(string NombreArchivo, string Contenido);

@@ -1,6 +1,7 @@
 using DataGlobal.DataHub.Common.DTOs;
 using DataGlobal.DataHub.Common.Util;
 using DataGlobal.DataHub.Services.Services.Interfaces;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DataGlobal.DataHub.Api.Controllers;
@@ -63,6 +64,15 @@ public class PaginasController(IPaginaService paginas) : ControllerBase
     [HttpGet("{guid:guid}/contenido")]
     [ProducesResponseType<ContenidoPaginaDto>(StatusCodes.Status200OK)]
     public async Task<ContenidoPaginaDto> ObtenerContenido(Guid guid) => await paginas.ObtenerContenidoAsync(guid);
+
+    /// <summary>Descarga la página como {slug}.md (text/markdown, UTF-8) con Front Matter YAML.</summary>
+    [HttpGet("{guid:guid}/markdown")]
+    [ProducesResponseType<string>(StatusCodes.Status200OK, "text/markdown")]
+    public async Task<IActionResult> ExportarMarkdown(Guid guid)
+    {
+        var a = await paginas.ExportarMarkdownAsync(guid);
+        return File(new UTF8Encoding(false).GetBytes(a.Contenido), "text/markdown; charset=utf-8", a.NombreArchivo);
+    }
 
     /// <summary>Guarda el contenido (máx. 2 MB). 409 si la versión enviada no es la guardada; 400 si el documento es inválido.</summary>
     [HttpPut("{guid:guid}/contenido")]
