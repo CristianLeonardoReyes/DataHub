@@ -5,6 +5,7 @@ import * as api from './api/jerarquia'
 import { useArbol } from './arbol'
 import { EditorContenido } from './editor'
 import { errorDe, FormNombre } from './jerarquia-ui'
+import { InsigniaEstado, PanelDetalles } from './metadata'
 import { useSesion } from './Sesion'
 import { Alerta, Boton, btnSmCls, Encabezado, panelCls } from './ui'
 
@@ -72,7 +73,10 @@ export function PaginaVista() {
         </ol>
       </nav>
       <Encabezado titulo={pagina.titulo}
-        linea={`Actualizada ${new Date(pagina.fechaActualizacion).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}`}
+        linea={<span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
+          <InsigniaEstado estado={pagina.estado} />
+          {`Actualizada ${new Date(pagina.fechaActualizacion).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}`}
+        </span>}
         acciones={pagina.puedeEliminar && (
           <Boton type="button" cargando={eliminando} textoCarga="Eliminando…" className={`${btnSmCls} text-danger hover:bg-danger-bg`} onClick={() => void eliminar(pagina)}>
             <Trash2 aria-hidden className="size-3.5" />Eliminar página
@@ -92,6 +96,8 @@ export function PaginaVista() {
               }} />
           </div>
         )}
+        <PanelDetalles key={pagina.guid} pagina={pagina} editable={puede('metadataEditar')}
+          onGuardado={async () => { await recargarArbol() }} />
         <EditorContenido key={guid} guid={guid} editable={puede('paginasEditar')} />
         <section aria-labelledby="h-sub">
           <div className="mb-3 flex items-center justify-between gap-3">

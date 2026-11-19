@@ -42,4 +42,7 @@ public static class SpNombres
     public const string PaginaConsultarRecientes = "pag_consultarRecientes";
     public const string ContenidoConsultar = "pco_consultar";
     public const string ContenidoEditar = "pco_editar";
+    public const string PaginaEditarMetadata = "pag_editarMetadata";
+    public const string EtiquetaConsultar = "eti_consultar";
+    public const string UsuarioConsultarResponsables = "usu_consultarResponsables";
 }

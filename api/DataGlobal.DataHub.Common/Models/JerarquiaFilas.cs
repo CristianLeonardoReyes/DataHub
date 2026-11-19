@@ -44,8 +44,14 @@ public class PaginaDetalleFila
     public string WorkspaceNombre { get; set; } = "";
     public Guid EspacioGuid { get; set; }
     public string EspacioNombre { get; set; } = "";
+    public string Estado { get; set; } = "";
+    public string TipoDocumento { get; set; } = "";
+    public Guid? ResponsableGuid { get; set; }
+    public string? ResponsableNombre { get; set; }
+    public DateTime? FechaRevision { get; set; }
 }
 
 public class PaginaPadreFila { public Guid Guid { get; set; } public string Titulo { get; set; } = ""; }
 
-public record PaginaDetalleFilas(PaginaDetalleFila Pagina, IReadOnlyList<PaginaPadreFila> Padres, IReadOnlyList<PaginaPadreFila> Hijas);
+public record PaginaDetalleFilas(PaginaDetalleFila Pagina, IReadOnlyList<PaginaPadreFila> Padres, IReadOnlyList<PaginaPadreFila> Hijas,
+    IReadOnlyList<string> Etiquetas);

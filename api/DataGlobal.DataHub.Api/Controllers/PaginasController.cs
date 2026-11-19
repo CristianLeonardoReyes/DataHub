@@ -41,6 +41,15 @@ public class PaginasController(IPaginaService paginas) : ControllerBase
         return NoContent();
     }
 
+    /// <summary>Reemplaza estado, tipo, responsable, fecha de revisión y etiquetas. 403 si pasa a aprobado sin ser Coordinador o superior; 400 si el responsable no es un usuario activo del cliente.</summary>
+    [HttpPut("{guid:guid}/metadata")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> EditarMetadata(Guid guid, EditarMetadataRequest solicitud)
+    {
+        await paginas.EditarMetadataAsync(guid, solicitud);
+        return NoContent();
+    }
+
     /// <summary>Elimina la página y sus subpáginas. El Colaborador solo elimina las propias y sin subpáginas (403 si no).</summary>
     [HttpDelete("{guid:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

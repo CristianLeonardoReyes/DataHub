@@ -27,8 +27,22 @@ public class PaginaRepository(DapperContext context) : BaseRepository(context), 
         QueryMultipleAsync(SpNombres.PaginaConsultarPorGuid,
             new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo, p_Guid = guid },
             async g => await g.ReadFirstOrDefaultAsync<PaginaDetalleFila>() is { } p
-                ? new PaginaDetalleFilas(p, (await g.ReadAsync<PaginaPadreFila>()).AsList(), (await g.ReadAsync<PaginaPadreFila>()).AsList())
+                ? new PaginaDetalleFilas(p, (await g.ReadAsync<PaginaPadreFila>()).AsList(), (await g.ReadAsync<PaginaPadreFila>()).AsList(),
+                    (await g.ReadAsync<string>()).AsList())
                 : null);
+
+    public async Task<int> EditarMetadataAsync(Alcance a, Guid guid, string estado, string tipoDocumento, Guid? responsableGuid,
+        DateOnly? fechaRevision, string etiquetasJson, bool puedeAprobar) =>
+        await ExecuteScalarAsync<int>(SpNombres.PaginaEditarMetadata,
+            new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo, p_Guid = guid, p_Estado = estado,
+                  p_TipoDocumento = tipoDocumento, p_ResponsableGuid = responsableGuid,
+                  p_FechaRevision = fechaRevision?.ToDateTime(TimeOnly.MinValue), p_Etiquetas = etiquetasJson, p_PuedeAprobar = puedeAprobar });
+
+    public Task<IReadOnlyList<string>> ConsultarEtiquetasAsync(Alcance a, string texto) =>
+        QueryListAsync<string>(SpNombres.EtiquetaConsultar, new { p_ClienteId = a.ClienteId, p_Texto = texto });
+
+    public Task<IReadOnlyList<ResponsableDto>> ConsultarResponsablesAsync(Alcance a) =>
+        QueryListAsync<ResponsableDto>(SpNombres.UsuarioConsultarResponsables, new { p_ClienteId = a.ClienteId });
 
     public Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync(Alcance a) =>
         QueryListAsync<PaginaRecienteDto>(SpNombres.PaginaConsultarRecientes,

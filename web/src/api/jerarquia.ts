@@ -7,7 +7,18 @@ export type EspacioArbol = S['EspacioArbolDto']
 export type ColeccionArbol = S['ColeccionArbolDto']
 export type PaginaArbol = S['PaginaArbolDto']
 export type Miembro = S['MiembroDto']
-export type PaginaDetalle = S['PaginaDetalleDto']
+export type EstadoPagina = 'borrador' | 'en_revision' | 'aprobado' | 'archivado'
+export type TipoDocumento = 'general' | 'adr' | 'api' | 'runbook' | 'arquitectura' | 'onboarding' | 'guia' | 'procedimiento' | 'manual' | 'acta'
+export type Responsable = { guid: string; nombre: string }
+export type MetadataPagina = {
+  estado: EstadoPagina
+  tipoDocumento: TipoDocumento
+  responsableGuid: string | null
+  fechaRevision: string | null
+  etiquetas: string[]
+}
+// La API expone estado y tipo como string: estos tipos los estrechan a sus valores.
+export type PaginaDetalle = S['PaginaDetalleDto'] & Omit<MetadataPagina, 'responsableGuid'> & { responsable: Responsable | null; puedeAprobar: boolean }
 export type PaginaReciente = S['PaginaRecienteDto']
 
 type Elemento = S['ActualizarElementoRequest']
@@ -43,3 +54,6 @@ export const paginas = {
   obtener: (guid: string) => pedir<PaginaDetalle>('GET', `/paginas/${guid}`),
   recientes: () => pedir<PaginaReciente[]>('GET', '/paginas/recientes'),
 }
+export const metadata = (guid: string, b: MetadataPagina) => pedir<void>('PUT', `/paginas/${guid}/metadata`, b)
+export const etiquetas = (q: string) => pedir<string[]>('GET', `/etiquetas?q=${encodeURIComponent(q)}`)
+export const responsables = () => pedir<Responsable[]>('GET', '/responsables')

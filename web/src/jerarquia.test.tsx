@@ -26,6 +26,7 @@ const ARBOL = [{
 const DETALLE = {
   guid: 'p2', titulo: 'Alta de clientes', coleccionGuid: 'c1', paginaPadreGuid: 'p1', fechaActualizacion: new Date().toISOString(),
   puedeEliminar: false,
+  estado: 'borrador', tipoDocumento: 'general', responsable: null, fechaRevision: null, etiquetas: [], puedeAprobar: false,
   ruta: [
     { tipo: 'workspace', guid: 'w1', nombre: 'Soporte' },
     { tipo: 'espacio', guid: 'e1', nombre: 'Manuales' },

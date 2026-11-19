@@ -12,6 +12,11 @@ public interface IPaginaRepository
     /// <summary>0 no existe o fuera de alcance, 1 ok, 3 prohibido (solo propia y sin subpáginas).</summary>
     Task<int> EliminarAsync(Alcance a, Guid guid, bool soloPropiaSinHijas);
     Task<PaginaDetalleFilas?> ObtenerAsync(Alcance a, Guid guid);
+    /// <summary>0 no existe o fuera de alcance, 1 ok, 2 responsable no válido, 3 sin permiso para aprobar.</summary>
+    Task<int> EditarMetadataAsync(Alcance a, Guid guid, string estado, string tipoDocumento, Guid? responsableGuid,
+        DateOnly? fechaRevision, string etiquetasJson, bool puedeAprobar);
+    Task<IReadOnlyList<string>> ConsultarEtiquetasAsync(Alcance a, string texto);
+    Task<IReadOnlyList<ResponsableDto>> ConsultarResponsablesAsync(Alcance a);
     Task<IReadOnlyList<PaginaRecienteDto>> RecientesAsync(Alcance a);
     /// <summary>Resultado 0 fuera de alcance, 1 ok (ContenidoJson null y versión 0 si aún no hay contenido).</summary>
     Task<ContenidoFila> ObtenerContenidoAsync(Alcance a, Guid guid);
