@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { EditorContent, useEditor, useEditorState } from '@tiptap/react'
-import type { Editor } from '@tiptap/react'
+import { EditorContent, Node, NodeViewWrapper, ReactNodeViewRenderer, useEditor, useEditorState } from '@tiptap/react'
+import type { Editor, NodeViewProps } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { TaskItem, TaskList } from '@tiptap/extension-list'
 import { TableKit } from '@tiptap/extension-table'
 import {
-  Bold, Code, Code2, Heading1, Heading2, Heading3, Italic, Link2, List, ListChecks, ListOrdered, Minus, Quote,
+  Bold, Code, Code2, Heading1, Heading2, Heading3, ImagePlus, Italic, Link2, List, ListChecks, ListOrdered, Minus, Quote,
   Strikethrough, Table2, Trash2,
 } from 'lucide-react'
+import * as adj from './api/adjuntos'
 import * as api from './api/contenido'
+import { useUrlAdjunto } from './archivos'
 import { Alerta, Boton, btnSmCls, inputCls, panelCls } from './ui'
 
 const ESQUEMAS = ['http:', 'https:', 'mailto:']
@@ -20,6 +22,38 @@ function enlacePermitido(url: string) {
     return false
   }
 }
+
+function ImagenVista({ node }: NodeViewProps) {
+  const id = String(node.attrs.attachmentId ?? '')
+  const { url, status, reintentar } = useUrlAdjunto(id)
+  return (
+    <NodeViewWrapper className="my-2">
+      {status ? <p className="text-[13px] text-muted">{status === 404 ? 'Imagen no disponible' : 'No se pudo cargar la imagen'}</p>
+        : url ? <img src={url} alt={node.attrs.alt ?? ''} onError={reintentar} className="max-w-full" />
+        : <div role="img" aria-label="Cargando imagen" className="h-24 w-full animate-pulse rounded-md bg-raised" />}
+    </NodeViewWrapper>
+  )
+}
+
+// El JSON guarda solo attachmentId (las URL firmadas caducan); nunca src.
+const Imagen = Node.create({
+  name: 'image',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return { attachmentId: { default: null }, alt: { default: null } }
+  },
+  parseHTML() {
+    return [{ tag: 'img[data-attachment-id]' }]
+  },
+  renderHTML({ node }) {
+    return ['img', { 'data-attachment-id': node.attrs.attachmentId, alt: node.attrs.alt }]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ImagenVista)
+  },
+})
 
 const extensiones = [
   StarterKit.configure({
@@ -34,6 +68,7 @@ const extensiones = [
   TaskList,
   TaskItem.configure({ nested: true }),
   TableKit,
+  Imagen,
 ]
 
 type Estado = 'quieto' | 'editando' | 'guardando' | 'guardado' | 'error' | 'conflicto'
@@ -114,7 +149,7 @@ function useAutoguardado(guid: string, version: number, editable: boolean, alCon
 
 type Carga = { status: number; detalle?: string | null } | { contenido: api.TiptapDoc | null; version: number }
 
-export function EditorContenido({ guid, editable }: { guid: string; editable: boolean }) {
+export function EditorContenido({ guid, editable, alSubirImagen }: { guid: string; editable: boolean; alSubirImagen?: () => void }) {
   const [carga, setCarga] = useState<Carga | null>(null)
   const [intento, setIntento] = useState(0)
 
@@ -133,13 +168,13 @@ export function EditorContenido({ guid, editable }: { guid: string; editable: bo
   if ('status' in carga)
     return <Alerta texto={carga.status === 404 ? 'Página no encontrada o sin acceso' : (carga.detalle ?? 'No se pudo cargar el contenido')} />
   return (
-    <EditorCargado key={`${guid}:${intento}`} guid={guid} inicial={carga.contenido} version={carga.version} editable={editable}
+    <EditorCargado key={`${guid}:${intento}`} guid={guid} inicial={carga.contenido} version={carga.version} editable={editable} alSubirImagen={alSubirImagen}
       recargar={() => { setCarga(null); setIntento((i) => i + 1) }} />
   )
 }
 
-function EditorCargado({ guid, inicial, version, editable, recargar }:
-  { guid: string; inicial: api.TiptapDoc | null; version: number; editable: boolean; recargar: () => void }) {
+function EditorCargado({ guid, inicial, version, editable, recargar, alSubirImagen }:
+  { guid: string; inicial: api.TiptapDoc | null; version: number; editable: boolean; recargar: () => void; alSubirImagen?: () => void }) {
   const [conflicto, setConflicto] = useState(false)
   const { estado, detalle, alEditar, reintentar } = useAutoguardado(guid, version, editable, () => setConflicto(true))
   const editor = useEditor({
@@ -161,7 +196,7 @@ function EditorCargado({ guid, inicial, version, editable, recargar }:
         </div>
       )}
       <div className={`${panelCls} overflow-hidden`}>
-        {editable && !conflicto && editor && <Barra editor={editor} />}
+        {editable && !conflicto && editor && <Barra editor={editor} guid={guid} alSubirImagen={alSubirImagen} />}
         <div className="p-4"><EditorContent editor={editor} /></div>
       </div>
       {editable && (
@@ -179,7 +214,19 @@ function EditorCargado({ guid, inicial, version, editable, recargar }:
   )
 }
 
-function Barra({ editor }: { editor: Editor }) {
+function Barra({ editor, guid, alSubirImagen }: { editor: Editor; guid: string; alSubirImagen?: () => void }) {
+  const entrada = useRef<HTMLInputElement>(null)
+  const [subiendo, setSubiendo] = useState(false)
+  const [errorImagen, setErrorImagen] = useState<string | null>(null)
+  async function subirImagen(archivo: File) {
+    setSubiendo(true)
+    setErrorImagen(null)
+    const r = await adj.subirArchivo(guid, archivo)
+    setSubiendo(false)
+    if ('error' in r) return setErrorImagen(r.error)
+    editor.chain().focus().insertContent({ type: 'image', attrs: { attachmentId: r.adjunto.guid } }).run()
+    alSubirImagen?.()
+  }
   const [enlace, setEnlace] = useState<string | null>(null)
   const [errorEnlace, setErrorEnlace] = useState<string | null>(null)
   const a = useEditorState({
@@ -238,9 +285,18 @@ function Barra({ editor }: { editor: Editor }) {
           {B('Cita', <Quote aria-hidden className={i} />, a.quote, () => c().toggleBlockquote().run())}
           {B('Bloque de código', <Code2 aria-hidden className={i} />, a.codeBlock, () => c().toggleCodeBlock().run())}
           {B('Separador', <Minus aria-hidden className={i} />, null, () => c().setHorizontalRule().run())}
+          {B('Insertar imagen', <ImagePlus aria-hidden className={i} />, null, () => entrada.current?.click())}
           {B('Insertar tabla', <Table2 aria-hidden className={i} />, null, () => c().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run())}
         </div>
       </div>
+      <input ref={entrada} type="file" hidden aria-label="Archivo de imagen" accept="image/png,image/jpeg,image/webp,image/gif"
+        disabled={subiendo} onChange={(e) => {
+          const f = e.target.files?.[0]
+          e.target.value = ''
+          if (f) void subirImagen(f)
+        }} />
+      {subiendo && <p role="status" className="mt-1.5 text-[13px] text-muted">Subiendo imagen…</p>}
+      {errorImagen && <p role="alert" className="mt-1.5 text-[13px] text-danger-ink">{errorImagen}</p>}
       {a.tabla && (
         <div role="toolbar" aria-label="Tabla" className="mt-1.5 flex flex-wrap items-center gap-1.5">
           <button type="button" className={btnSmCls} onClick={() => c().addRowAfter().run()}>Añadir fila</button>

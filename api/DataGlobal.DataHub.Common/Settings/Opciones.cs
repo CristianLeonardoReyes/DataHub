@@ -33,3 +33,9 @@ public class AppOpciones
 {
     public string UrlBase { get; set; } = "";
 }
+
+public class ArchivosOpciones
+{
+    public int TamanoMaximoMb { get; set; } = 25;
+    public string Contenedor { get; set; } = "adjuntos";
+}

@@ -8,6 +8,7 @@ using DataGlobal.DataHub.Common.Settings;
 using DataGlobal.DataHub.Repository;
 using DataGlobal.DataHub.Repository.Implementations;
 using DataGlobal.DataHub.Repository.Interfaces;
+using DataGlobal.DataHub.Services.Almacen;
 using DataGlobal.DataHub.Services.Correo;
 using DataGlobal.DataHub.Services.Services.Implementations;
 using DataGlobal.DataHub.Services.Services.Interfaces;
@@ -35,6 +36,7 @@ builder.Services.AddOptions<SesEmailSettings>().Bind(config.GetSection("SesEmail
         "Con Correo:Modo=Ses, SesEmailSettings:Region y SesEmailSettings:Aws_from_address son obligatorios.")
     .ValidateOnStart();
 builder.Services.Configure<AppOpciones>(config.GetSection("App"));
+builder.Services.Configure<ArchivosOpciones>(config.GetSection("Archivos"));
 
 // Acceso
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -47,10 +49,15 @@ builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 builder.Services.AddScoped<IEspacioRepository, EspacioRepository>();
 builder.Services.AddScoped<IColeccionRepository, ColeccionRepository>();
 builder.Services.AddScoped<IPaginaRepository, PaginaRepository>();
+builder.Services.AddScoped<IAdjuntoRepository, AdjuntoRepository>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IEspacioService, EspacioService>();
 builder.Services.AddScoped<IColeccionService, ColeccionService>();
 builder.Services.AddScoped<IPaginaService, PaginaService>();
+builder.Services.AddScoped<IAdjuntoService, AdjuntoService>();
+builder.Services.AddSingleton<IAlmacenArchivos>(sp => new AlmacenAzureBlob(
+    sp.GetRequiredService<IConfiguration>().GetConnectionString("AzureBlobStorage") ?? string.Empty,
+    sp.GetRequiredService<IOptions<ArchivosOpciones>>().Value.Contenedor));
 builder.Services.AddScoped<UsuarioActual>();
 builder.Services.AddSingleton<IEnviadorCorreo>(sp =>
 {
@@ -154,6 +161,8 @@ builder.Services.AddRateLimiter(o =>
     o.AddPolicy("login", c => Ventana(c, 10));
     o.AddPolicy("olvide", c => Ventana(c, 5));
     o.AddPolicy("token", c => Ventana(c, 10)); // aceptar invitación y restablecer comparten el cupo
+    o.AddPolicy("subida", c => RateLimitPartition.GetFixedWindowLimiter(c.User.FindFirstValue("usuarioId") ?? c.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 })); // por usuario
 });
 
 var app = builder.Build();

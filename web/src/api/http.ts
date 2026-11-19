@@ -34,8 +34,9 @@ export async function pedir<T>(metodo: 'GET' | 'POST' | 'PUT' | 'DELETE', ruta: 
     r = await fetch(`/api/v1${ruta}`, {
       method: metodo,
       credentials: 'same-origin',
-      headers: cuerpo === undefined ? undefined : { 'Content-Type': 'application/json' },
-      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+      // FormData va tal cual: el navegador pone el Content-Type con el boundary.
+      headers: cuerpo === undefined || cuerpo instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
+      body: cuerpo === undefined ? undefined : cuerpo instanceof FormData ? cuerpo : JSON.stringify(cuerpo),
     })
   } catch {
     return { ok: false, status: 0, problema: { status: 0 } }
