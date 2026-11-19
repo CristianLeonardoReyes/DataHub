@@ -45,4 +45,8 @@ public static class SpNombres
     public const string PaginaEditarMetadata = "pag_editarMetadata";
     public const string EtiquetaConsultar = "eti_consultar";
     public const string UsuarioConsultarResponsables = "usu_consultarResponsables";
+    public const string AdjuntoInsertar = "adj_insertar";
+    public const string AdjuntoConsultarPorPagina = "adj_consultarPorPagina";
+    public const string AdjuntoConsultarPorGuid = "adj_consultarPorGuid";
+    public const string AdjuntoEliminar = "adj_eliminar";
 }

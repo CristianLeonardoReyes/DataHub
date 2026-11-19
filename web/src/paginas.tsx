@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { FilePlus, FileText, Trash2 } from 'lucide-react'
 import * as api from './api/jerarquia'
 import { useArbol } from './arbol'
+import { Archivos } from './archivos'
 import { EditorContenido } from './editor'
 import { errorDe, FormNombre } from './jerarquia-ui'
 import { InsigniaEstado, PanelDetalles } from './metadata'
@@ -20,6 +21,7 @@ export function PaginaVista() {
   const [nueva, setNueva] = useState(false)
   const [eliminando, setEliminando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [recargaArchivos, setRecargaArchivos] = useState(0)
 
   // `version` cambia tras cada recarga del árbol: refresca título y subpáginas tras renombrar o crear.
   useEffect(() => {
@@ -98,7 +100,8 @@ export function PaginaVista() {
         )}
         <PanelDetalles key={pagina.guid} pagina={pagina} editable={puede('metadataEditar')}
           onGuardado={async () => { await recargarArbol() }} />
-        <EditorContenido key={guid} guid={guid} editable={puede('paginasEditar')} />
+        <EditorContenido key={guid} guid={guid} editable={puede('paginasEditar')} alSubirImagen={() => setRecargaArchivos((n) => n + 1)} />
+        <Archivos key={`a${guid}`} guid={guid} editable={puede('paginasEditar')} recarga={recargaArchivos} />
         <section aria-labelledby="h-sub">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 id="h-sub" className="text-[15px] font-semibold">Subpáginas</h2>
