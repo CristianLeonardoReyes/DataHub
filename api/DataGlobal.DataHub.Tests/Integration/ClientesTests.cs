@@ -67,7 +67,7 @@ public class ClientesTests : IClassFixture<MySqlFixture>, IAsyncDisposable
     private async Task<(Guid Guid, string CorreoAdmin, string Token)> CrearClienteAsync(string cookieSa, string? slug = null, string? correoAdmin = null)
     {
         correoAdmin ??= Correo();
-        var r = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", cookieSa, new { nombre = "Acme", slug = slug ?? Slug(), correoAdmin });
+        var r = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", cookieSa, new { nombre = "Acme " + Guid.NewGuid().ToString("N")[..8], slug = slug ?? Slug(), correoAdmin });
         Assert.Equal(HttpStatusCode.Created, r.StatusCode);
         var json = await r.Content.ReadFromJsonAsync<JsonElement>(Ct);
         var guid = json.GetProperty("guid").GetGuid();
@@ -204,13 +204,13 @@ public class ClientesTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var url = "/api/v1/clientes/" + guid;
         var cuerpo = await (await EnviarAsync(HttpMethod.Get, url, sa)).Content.ReadFromJsonAsync<JsonElement>(Ct);
         var slug = cuerpo.GetProperty("slug").GetString();
-        Assert.Equal(HttpStatusCode.OK, (await EnviarAsync(HttpMethod.Put, url, sa, new { nombre = "Acme", slug, activo = false })).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await EnviarAsync(HttpMethod.Put, url, sa, new { nombre = "Acme " + slug, slug, activo = false })).StatusCode);
 
         Assert.Equal(HttpStatusCode.Unauthorized, (await EnviarAsync(HttpMethod.Get, "/api/v1/auth/me", admin)).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized,
             (await _http.PostAsJsonAsync("/api/v1/auth/login", new { correo, contrasena = Clave }, Ct)).StatusCode);
 
-        Assert.Equal(HttpStatusCode.OK, (await EnviarAsync(HttpMethod.Put, url, sa, new { nombre = "Acme", slug, activo = true })).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await EnviarAsync(HttpMethod.Put, url, sa, new { nombre = "Acme " + slug, slug, activo = true })).StatusCode);
         Assert.Equal(HttpStatusCode.NoContent,
             (await _http.PostAsJsonAsync("/api/v1/auth/login", new { correo, contrasena = Clave }, Ct)).StatusCode);
     }
@@ -221,9 +221,81 @@ public class ClientesTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var sa = await SuperAdminCookieAsync();
         var (guid, _, token) = await CrearClienteAsync(sa);
         var slug = (await (await EnviarAsync(HttpMethod.Get, "/api/v1/clientes/" + guid, sa)).Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("slug").GetString();
-        await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + guid, sa, new { nombre = "Acme", slug, activo = false });
+        await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + guid, sa, new { nombre = "Acme " + slug, slug, activo = false });
 
         var r = await _http.PostAsJsonAsync("/api/v1/auth/aceptar-invitacion", new { token, nombre = "Admin", contrasena = Clave }, Ct);
         Assert.Equal(HttpStatusCode.BadRequest, r.StatusCode);
+    }
+
+    [Fact]
+    public async Task Nombre_repetido_da_409_al_crear_y_al_editar_aunque_cambie_mayuscula_o_tilde()
+    {
+        var sa = await SuperAdminCookieAsync();
+        var nombre = "Café " + Guid.NewGuid().ToString("N")[..8];
+        var crear = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa, new { nombre, slug = Slug(), correoAdmin = Correo() });
+        Assert.Equal(HttpStatusCode.Created, crear.StatusCode);
+
+        var variante = nombre.ToUpperInvariant().Replace("É", "E");
+        var dup = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa, new { nombre = variante, slug = Slug(), correoAdmin = Correo() });
+        Assert.Equal(HttpStatusCode.Conflict, dup.StatusCode);
+        Assert.Contains("\"campo\":\"nombre\"", await dup.Content.ReadAsStringAsync(Ct));
+
+        var (otro, _, _) = await CrearClienteAsync(sa);
+        var slugOtro = (await (await EnviarAsync(HttpMethod.Get, "/api/v1/clientes/" + otro, sa)).Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("slug").GetString();
+        var edit = await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + otro, sa, new { nombre = variante, slug = slugOtro, activo = true });
+        Assert.Equal(HttpStatusCode.Conflict, edit.StatusCode);
+        Assert.Contains("\"campo\":\"nombre\"", await edit.Content.ReadAsStringAsync(Ct));
+
+        var propio = await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + otro, sa, new { nombre = "Acme " + slugOtro, slug = slugOtro, activo = true });
+        Assert.Equal(HttpStatusCode.OK, propio.StatusCode);
+    }
+
+    [Fact]
+    public async Task Altas_simultaneas_del_mismo_slug_correo_o_nombre_dan_una_201_y_el_resto_409()
+    {
+        var sa = await SuperAdminCookieAsync();
+        const int n = 6;
+
+        var slug = Slug();
+        var porSlug = await Task.WhenAll(Enumerable.Range(0, n).Select(i =>
+            EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa, new { nombre = "S" + Guid.NewGuid().ToString("N")[..8], slug, correoAdmin = Correo() })));
+        Assert.Equal(1, porSlug.Count(r => r.StatusCode == HttpStatusCode.Created));
+        Assert.Equal(n - 1, porSlug.Count(r => r.StatusCode == HttpStatusCode.Conflict));
+
+        var correo = Correo();
+        var porCorreo = await Task.WhenAll(Enumerable.Range(0, n).Select(i =>
+            EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa, new { nombre = "M" + Guid.NewGuid().ToString("N")[..8], slug = Slug(), correoAdmin = correo })));
+        Assert.Equal(1, porCorreo.Count(r => r.StatusCode == HttpStatusCode.Created));
+        Assert.Equal(n - 1, porCorreo.Count(r => r.StatusCode == HttpStatusCode.Conflict));
+
+        var nombre = "N" + Guid.NewGuid().ToString("N")[..8];
+        var porNombre = await Task.WhenAll(Enumerable.Range(0, n).Select(i =>
+            EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa, new { nombre, slug = Slug(), correoAdmin = Correo() })));
+        Assert.Equal(1, porNombre.Count(r => r.StatusCode == HttpStatusCode.Created));
+        Assert.Equal(n - 1, porNombre.Count(r => r.StatusCode == HttpStatusCode.Conflict));
+        foreach (var r in porCorreo.Where(r => r.StatusCode == HttpStatusCode.Conflict))
+            Assert.DoesNotContain(correo, await r.Content.ReadAsStringAsync(Ct));
+    }
+
+    [Fact]
+    public async Task Ediciones_simultaneas_al_mismo_nombre_dan_una_200_y_otra_409_sin_texto_de_mysql()
+    {
+        var sa = await SuperAdminCookieAsync();
+        var (a, _, _) = await CrearClienteAsync(sa);
+        var (b, _, _) = await CrearClienteAsync(sa);
+        async Task<string> SlugDe(Guid g) =>
+            (await (await EnviarAsync(HttpMethod.Get, "/api/v1/clientes/" + g, sa)).Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("slug").GetString()!;
+        var (sa1, sb1) = (await SlugDe(a), await SlugDe(b));
+        var nombre = "Carrera " + Guid.NewGuid().ToString("N")[..8];
+
+        var rs = await Task.WhenAll(
+            EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + a, sa, new { nombre, slug = sa1, activo = true }),
+            EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + b, sa, new { nombre, slug = sb1, activo = true }));
+
+        Assert.Equal(1, rs.Count(r => r.StatusCode == HttpStatusCode.OK));
+        var conflicto = rs.Single(r => r.StatusCode == HttpStatusCode.Conflict);
+        var cuerpo = await conflicto.Content.ReadAsStringAsync(Ct);
+        Assert.Contains("\"campo\":\"nombre\"", cuerpo);
+        Assert.DoesNotContain("Duplicate", cuerpo);
     }
 }

@@ -197,7 +197,7 @@ public class ClienteOperandoTests : IClassFixture<MySqlFixture>, IAsyncDisposabl
 
         Assert.Equal(HttpStatusCode.NotFound, (await OperarAsync(sa, Guid.NewGuid())).StatusCode);
 
-        await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + a.Guid, sa, new { nombre = "Acme", slug = a.Slug, activo = false });
+        await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + a.Guid, sa, new { nombre = "Acme " + a.Slug, slug = a.Slug, activo = false });
         var r = await OperarAsync(sa, a.Guid);
         Assert.Equal(HttpStatusCode.BadRequest, r.StatusCode);
         Assert.Contains("No puedes operar dentro de un cliente inactivo.", await r.Content.ReadAsStringAsync(Ct));
@@ -212,7 +212,7 @@ public class ClienteOperandoTests : IClassFixture<MySqlFixture>, IAsyncDisposabl
         Assert.Equal(HttpStatusCode.OK, (await EnviarAsync(HttpMethod.Get, "/api/v1/usuarios", enA)).StatusCode);
 
         Assert.Equal(HttpStatusCode.OK,
-            (await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + a.Guid, enA, new { nombre = "Acme", slug = a.Slug, activo = false })).StatusCode);
+            (await EnviarAsync(HttpMethod.Put, "/api/v1/clientes/" + a.Guid, enA, new { nombre = "Acme " + a.Slug, slug = a.Slug, activo = false })).StatusCode);
 
         Assert.Equal(HttpStatusCode.BadRequest, (await EnviarAsync(HttpMethod.Get, "/api/v1/usuarios", enA)).StatusCode);
         Assert.Equal(JsonValueKind.Null, (await MeAsync(enA)).GetProperty("cliente").ValueKind);

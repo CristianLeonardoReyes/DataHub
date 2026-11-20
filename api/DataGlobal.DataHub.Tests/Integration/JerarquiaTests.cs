@@ -87,7 +87,7 @@ public class JerarquiaTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var sa = await SuperAdminCookieAsync();
         var correo = Correo();
         var r = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa,
-            new { nombre = "Acme", slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
+            new { nombre = "Acme " + Guid.NewGuid().ToString("N")[..8], slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
         Assert.Equal(HttpStatusCode.Created, r.StatusCode);
         await AceptarAsync(correo);
         return await LoginCookieAsync(correo);
@@ -593,5 +593,30 @@ public class JerarquiaTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         Assert.Equal(HttpStatusCode.OK, (await GuardarAsync(admin, primera, Doc("Editada"), 0)).StatusCode);
         var despues = await (await EnviarAsync(HttpMethod.Get, "/api/v1/paginas/recientes", admin)).Content.ReadFromJsonAsync<JsonElement>(Ct);
         Assert.Equal([primera, segunda], Guids(despues));
+    }
+
+    [Fact]
+    public async Task Altas_concurrentes_obtienen_posiciones_sin_repetir()
+    {
+        const int n = 8;
+        var admin = await AdminAsync();
+        var ws0 = await WorkspaceAsync(admin, "Base");
+        var esp = await EspacioAsync(admin, ws0);
+        var col = await ColeccionAsync(admin, esp);
+
+        async Task Verificar(string tabla, Func<int, Task<Guid>> alta, string filtro, object p)
+        {
+            var guids = await Task.WhenAll(Enumerable.Range(0, n).Select(alta));
+            await using var cn = new MySqlConnection(_db.ConnectionString);
+            var pos = (await cn.QueryAsync<int>($"SELECT Posicion FROM {tabla} WHERE {filtro} AND FechaEliminacion IS NULL ORDER BY Posicion", p)).ToList();
+            Assert.Equal(Enumerable.Range(0, pos.Count), pos);
+            Assert.True(pos.Count >= n);
+            Assert.Equal(guids.Length, guids.Distinct().Count());
+        }
+
+        await Verificar("Coleccion", i => ColeccionAsync(admin, esp, "C" + i), "EspacioId = (SELECT Id FROM Espacio WHERE Guid = @g)", new { g = esp });
+        await Verificar("Pagina", i => PaginaAsync(admin, col, "P" + i), "ColeccionId = (SELECT Id FROM Coleccion WHERE Guid = @g) AND PaginaPadreId IS NULL", new { g = col });
+        await Verificar("Espacio", i => EspacioAsync(admin, ws0, "E" + i), "WorkspaceId = (SELECT Id FROM Workspace WHERE Guid = @g)", new { g = ws0 });
+        await Verificar("Workspace", i => WorkspaceAsync(admin, "W" + i), "ClienteId = (SELECT ClienteId FROM Workspace WHERE Guid = @g)", new { g = ws0 });
     }
 }

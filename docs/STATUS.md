@@ -45,7 +45,7 @@ tocó. La historia la guarda git._
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (92 pruebas), oxlint (11
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (93 pruebas), oxlint (11
   warnings aceptados). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
 - **Super admin sin cliente operando:** tras el login va a Inicio (no a la ruta anterior); página, búsqueda y
   contenedores muestran "Selecciona un cliente para operar" sin llamar a la API (evita el 400).
@@ -87,11 +87,15 @@ tocó. La historia la guarda git._
    cubre `LogsTests` (token, búsqueda y contraseña no aparecen); `traceId` en los ProblemDetails.
    Verificado en modo Production: línea de error JSON con el mismo TraceId del 500 y sin detalle.
    Riesgo menor: el mensaje de una MySqlException o de SES podría llevar un correo. Ver README "Logs".
-10. **Seguridad al publicar** — pruebas de `/openapi` y HSTS en Production en la misma tarjeta; IP real
-    del límite de login, tras desplegar.
+10. **Seguridad al publicar** — pruebas hechas en DAT-201 (`SeguridadProduccionTests`: `/openapi` 404, HSTS,
+    cookie HttpOnly/Secure/SameSite=Strict). Falta: IP real del límite de login, tras desplegar.
 11. **Gestión del repo** — cerrado: aprobación de PR interna; ruta de OneDrive en gestión.
-12. **Mejoras** (búsqueda título+contenido, `Posicion` con `FOR UPDATE`, slug repetido → 409, aviso de
-    correo fallido, metadatos C2PA de los logos) — pendiente, tarjeta "Mejoras técnicas previas a producción".
+12. **Mejoras (DAT-201)** — implementadas, migración `2026-11-20_mejoras_busqueda_posicion_cliente.sql`
+    pendiente de ejecutar (usuario; antes, la consulta de nombres duplicados de su cabecera). Búsqueda:
+    cada término en título o contenido (`p_T1..p_T8`); posición con `FOR UPDATE` del padre; nombre de
+    cliente único (409 campo `nombre`); altas de clientes/invitados con `GET_LOCK` (timeout → 503);
+    1062 → 409 sin texto de MySQL; logos sin C2PA. Aviso de correo fallido: sin decidir (opcional).
+    Tras ejecutar: actualizar `db/Tablas/Cliente.sql` y los 9 SP en `db/Procedimientos`.
 - Opcional: el bundle pesa 847 kB (aviso de Vite >500 kB); dividir el editor con `import()` si la carga
   supera RNF-06.
 

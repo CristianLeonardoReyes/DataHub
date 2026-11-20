@@ -60,7 +60,7 @@ public class ConflictoException(string mensaje, string? campo = null) : Exceptio
     public string? Campo { get; } = campo;
 }
 
-/// <summary>Fila de resultado de cli_insertarConAdmin: 1 ok, 2 slug duplicado, 3 correo duplicado.</summary>
+/// <summary>Fila de resultado de cli_insertarConAdmin: 1 ok, 2 slug duplicado, 3 correo duplicado, 4 nombre duplicado.</summary>
 public class ResultadoCrearCliente
 {
     public int Resultado { get; set; }

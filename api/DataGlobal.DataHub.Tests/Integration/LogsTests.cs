@@ -4,7 +4,10 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Dapper;
+using DataGlobal.DataHub.Services.Seguridad;
 using Microsoft.Extensions.Logging;
+using MySqlConnector;
 
 namespace DataGlobal.DataHub.Tests.Integration;
 
@@ -69,5 +72,44 @@ public class LogsTests(MySqlFixture db) : IClassFixture<MySqlFixture>
         using var json = JsonDocument.Parse(await r.Content.ReadAsStringAsync(Ct));
         Assert.False(string.IsNullOrWhiteSpace(json.RootElement.GetProperty("traceId").GetString()));
         Assert.DoesNotContain(logs.Lineas, l => l.Contains("ClaveSecreta!987"));
+    }
+
+    [Fact]
+    public async Task Conflictos_de_correo_duplicado_no_dejan_el_correo_en_los_logs()
+    {
+        var (factory, http, logs) = Crear();
+        using var _f = factory; using var _h = http;
+        var admin = $"{Guid.NewGuid():N}@test.co";
+        var token = TokenUtil.Generar();
+        await using (var cn = new MySqlConnection(db.ConnectionString))
+        {
+            var id = await cn.ExecuteScalarAsync<long>(
+                "INSERT INTO Usuario (Correo, Nombre, Perfil) VALUES (@admin, 'Pendiente', 'super_admin'); SELECT LAST_INSERT_ID();", new { admin });
+            await cn.ExecuteAsync(
+                "INSERT INTO UsuarioToken (UsuarioId, Tipo, TokenHash, FechaExpiracion) VALUES (@id, 'invitacion', @hash, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 72 HOUR))",
+                new { id, hash = TokenUtil.Hash(token) });
+        }
+        await http.PostAsJsonAsync("/api/v1/auth/aceptar-invitacion", new { token, nombre = "Root", contrasena = "ClaveSegura@123" }, Ct);
+        var login = await http.PostAsJsonAsync("/api/v1/auth/login", new { correo = admin, contrasena = "ClaveSegura@123" }, Ct);
+        var cookie = login.Headers.GetValues("Set-Cookie").First(c => c.StartsWith("datahub_sesion=")).Split(';')[0];
+
+        Task<HttpResponseMessage> Alta(string correo) => Enviar(cookie, correo);
+        async Task<HttpResponseMessage> Enviar(string c, string correo)
+        {
+            var req = new HttpRequestMessage(HttpMethod.Post, "/api/v1/clientes");
+            req.Headers.Add("Cookie", c);
+            req.Content = JsonContent.Create(new { nombre = "L" + Guid.NewGuid().ToString("N")[..8], slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
+            return await http.SendAsync(req, Ct);
+        }
+
+        var correoNegocio = $"{Guid.NewGuid():N}@secreto.co";
+        Assert.Equal(HttpStatusCode.Created, (await Alta(correoNegocio)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await Alta(correoNegocio)).StatusCode);
+
+        var correoCarrera = $"{Guid.NewGuid():N}@carrera.co";
+        var rs = await Task.WhenAll(Enumerable.Range(0, 4).Select(_ => Alta(correoCarrera)));
+        Assert.DoesNotContain(rs, r => (int)r.StatusCode >= 500);
+
+        Assert.DoesNotContain(logs.Lineas, l => l.Contains(correoNegocio) || l.Contains(correoCarrera));
     }
 }

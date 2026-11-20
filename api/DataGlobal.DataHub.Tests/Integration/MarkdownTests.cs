@@ -87,7 +87,7 @@ public class MarkdownTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var sa = await SuperAdminCookieAsync();
         var correo = Correo();
         var r = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa,
-            new { nombre = "Acme", slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
+            new { nombre = "Acme " + Guid.NewGuid().ToString("N")[..8], slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
         Assert.Equal(HttpStatusCode.Created, r.StatusCode);
         await AceptarAsync(correo);
         return await LoginCookieAsync(correo);

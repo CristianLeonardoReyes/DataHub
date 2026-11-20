@@ -87,7 +87,7 @@ public class BusquedaTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var sa = await SuperAdminCookieAsync();
         var correo = Correo();
         var r = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa,
-            new { nombre = "Acme", slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
+            new { nombre = "Acme " + Guid.NewGuid().ToString("N")[..8], slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
         Assert.Equal(HttpStatusCode.Created, r.StatusCode);
         await AceptarAsync(correo);
         return await LoginCookieAsync(correo);
@@ -339,5 +339,55 @@ public class BusquedaTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         Assert.Equal([p], await GuidsBusquedaAsync(admin, "arquitectura de software"));
         Assert.Equal([p], await GuidsBusquedaAsync(admin, "ar"));
         Assert.Equal(HttpStatusCode.BadRequest, await CodigoAsync(HttpMethod.Get, "/api/v1/buscar?q=de", admin));
+    }
+
+    [Fact]
+    public async Task Cada_termino_puede_estar_en_el_titulo_o_en_el_contenido()
+    {
+        var (admin, col) = await EntornoAsync();
+        var mixta = await PaginaAsync(admin, col, "Granate instalacion");
+        await GuardarAsync(admin, mixta, "Guia para el esmeralda final.");
+        var soloTitulo = await PaginaAsync(admin, col, "Granate esmeralda");
+        var soloUno = await PaginaAsync(admin, col, "Granate suelto");
+
+        var r = await GuidsBusquedaAsync(admin, "granate esmeralda");
+        Assert.Equal(new[] { mixta, soloTitulo }.Order(), r.Order());
+        Assert.DoesNotContain(soloUno, r);
+        Assert.Equal([mixta], await GuidsBusquedaAsync(admin, "instalacion esmeralda"));
+        Assert.Empty(await GuidsBusquedaAsync(admin, "granate inexistente"));
+    }
+
+    [Fact]
+    public async Task Termino_repartido_entre_titulo_y_contenido_respeta_cliente_y_workspace_asignado()
+    {
+        var admin = await AdminAsync();
+        var ws1 = await WorkspaceAsync(admin, "Uno");
+        var ws2 = await WorkspaceAsync(admin, "Dos");
+        var p1 = await PaginaAsync(admin, await ColeccionAsync(admin, await EspacioAsync(admin, ws1)), "Citrino manual");
+        var p2 = await PaginaAsync(admin, await ColeccionAsync(admin, await EspacioAsync(admin, ws2)), "Citrino otro");
+        await GuardarAsync(admin, p1, "para el usuario");
+        await GuardarAsync(admin, p2, "para el usuario");
+        var (otro, colOtro) = await EntornoAsync();
+        var po = await PaginaAsync(otro, colOtro, "Citrino manual");
+        await GuardarAsync(otro, po, "para el usuario");
+        var (colab, cc) = await UsuarioAsync(admin, "colaborador");
+        await AsignarAsync(admin, ws1, colab);
+
+        Assert.Equal(new[] { p1, p2 }.Order(), (await GuidsBusquedaAsync(admin, "citrino usuario")).Order());
+        Assert.Equal([p1], await GuidsBusquedaAsync(cc, "citrino usuario"));
+        Assert.Equal([po], await GuidsBusquedaAsync(otro, "citrino usuario"));
+    }
+
+    [Fact]
+    public async Task Ocho_terminos_repartidos_entre_titulo_y_contenido_encuentran_la_pagina()
+    {
+        var (admin, col) = await EntornoAsync();
+        var p = await PaginaAsync(admin, col, "alfa bravo carlos delta");
+        await GuardarAsync(admin, p, "eco foxtrot golf hotel");
+        var parcial = await PaginaAsync(admin, col, "alfa bravo carlos delta");
+
+        Assert.Equal([p], await GuidsBusquedaAsync(admin, "alfa bravo carlos delta eco foxtrot golf hotel"));
+        Assert.Empty(await GuidsBusquedaAsync(admin, "alfa bravo carlos delta eco foxtrot golf india"));
+        Assert.DoesNotContain(parcial, await GuidsBusquedaAsync(admin, "alfa hotel"));
     }
 }
