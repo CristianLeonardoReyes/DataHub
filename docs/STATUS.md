@@ -4,10 +4,9 @@ tocó. La historia la guarda git._
 
 ## Común
 
-- **Hecho en `develop`:** pasos 1–9 (… Búsqueda, Markdown), PR #18.
-- **En curso:** `feat/DAT-188-cierre-del-mvp-…` (paso 10) — lista para commit/PR (2026-11-19).
-  api 244/244, web 85/85. Criterios PRD §9: los 8 con prueba de integración. Despliegue (PRD §7.6)
-  fuera del paso 10: se hace tras probar todo en local.
+- **Hecho en `develop`:** pasos 1–10 del PRD §11 (MVP), PR #19. Criterios §9 con prueba de integración.
+- **En curso:** `Vista-y-edición-de-workspaces,-espacios-y-colecciones` (mejora de UX tras QA) — lista
+  para commit/PR (2026-11-19). api 244/244, web 91/91. Despliegue (PRD §7.6) tras probar todo en local.
 - **Reglas 3a:** sin permiso → 403; recurso ajeno → 404; la web oculta según `permisos`.
 - **Local:** README "Guía de arranque". API perfil `http` en `:5080`; Vite `:5173` con proxy.
   `dotnet test` requiere Docker; si la API bloquea `bin/`, usar `-p:OutDir=…/Tests/bin/alt/`.
@@ -46,10 +45,12 @@ tocó. La historia la guarda git._
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (85 pruebas), oxlint (11
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (91 pruebas), oxlint (11
   warnings aceptados). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
 - **Tema** claro por defecto (`datahub-tema`, aplicado por `public/tema.js`: la CSP no admite scripts inline). **Sesión:** modal "Tu sesión expiró" (`X-Sesion-Expira` o 401).
-- **Jerarquía:** árbol en el menú, `/workspaces`, `/paginas/:guid`, recientes. Menú ⋯ con teclado (roles menu/menuitem).
+- **Jerarquía:** árbol en el menú (nombre → vista, chevron → expandir), `/workspaces` (gestión),
+  `/workspaces|espacios|colecciones/:guid` (`contenedores.tsx`: nombre y descripción editables, hijos;
+  lee del árbol, sin endpoints nuevos; permisos UX en `jerarquia-nodos.ts`), `/paginas/:guid`, recientes. Menú ⋯ con teclado (roles menu/menuitem).
 - **Editor** (Tiptap 3.32.2): autoguardado 1,5 s, un PUT a la vez, reintento 5 s, guarda al salir;
   409 bloquea y ofrece Recargar. Imagen = nodo propio `image` con `attachmentId`.
 - **Metadata:** insignia y panel "Detalles" (guardado explícito, etiquetas con `<datalist>`).

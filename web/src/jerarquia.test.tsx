@@ -67,15 +67,22 @@ function montar(ruta: string, usuario: unknown = ADMIN, extra: Record<string, Ru
   )
 }
 
-test('el árbol se muestra y se expande y contrae', async () => {
+test('el árbol se muestra; el chevron expande y contrae y el nombre navega', async () => {
   montar('/')
-  const ws = await screen.findByRole('button', { name: 'Soporte' })
+  const ws = await screen.findByRole('button', { name: 'Contraer Soporte' })
   expect(ws).toHaveAttribute('aria-expanded', 'true')
   expect(screen.getByRole('link', { name: 'Inicio rapido' })).toHaveAttribute('href', '/paginas/p1')
   await userEvent.click(ws)
-  expect(ws).toHaveAttribute('aria-expanded', 'false')
+  expect(screen.getByRole('button', { name: 'Expandir Soporte' })).toHaveAttribute('aria-expanded', 'false')
   expect(screen.queryByRole('link', { name: 'Inicio rapido' })).toBeNull()
-  expect(screen.queryByRole('button', { name: 'Manuales' })).toBeNull()
+  expect(screen.queryByRole('link', { name: 'Manuales' })).toBeNull()
+})
+
+test('en el árbol, clic en el nombre navega a su vista', async () => {
+  montar('/')
+  await userEvent.click(await screen.findByRole('link', { name: 'Guias' }))
+  expect(await screen.findByRole('heading', { name: 'Guias' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Contraer Soporte' })).toHaveAttribute('aria-expanded', 'true')
 })
 
 test('sin árbol muestra el estado vacío', async () => {
@@ -86,7 +93,7 @@ test('sin árbol muestra el estado vacío', async () => {
 
 test('un colaborador no ve acciones de workspace ni espacio; en colección y páginas solo las de páginas', async () => {
   montar('/', COLABORADOR)
-  await screen.findByRole('button', { name: 'Soporte' })
+  await screen.findByRole('link', { name: 'Soporte' })
   expect(screen.queryByRole('button', { name: 'Acciones de Soporte' })).toBeNull()
   expect(screen.queryByRole('button', { name: 'Acciones de Manuales' })).toBeNull()
   await userEvent.click(screen.getByRole('button', { name: 'Acciones de Guias' }))
@@ -231,4 +238,59 @@ test('Inicio muestra las páginas actualizadas recientemente', async () => {
   expect(bloque.getByRole('link', { name: /Guía de alta/ })).toHaveAttribute('href', '/paginas/p1')
   expect(bloque.getByText('Soporte / Guias')).toBeInTheDocument()
   expect(bloque.getByText('hace 5 minutos')).toBeInTheDocument()
+})
+
+const COORDINADOR = { ...ADMIN, perfil: 'coordinador', permisos: ['espaciosColeccionesGestionar', 'paginasEditar', 'paginasEliminar'] }
+const ARBOL_DESC = [{
+  ...ARBOL[0], espacios: [{ ...ARBOL[0].espacios[0], colecciones: [{ ...ARBOL[0].espacios[0].colecciones[0], descripcion: 'Guias de uso' }] }],
+}]
+
+test('la vista de colección muestra nombre, descripción, ruta e hijos', async () => {
+  montar('/colecciones/c1', COLABORADOR, { 'GET /arbol': ARBOL_DESC })
+  expect(await screen.findByRole('heading', { name: 'Guias' })).toBeInTheDocument()
+  expect(screen.getByText('Guias de uso')).toBeInTheDocument()
+  const ruta = within(screen.getByRole('navigation', { name: 'Ruta' }))
+  expect(ruta.getByRole('link', { name: 'Soporte' })).toHaveAttribute('href', '/workspaces/w1')
+  expect(ruta.getByRole('link', { name: 'Manuales' })).toHaveAttribute('href', '/espacios/e1')
+  const lista = within(screen.getByRole('region', { name: 'Páginas' }))
+  expect(lista.getByRole('link', { name: 'Inicio rapido' })).toHaveAttribute('href', '/paginas/p1')
+})
+
+test('guardar los detalles envía PUT con nombre y descripcion y sin posicion', async () => {
+  montar('/colecciones/c1', ADMIN, { 'GET /arbol': ARBOL_DESC, 'PUT /colecciones/c1': () => respuesta(204) })
+  const desc = await screen.findByLabelText('Descripción')
+  expect(desc).toHaveValue('Guias de uso')
+  await userEvent.clear(desc)
+  await userEvent.click(screen.getByRole('button', { name: 'Guardar' }))
+  await waitFor(() => expect(llamadas('PUT /colecciones/c1')).toHaveLength(1))
+  expect(JSON.parse(llamadas('PUT /colecciones/c1')[0][1].body)).toEqual({ nombre: 'Guias', descripcion: null })
+  await waitFor(() => expect(llamadas('GET /arbol')).toHaveLength(2))
+  expect(await screen.findByText('Cambios guardados')).toBeInTheDocument()
+})
+
+test('el colaborador ve la colección en solo lectura y puede agregar páginas', async () => {
+  montar('/colecciones/c1', COLABORADOR)
+  await screen.findByRole('heading', { name: 'Guias' })
+  expect(screen.queryByRole('button', { name: 'Guardar' })).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Eliminar' })).toBeNull()
+  await userEvent.click(screen.getByRole('button', { name: 'Agregar página' }))
+  expect(screen.getByLabelText('Nombre del nuevo página')).toBeInTheDocument()
+})
+
+test('el coordinador edita espacio y colección pero no el workspace', async () => {
+  montar('/workspaces/w1', COORDINADOR)
+  await screen.findByRole('heading', { name: 'Soporte' })
+  expect(screen.queryByRole('button', { name: 'Guardar' })).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Eliminar' })).toBeNull()
+  expect(screen.getByRole('button', { name: 'Agregar espacio' })).toBeInTheDocument()
+  await userEvent.click(within(screen.getByRole('region', { name: 'Espacios' })).getByRole('link', { name: 'Manuales' }))
+  expect(await screen.findByRole('button', { name: 'Guardar' })).toBeInTheDocument()
+  await userEvent.click(within(screen.getByRole('region', { name: 'Colecciones' })).getByRole('link', { name: 'Guias' }))
+  expect(await screen.findByRole('button', { name: 'Guardar' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Eliminar' })).toBeInTheDocument()
+})
+
+test('un guid inexistente muestra no encontrado o sin acceso', async () => {
+  montar('/espacios/zz')
+  expect(await screen.findByText('No encontrado o sin acceso')).toBeInTheDocument()
 })
