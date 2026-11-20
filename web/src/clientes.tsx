@@ -169,7 +169,8 @@ export function ClienteForm() {
     if (r.status === 404) setNoExiste(true)
     else if (r.status === 409) {
       // El backend indica el campo en conflicto en la extensión `campo` del ProblemDetails.
-      setErrores((r.problema as { campo?: string }).campo === 'correoAdmin' ? { correo: detalle } : { slug: detalle })
+      const campo = (r.problema as { campo?: string }).campo
+      setErrores(campo === 'correoAdmin' ? { correo: detalle } : campo === 'nombre' ? { nombre: detalle } : { slug: detalle })
     } else setErrores({ general: detalle })
     setEnviando(false)
   }

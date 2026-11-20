@@ -86,7 +86,7 @@ public class UsuariosTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         var sa = await SuperAdminCookieAsync();
         var correo = Correo();
         var r = await EnviarAsync(HttpMethod.Post, "/api/v1/clientes", sa,
-            new { nombre = "Acme", slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
+            new { nombre = "Acme " + Guid.NewGuid().ToString("N")[..8], slug = "c-" + Guid.NewGuid().ToString("N")[..12], correoAdmin = correo });
         Assert.Equal(HttpStatusCode.Created, r.StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, (await AceptarAsync((await TokensAsync(correo))[0])).StatusCode);
         return (correo, await LoginCookieAsync(correo));
@@ -301,5 +301,17 @@ public class UsuariosTests : IClassFixture<MySqlFixture>, IAsyncDisposable
         Assert.Equal(HttpStatusCode.BadRequest, (await PutAsync(sa, Guid.NewGuid(), "admin", true)).StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest,
             (await EnviarAsync(HttpMethod.Post, $"/api/v1/usuarios/{Guid.NewGuid()}/reenviar-invitacion", sa)).StatusCode);
+    }
+
+    [Fact]
+    public async Task Invitaciones_simultaneas_del_mismo_correo_dan_una_201_y_el_resto_409()
+    {
+        var (_, admin) = await AdminAsync();
+        var correo = Correo();
+        var rs = await Task.WhenAll(Enumerable.Range(0, 6).Select(_ =>
+            EnviarAsync(HttpMethod.Post, "/api/v1/usuarios", admin, new { correo, perfil = "colaborador" })));
+
+        Assert.Equal(1, rs.Count(r => r.StatusCode == HttpStatusCode.Created));
+        Assert.Equal(5, rs.Count(r => r.StatusCode == HttpStatusCode.Conflict));
     }
 }

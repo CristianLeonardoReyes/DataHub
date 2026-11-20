@@ -47,6 +47,7 @@ public class ClienteService(
         {
             case 2: throw new ConflictoException("Ya existe un cliente con ese slug.", "slug");
             case 3: throw new ConflictoException("Ya existe un usuario con ese correo.", "correoAdmin");
+            case 4: throw new ConflictoException("Ya existe un cliente con ese nombre.", "nombre");
         }
 
         var enlace = $"{app.Value.UrlBase.TrimEnd('/')}/aceptar-invitacion?token={token}";
@@ -69,6 +70,7 @@ public class ClienteService(
         {
             case 0: throw new NoEncontradoException("El cliente no existe.");
             case 2: throw new ConflictoException("Ya existe un cliente con ese slug.", "slug");
+            case 4: throw new ConflictoException("Ya existe un cliente con ese nombre.", "nombre");
         }
         return (await clientes.ObtenerPorGuidAsync(guid))!;
     }

@@ -48,11 +48,17 @@ public class PaginaRepository(DapperContext context) : BaseRepository(context), 
         QueryListAsync<PaginaRecienteDto>(SpNombres.PaginaConsultarRecientes,
             new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo });
 
-    public Task<BusquedaFilas> BuscarAsync(Alcance a, string consulta, string primero, int desplazamiento, int limite) =>
-        QueryMultipleAsync(SpNombres.PaginaConsultarBusqueda,
-            new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo, p_Consulta = consulta, p_Primero = primero,
-                  p_Desplazamiento = desplazamiento, p_Limite = limite },
+    public Task<BusquedaFilas> BuscarAsync(Alcance a, string consulta, string primero, int desplazamiento, int limite)
+    {
+        // La consulta llega como "+uno* +dos*": el SP recibe cada término suelto (NULL si no hay).
+        var t = consulta.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim('+', '*')).ToArray();
+        string? T(int i) => i < t.Length ? t[i] : null;
+        return QueryMultipleAsync(SpNombres.PaginaConsultarBusqueda,
+            new { p_ClienteId = a.ClienteId, p_UsuarioId = a.UsuarioId, p_VeTodo = a.VeTodo,
+                  p_T1 = T(0), p_T2 = T(1), p_T3 = T(2), p_T4 = T(3), p_T5 = T(4), p_T6 = T(5), p_T7 = T(6), p_T8 = T(7),
+                  p_Primero = primero, p_Desplazamiento = desplazamiento, p_Limite = limite },
             async g => new BusquedaFilas(await g.ReadFirstAsync<int>(), (await g.ReadAsync<BusquedaFila>()).AsList()));
+    }
 
     public async Task<ContenidoFila> ObtenerContenidoAsync(Alcance a, Guid guid) =>
         (await QueryFirstOrNullAsync<ContenidoFila>(SpNombres.ContenidoConsultar,

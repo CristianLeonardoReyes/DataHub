@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -211,7 +212,12 @@ app.Use((ctx, next) =>
 
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 
-app.UseExceptionHandler();
+// Las excepciones que traduce SolicitudInvalidaHandler (4xx de negocio, 1062) no se registran: el mensaje de MySQL puede llevar el correo.
+// Los 500 reales siguen registrándose.
+app.UseExceptionHandler(new ExceptionHandlerOptions
+{
+    SuppressDiagnosticsCallback = c => c.ExceptionHandledBy == ExceptionHandledType.ExceptionHandlerService
+});
 
 if (app.Environment.IsDevelopment())
 {

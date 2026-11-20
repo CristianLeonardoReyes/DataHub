@@ -9,7 +9,7 @@ public class EsquemaUsuarioTests(MySqlFixture db) : IClassFixture<MySqlFixture>
     {
         await using var cn = new MySqlConnection(db.ConnectionString);
         return await cn.ExecuteScalarAsync<long>(
-            "INSERT INTO Cliente (Nombre, Slug) VALUES ('Cliente', @slug); SELECT LAST_INSERT_ID();",
+            "INSERT INTO Cliente (Nombre, Slug) VALUES (@slug, @slug); SELECT LAST_INSERT_ID();",
             new { slug = Guid.NewGuid().ToString("N") });
     }
 

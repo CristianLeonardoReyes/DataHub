@@ -99,6 +99,17 @@ test('nuevo cliente: 409 de correo se muestra junto al campo correo', async () =
   expect(screen.getByLabelText('Correo del Admin')).toHaveAttribute('aria-invalid', 'true')
 })
 
+test('nuevo cliente: 409 de nombre repetido se muestra junto al campo nombre', async () => {
+  simular(SUPER, (_u, i) =>
+    i?.method === 'POST' ? respuesta(409, { status: 409, detail: 'Ya existe un cliente con ese nombre.', campo: 'nombre' }) : respuesta(404))
+  montar('/clientes/nuevo')
+  await userEvent.type(await screen.findByLabelText('Nombre'), 'Acme')
+  await userEvent.type(screen.getByLabelText('Correo del Admin'), 'admin@acme.co')
+  await userEvent.click(screen.getByRole('button', { name: 'Crear cliente' }))
+  expect(await screen.findByText('Ya existe un cliente con ese nombre.')).toHaveAttribute('id', 'nombre-error')
+  expect(screen.getByLabelText('Nombre')).toHaveAttribute('aria-invalid', 'true')
+})
+
 test('nuevo cliente: mientras la petición está pendiente el botón carga y queda deshabilitado', async () => {
   let resolver!: (r: Response) => void
   fetchMock.mockImplementation(async (url: string, i?: RequestInit) =>
