@@ -1,0 +1,104 @@
+# Compila web + api, ejecuta las pruebas y publica todo en una sola Web App de Azure (PRD §7.6).
+# - Pull request hacia develop/main: solo compila y prueba.
+# - Push a main (merge del PR de publicación) o ejecución manual sobre main: compila, prueba y despliega.
+#
+# Mientras no exista la Web App, el job de despliegue se omite (no falla).
+# Para activarlo (todo en GitHub/Azure, sin editar este archivo):
+#   1. GitHub: Settings → Secrets and variables → Actions → pestaña Variables → New repository variable
+#      nombre AZURE_WEBAPP_NAME, valor = nombre de la Web App.
+#   2. En Azure: Web App → Información general → "Descargar perfil de publicación".
+#      En GitHub: Settings → Secrets and variables → Actions → New repository secret
+#      nombre AZURE_WEBAPP_PUBLISH_PROFILE, valor = contenido completo del archivo descargado.
+#      (En la Web App: Configuración → General → "Credenciales de publicación de autenticación básica de SCM" = Activado.)
+#   3. Configura las App Settings de la Web App (ver docs/STATUS.md, "Salida a producción", punto 7).
+# Los valores de configuración nunca van en este archivo.
+
+name: Desplegar DataHub
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  NODE_VERSION: '22'
+  API_PROYECTO: api/DataGlobal.DataHub.Api/DataGlobal.DataHub.Api.csproj
+  PRUEBAS_PROYECTO: api/DataGlobal.DataHub.Tests
+
+jobs:
+  compilar:
+    name: Compilar y probar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Web - instalar dependencias
+        working-directory: web
+        run: npm ci
+
+      - name: Web - pruebas
+        working-directory: web
+        run: npm test
+
+      # Usa los tipos OpenAPI ya versionados en web/src/api/esquema.d.ts.
+      - name: Web - build
+        working-directory: web
+        run: npm run build
+
+      # Las pruebas de integración levantan MySQL y Azurite con Testcontainers (Docker viene en ubuntu-latest).
+      - name: API - pruebas
+        run: dotnet test ${{ env.PRUEBAS_PROYECTO }} -c Release
+
+      - name: Copiar el build de web a wwwroot
+        run: |
+          rm -rf api/DataGlobal.DataHub.Api/wwwroot
+          mkdir -p api/DataGlobal.DataHub.Api/wwwroot
+          cp -r web/dist/. api/DataGlobal.DataHub.Api/wwwroot/
+
+      - name: API - publicar
+        run: dotnet publish ${{ env.API_PROYECTO }} -c Release -o publicar
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: datahub
+          path: publicar
+          retention-days: 7
+
+  desplegar:
+    name: Desplegar en Azure
+    needs: compilar
+    # Solo main, y solo cuando la variable AZURE_WEBAPP_NAME ya está definida.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.AZURE_WEBAPP_NAME != ''
+    runs-on: ubuntu-latest
+    environment: produccion
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: datahub
+          path: publicar
+
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: publicar

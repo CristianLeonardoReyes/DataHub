@@ -60,22 +60,34 @@ tocó. La historia la guarda git._
   sin innerHTML y paginación.
 - **Markdown:** botón "Exportar a Markdown" (`pedirArchivo` en `http.ts`); 401 abre el modal de sesión.
 
-## Pendientes conocidos
+## Salida a producción (2026-11-20)
 
-- Búsqueda: cada término debe estar en el título o en el contenido (no repartido entre ambos). Mejora
-  posterior: columna única de búsqueda con un FULLTEXT (cambia PRD §6; requiere decisión).
-- **Prueba real de archivos (bloqueada):** crear la cuenta de almacenamiento propia de DataHub (la
-  cadena actual apunta a `datahub`, que no es de la empresa → 403), guardar su cadena en user-secrets
-  y reiniciar la API; luego probar subir/ver/descargar/imagen en editor/eliminar. El usuario avisa.
-- **Prueba manual pendiente (usuario, con su API y MySQL):** recorrer la DoD (PRD §10) con la API
-  sirviendo el build de `web/` y la consola abierta: editor sin violaciones de CSP, vista previa
-  `<dialog>` (foco, Esc), exportar Markdown (también en Firefox), menú ⋯ con teclado. Desde el entorno
-  del agente MySQL no responde (timeout); solo se verificó la CSP en el login.
-- Al desplegar: confirmar que el límite de login cuenta por la IP real (depende de `UseForwardedHeaders`).
-- `CODEOWNERS` y proteger `main`/`develop` (usuario).
-- Producción: `Jwt__Clave` propia al crear la Web App.
-- Limpiar metadatos "generado por IA" (C2PA/Recraft) de `docs/diseno/logo/*.svg` — pendiente de decisión.
-- Definir la carpeta de OneDrive de la empresa para los valores de entorno.
+1. **Blob real** — en espera: el usuario habilita la cuenta de almacenamiento propia (Azure). Luego
+   user-secrets `ConnectionStrings:AzureBlobStorage` y probar subir/ver/descargar/imagen/eliminar.
+2. **Prueba manual DoD (PRD §10)** — en espera (el punto 7 depende del 1); el resto se puede recorrer ya.
+3. **CSP con la app completa** — cerrado (2026-11-20, API sirviendo el build en `:5080`): login, Inicio,
+   editor y vista de colección sin violaciones (solo Browser Link/hot reload de VS, que no van a prod).
+   Falta la vista previa de imagen/PDF del blob, junto con el punto 1.
+4. **BD de producción** — en espera: va en el servidor de producción de la empresa (el actual es el de
+   pruebas); el usuario no tiene acceso y la crea el encargado. Solo estructura (migraciones o volcado
+   `--no-data --routines`), sin datos de prueba; MySQL ≥ 8.0.16, collation 0900, usuario solo sobre la
+   base, acceso de red desde la Web App y respaldos. Código: sin cambios (solo `ConnectionStrings__DataHub`).
+5. **Super admin** — script listo: `db/Semillas/super_admin.sql` (reemplaza `dev_super_admin.sql`;
+   `@correo`, `@nombre`, `@urlBase`; invitación de 72 h, solo hash del token). Probado en la BD de pruebas
+   (2026-11-20). En producción: lo ejecuta el encargado tras las migraciones, con `@urlBase` de la Web App.
+6. **Pipeline** — listo `.github/workflows/deploy.yml`: PR a develop/main compila y prueba (web + api con
+   Docker); push a main despliega. El despliegue se omite hasta definir en GitHub la variable
+   `AZURE_WEBAPP_NAME` y el secreto `AZURE_WEBAPP_PUBLISH_PROFILE`. Web App recomendada: Linux, .NET 10.
+7. **App Settings de la Web App** — en espera de la Web App (`App__UrlBase`, cadenas, `Jwt__Clave` nueva…).
+8. **Correo SES** — listo (usuario).
+9. **Logs JSON con request id (RNF-05)** — pendiente, tarjeta "Mejoras técnicas previas a producción".
+10. **Seguridad al publicar** — pruebas de `/openapi` y HSTS en Production en la misma tarjeta; IP real
+    del límite de login, tras desplegar.
+11. **Gestión del repo** — cerrado: aprobación de PR interna; ruta de OneDrive en gestión.
+12. **Mejoras** (búsqueda título+contenido, `Posicion` con `FOR UPDATE`, slug repetido → 409, aviso de
+    correo fallido, metadatos C2PA de los logos) — pendiente, tarjeta "Mejoras técnicas previas a producción".
+- Opcional: el bundle pesa 847 kB (aviso de Vite >500 kB); dividir el editor con `import()` si la carga
+  supera RNF-06.
 
 ## Variables por subir a OneDrive
 
