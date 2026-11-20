@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { LoaderCircle, Search } from 'lucide-react'
 import * as api from './api/busqueda'
+import { useSesion } from './Sesion'
 import { Alerta, AvisoInfo, btnSmCls, Encabezado, linkCls, panelCls } from './ui'
 
 // Cada unidad UTF-16 a su base sin tilde y en minúscula; si el cambio alteraría la longitud
@@ -40,9 +41,11 @@ export function Busqueda() {
   const q = (params.get('q') ?? '').trim()
   const pagina = Math.max(1, parseInt(params.get('pagina') ?? '1', 10) || 1)
   const [estado, setEstado] = useState<Estado>({ tipo: 'cargando' })
+  const { usuario } = useSesion()
+  const sinCliente = usuario?.perfil === 'super_admin' && !usuario.cliente
 
   useEffect(() => {
-    if (!q) return
+    if (!q || sinCliente) return
     let vigente = true
     setEstado({ tipo: 'cargando' })
     void api.buscar(q, pagina).then((r) => {
@@ -54,10 +57,17 @@ export function Busqueda() {
       else setEstado({ tipo: 'error', texto: 'No se pudo buscar. Intenta de nuevo.' })
     })
     return () => { vigente = false }
-  }, [q, pagina])
+  }, [q, pagina, sinCliente])
 
   const irA = (p: number) => setParams({ q, pagina: String(p) })
 
+  if (sinCliente)
+    return (
+      <>
+        <Encabezado titulo="Buscar" />
+        <Alerta texto="Selecciona un cliente para operar" />
+      </>
+    )
   if (!q)
     return (
       <>

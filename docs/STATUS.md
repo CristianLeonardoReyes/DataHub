@@ -45,8 +45,10 @@ tocó. La historia la guarda git._
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (91 pruebas), oxlint (11
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (92 pruebas), oxlint (11
   warnings aceptados). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
+- **Super admin sin cliente operando:** tras el login va a Inicio (no a la ruta anterior); página, búsqueda y
+  contenedores muestran "Selecciona un cliente para operar" sin llamar a la API (evita el 400).
 - **Tema** claro por defecto (`datahub-tema`, aplicado por `public/tema.js`: la CSP no admite scripts inline). **Sesión:** modal "Tu sesión expiró" (`X-Sesion-Expira` o 401).
 - **Jerarquía:** árbol en el menú (nombre → vista, chevron → expandir), `/workspaces` (gestión),
   `/workspaces|espacios|colecciones/:guid` (`contenedores.tsx`: nombre y descripción editables, hijos;

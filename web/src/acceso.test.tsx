@@ -96,6 +96,22 @@ test('tras login vuelve a la ruta protegida pedida', async () => {
   expect(await screen.findByRole('heading', { name: 'Invitar usuario' })).toBeInTheDocument()
 })
 
+test('Super admin sin cliente operando no vuelve a una página: va a Inicio sin pedirla', async () => {
+  let sesion = false
+  fetchMock.mockImplementation(async (url: string) => {
+    if (url.endsWith('/me')) return sesion ? respuesta(200, { ...yo, perfil: 'super_admin', permisos: ['clientesGestionar'] }) : respuesta(401, {})
+    if (url.includes('/clientes')) return respuesta(200, [])
+    sesion = true
+    return respuesta(204)
+  })
+  montar('/paginas/p1')
+  await userEvent.type(await screen.findByLabelText('Correo corporativo'), 'a@b.co')
+  await userEvent.type(screen.getByLabelText('Contraseña'), 'correcta123')
+  await userEvent.click(screen.getByRole('button', { name: 'Entrar' }))
+  expect(await screen.findByText('Hola, Ana')).toBeInTheDocument()
+  expect(fetchMock.mock.calls.some(([u]) => String(u).includes('/paginas/'))).toBe(false)
+})
+
 test('error de red muestra el mensaje de conexión', async () => {
   fetchMock.mockImplementation(async (url: string) => {
     if (url.endsWith('/me')) return respuesta(401, {})

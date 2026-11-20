@@ -12,7 +12,8 @@ import { Alerta, Boton, btnSmCls, Encabezado, panelCls } from './ui'
 
 export function PaginaVista() {
   const { guid = '' } = useParams()
-  const { puede } = useSesion()
+  const { puede, usuario } = useSesion()
+  const sinCliente = usuario?.perfil === 'super_admin' && !usuario.cliente
   const { recargarArbol, version } = useArbol()
   const nav = useNavigate()
   const cargada = useRef<string | null>(null)
@@ -26,6 +27,7 @@ export function PaginaVista() {
 
   // `version` cambia tras cada recarga del árbol: refresca título y subpáginas tras renombrar o crear.
   useEffect(() => {
+    if (sinCliente) return
     let vigente = true
     void api.paginas.obtener(guid).then((r) => {
       if (!vigente) return
@@ -38,7 +40,7 @@ export function PaginaVista() {
     return () => {
       vigente = false
     }
-  }, [guid, version])
+  }, [guid, version, sinCliente])
 
   async function eliminar(p: api.PaginaDetalle) {
     if (!window.confirm(`¿Eliminar "${p.titulo}"? También se eliminan sus subpáginas.`)) return
@@ -72,6 +74,7 @@ export function PaginaVista() {
     setExportando(false)
   }
 
+  if (sinCliente) return <Alerta texto="Selecciona un cliente para operar" />
   if (fallo)
     return (
       <section>
