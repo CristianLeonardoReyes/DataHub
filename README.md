@@ -98,8 +98,9 @@ necesitas tu propio usuario. Para una base nueva:
    `CREATE DATABASE DataHub CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`
 2. Ejecutar en orden de nombre todos los scripts de `db/Migraciones/` (cliente que entienda
    `DELIMITER`: MySQL Workbench, HeidiSQL o la consola `mysql`).
-3. Editar `@correo` en `db/Semillas/dev_super_admin.sql`, ejecutarlo y guardar el enlace que
-   devuelve (activa el Super admin; vale 72 h).
+3. Editar `@correo`, `@nombre` y `@urlBase` (local: `http://localhost:5173`) en
+   `db/Semillas/super_admin.sql`, ejecutarlo y abrir el enlace que devuelve para definir la
+   contraseña (vale 72 h). El mismo script sirve en producción con la URL de la Web App.
 
 **3. Secretos de la API** (fuera del repo; una sola vez por equipo)
 

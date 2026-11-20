@@ -5,6 +5,7 @@ import * as api from './api/jerarquia'
 import type { Resultado } from './api/http'
 import { useSesion } from './Sesion'
 import { errorDe, FormNombre } from './jerarquia-ui'
+import { HIJO, RECURSO, SEGMENTO, usePermisosNodo, type Tipo } from './jerarquia-nodos'
 import { Alerta, Boton } from './ui'
 
 type Ctx = {
@@ -50,10 +51,6 @@ export function useArbol() {
   return c
 }
 
-type Tipo = 'workspace' | 'espacio' | 'coleccion' | 'pagina'
-const HIJO: Record<Tipo, string> = { workspace: 'espacio', espacio: 'colección', coleccion: 'página', pagina: 'subpágina' }
-const RECURSO = { workspace: api.workspaces, espacio: api.espacios, coleccion: api.colecciones }
-
 type Accion = { clave: string; texto: string; icono: LucideIcon; peligro?: boolean; ejecutar: () => void }
 
 type FilaProps = {
@@ -72,7 +69,6 @@ type FilaProps = {
 }
 
 function Fila(p: FilaProps) {
-  const { puede } = useSesion()
   const { recargarArbol } = useArbol()
   const { pathname } = useLocation()
   const nav = useNavigate()
@@ -126,15 +122,8 @@ function Fila(p: FilaProps) {
     }
   }, [menu])
 
-  // Solo UX: decide la API.
-  const gestion = puede('espaciosColeccionesGestionar')
-  const paginas = puede('paginasEditar')
-  const permisos = {
-    workspace: { hijo: gestion, propio: puede('workspacesGestionar'), eliminar: puede('workspacesGestionar') },
-    espacio: { hijo: gestion, propio: gestion, eliminar: gestion },
-    coleccion: { hijo: paginas, propio: gestion, eliminar: gestion },
-    pagina: { hijo: paginas, propio: paginas, eliminar: puede('paginasEliminar') },
-  }[p.tipo]
+  const permisos = usePermisosNodo(p.tipo)
+  const activo = pathname === `/${SEGMENTO[p.tipo]}/${p.guid}`
 
   const crear = (n: string) =>
     p.tipo === 'workspace' ? api.espacios.crear({ workspaceGuid: p.guid, nombre: n })
@@ -189,34 +178,24 @@ function Fila(p: FilaProps) {
     },
   ].filter((a): a is Accion => !!a)
 
-  const nombreCls = `min-w-0 flex-1 truncate text-left ${p.tipo === 'workspace' ? 'font-medium text-ink' : ''}`
+  const nombreCls = 'min-w-0 flex-1 truncate text-left'
   const Chevron = abierto ? ChevronDown : ChevronRight
   return (
     <li>
       <div ref={raiz} className="group relative flex items-center rounded-md text-sm hover:bg-active/60" style={{ paddingLeft: p.nivel * 12 }}>
-        {p.tipo === 'pagina' ? (
-          <>
-            {p.tieneHijos ? (
-              <button type="button" aria-expanded={abierto} aria-label={`${abierto ? 'Contraer' : 'Expandir'} ${p.nombre}`}
-                className="flex size-7 shrink-0 items-center justify-center rounded-md text-faint hover:text-ink" onClick={() => setAbierto(!abierto)}>
-                <Chevron aria-hidden className="size-3.5" />
-              </button>
-            ) : <span aria-hidden className="size-7 shrink-0" />}
-            <NavLink to={`/paginas/${p.guid}`}
-              className={({ isActive }) => `${nombreCls} flex h-8 items-center rounded-md ${isActive ? 'bg-active font-medium text-ink' : 'text-muted hover:text-ink'}`}>
-              <span className="truncate">{p.nombre}</span>
-            </NavLink>
-          </>
-        ) : (
-          <button type="button" aria-expanded={abierto} onClick={() => setAbierto(!abierto)}
-            className={`flex h-8 min-w-0 flex-1 items-center gap-1 rounded-md ${p.tipo === 'workspace' ? '' : 'text-muted hover:text-ink'}`}>
-            <span className="flex size-6 shrink-0 items-center justify-center text-faint"><Chevron aria-hidden className="size-3.5" /></span>
-            <span className={nombreCls}>{p.nombre}</span>
+        {p.tieneHijos ? (
+          <button type="button" aria-expanded={abierto} aria-label={`${abierto ? 'Contraer' : 'Expandir'} ${p.nombre}`}
+            className="flex size-7 shrink-0 items-center justify-center rounded-md text-faint hover:text-ink" onClick={() => setAbierto(!abierto)}>
+            <Chevron aria-hidden className="size-3.5" />
           </button>
-        )}
+        ) : <span aria-hidden className="size-7 shrink-0" />}
+        <NavLink to={`/${SEGMENTO[p.tipo]}/${p.guid}`} end
+          className={({ isActive }) => `${nombreCls} flex h-8 items-center rounded-md ${isActive ? 'bg-active font-medium text-ink' : p.tipo === 'workspace' ? 'font-medium text-ink' : 'text-muted hover:text-ink'}`}>
+          <span className="truncate">{p.nombre}</span>
+        </NavLink>
         {acciones.length > 0 && (
           <button type="button" aria-label={`Acciones de ${p.nombre}`} aria-expanded={menu} aria-haspopup="menu" ref={botonMenu}
-            className="mr-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-muted hover:bg-active hover:text-ink aria-expanded:opacity-100 lg:opacity-0 lg:group-focus-within:opacity-100 lg:group-hover:opacity-100"
+            className={`mr-0.5 flex size-7 shrink-0 items-center justify-center rounded-md text-muted hover:bg-active hover:text-ink aria-expanded:opacity-100 ${activo ? '' : 'lg:opacity-0'} lg:group-focus-within:opacity-100 lg:group-hover:opacity-100`}
             onClick={(e) => {
               porTeclado.current = e.detail === 0
               setMenu(!menu)
