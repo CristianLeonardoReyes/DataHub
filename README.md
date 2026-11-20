@@ -195,3 +195,16 @@ Tras cambiar un endpoint o DTO, con la API corriendo: `npm --prefix web run tipo
 
 Front y API se publican juntos en una Azure Web App mediante GitHub Actions. El proceso
 completo está en el PRD §7.6, y lo ejecuta manualmente el responsable del proyecto.
+
+### Logs en producción
+
+Fuera de Development la API escribe una línea JSON por evento, con `TraceId`, `SpanId`,
+`RequestId` y `RequestPath` (sin query string) en `Scopes`. Las peticiones normales no se
+registran (`Microsoft.AspNetCore` en `Warning`), así que en los logs no quedan tokens de los
+enlaces de correo ni búsquedas. Nunca se registran contraseñas, tokens ni contenido de páginas.
+
+- **Ver en vivo:** Web App → Supervisión → Secuencia de registro. Antes, activar en
+  Supervisión → Registros de App Service el registro de la aplicación (sistema de archivos).
+- **Buscar un error reportado:** toda respuesta de error trae `traceId`
+  (`00-<TraceId>-<SpanId>-00`); el segundo bloque es el `TraceId` que aparece en la línea del log.
+- **Descargar:** `https://<web-app>.scm.azurewebsites.net/api/logs/docker` (Linux) o desde Kudu.

@@ -45,8 +45,10 @@ tocó. La historia la guarda git._
 
 ## Frontend (web/)
 
-- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (91 pruebas), oxlint (11
+- React 19, Vite 8, TS 6, Tailwind 4, react-router 7, lucide-react, Vitest (92 pruebas), oxlint (11
   warnings aceptados). Tipos: `npm run tipos` → `src/api/esquema.d.ts`.
+- **Super admin sin cliente operando:** tras el login va a Inicio (no a la ruta anterior); página, búsqueda y
+  contenedores muestran "Selecciona un cliente para operar" sin llamar a la API (evita el 400).
 - **Tema** claro por defecto (`datahub-tema`, aplicado por `public/tema.js`: la CSP no admite scripts inline). **Sesión:** modal "Tu sesión expiró" (`X-Sesion-Expira` o 401).
 - **Jerarquía:** árbol en el menú (nombre → vista, chevron → expandir), `/workspaces` (gestión),
   `/workspaces|espacios|colecciones/:guid` (`contenedores.tsx`: nombre y descripción editables, hijos;
@@ -80,7 +82,11 @@ tocó. La historia la guarda git._
    `AZURE_WEBAPP_NAME` y el secreto `AZURE_WEBAPP_PUBLISH_PROFILE`. Web App recomendada: Linux, .NET 10.
 7. **App Settings de la Web App** — en espera de la Web App (`App__UrlBase`, cadenas, `Jwt__Clave` nueva…).
 8. **Correo SES** — listo (usuario).
-9. **Logs JSON con request id (RNF-05)** — pendiente, tarjeta "Mejoras técnicas previas a producción".
+9. **Logs (RNF-05)** — cerrado en DAT-200: JSON con scopes (TraceId, RequestId, RequestPath sin query)
+   fuera de Development; `Microsoft.AspNetCore` en Warning ya venía en `appsettings.json` y ahora lo
+   cubre `LogsTests` (token, búsqueda y contraseña no aparecen); `traceId` en los ProblemDetails.
+   Verificado en modo Production: línea de error JSON con el mismo TraceId del 500 y sin detalle.
+   Riesgo menor: el mensaje de una MySqlException o de SES podría llevar un correo. Ver README "Logs".
 10. **Seguridad al publicar** — pruebas de `/openapi` y HSTS en Production en la misma tarjeta; IP real
     del límite de login, tras desplegar.
 11. **Gestión del repo** — cerrado: aprobación de PR interna; ruta de OneDrive en gestión.

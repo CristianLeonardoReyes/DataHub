@@ -26,7 +26,8 @@ export function Login() {
   const [enviando, setEnviando] = useState(false)
 
   if (cargando) return <main className="min-h-screen bg-ground" />
-  if (usuario) return <Navigate to={destinoInterno(state?.from)} replace />
+  // El Super admin entra sin cliente operando: la ruta anterior (una página, una búsqueda) daría 400.
+  if (usuario) return <Navigate to={usuario.perfil === 'super_admin' && !usuario.cliente ? '/' : destinoInterno(state?.from)} replace />
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
